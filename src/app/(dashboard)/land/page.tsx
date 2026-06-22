@@ -64,7 +64,7 @@ export default function LandPage() {
           <Plus className="h-4 w-4 mr-1" /> Add Land Record
         </Button>
       </PageHeader>
-      
+
       <DataTable columns={columns} data={data} isLoading={isLoading} searchKeys={["mouza", "khatian", "dag"]} />
 
       <EntityCreateModal

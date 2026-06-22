@@ -92,7 +92,7 @@ export function TopNavbar() {
           value={companyId}
           onValueChange={(v) => dispatch(setCompany(v))}
         >
-          <SelectTrigger className="hidden sm:flex w-20! h-9 overflow-hidden">
+          <SelectTrigger className="hidden sm:flex w-[300px] h-9 overflow-hidden">
             <Building2 className="h-4 w-4 mr-1 shrink-0" />
             <SelectValue />
           </SelectTrigger>
@@ -109,11 +109,11 @@ export function TopNavbar() {
           value={fiscalYear}
           onValueChange={(v) => dispatch(setFiscalYear(v))}
         >
-          <SelectTrigger className="hidden lg:flex w-[130px] h-9">
+          <SelectTrigger className="hidden lg:flex w-[180px] h-9 ">
             <Calendar className="h-4 w-4 mr-1 shrink-0" />
             <SelectValue />
           </SelectTrigger>
-          <SelectContent>
+          <SelectContent className="bg-white">
             {FISCAL_YEARS.map((fy) => (
               <SelectItem key={fy} value={fy}>
                 FY {fy}
@@ -122,7 +122,7 @@ export function TopNavbar() {
           </SelectContent>
         </Select>
 
-        <DropdownMenu>
+        {/* <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button variant="ghost" size="icon" className="relative">
               <Plus className="h-4 w-4" />
@@ -141,7 +141,7 @@ export function TopNavbar() {
               Record Collection
             </DropdownMenuItem>
           </DropdownMenuContent>
-        </DropdownMenu>
+        </DropdownMenu> */}
 
         <DropdownMenu>
           <DropdownMenuTrigger asChild>

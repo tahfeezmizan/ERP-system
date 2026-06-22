@@ -34,6 +34,12 @@ import type {
   CreateMilestoneFormData,
 } from "@/schemas";
 import { CRM_PIPELINE_STAGES } from "@/constants/app";
+import {
+  getLocalStorageData,
+  setLocalStorageData,
+  syncLandRecordSubkeys,
+  syncPropertyUnitSubkeys,
+} from "@/lib/storage-utils";
 
 function paginate<T>(data: T[], page = 1, pageSize = 10): PaginatedResponse<T> {
   const start = (page - 1) * pageSize;
@@ -47,22 +53,27 @@ function paginate<T>(data: T[], page = 1, pageSize = 10): PaginatedResponse<T> {
 
 export const landApi = baseApi.injectEndpoints({
   endpoints: (builder) => ({
-    getLandRecords: builder.query<typeof mockLandRecords, void>({
+    getLandRecords: builder.query<LandRecord[], void>({
       queryFn: async () => {
         await delay(400);
-        return { data: mockLandRecords };
+        return { data: getLocalStorageData<LandRecord>("landRecords", mockLandRecords) };
       },
       providesTags: ["Land"],
     }),
     createLandRecord: builder.mutation<LandRecord, CreateLandRecordFormData>({
       queryFn: async (data) => {
         await delay(400);
+        const records = [...getLocalStorageData<LandRecord>("landRecords", mockLandRecords)];
         const newRecord: LandRecord = {
           id: `land_${Math.random().toString(36).slice(2, 10)}`,
           owners: [],
           ...data,
         };
-        mockLandRecords.push(newRecord);
+        // Inject timestamp as required
+        (newRecord as any).createdAt = new Date().toISOString();
+        records.push(newRecord);
+        setLocalStorageData("landRecords", records);
+        syncLandRecordSubkeys(records);
         return { data: newRecord };
       },
       invalidatesTags: ["Land"],
@@ -72,16 +83,17 @@ export const landApi = baseApi.injectEndpoints({
 
 export const projectApi = baseApi.injectEndpoints({
   endpoints: (builder) => ({
-    getProjects: builder.query<typeof mockProjects, void>({
+    getProjects: builder.query<Project[], void>({
       queryFn: async () => {
         await delay(400);
-        return { data: mockProjects };
+        return { data: getLocalStorageData<Project>("projects", mockProjects) };
       },
       providesTags: ["Project"],
     }),
     createProject: builder.mutation<Project, CreateProjectFormData>({
       queryFn: async (data) => {
         await delay(400);
+        const list = [...getLocalStorageData<Project>("projects", mockProjects)];
         const newProject: Project = {
           id: `proj_${Math.random().toString(36).slice(2, 10)}`,
           status: "Planning",
@@ -89,7 +101,9 @@ export const projectApi = baseApi.injectEndpoints({
           completionPercent: 0,
           ...data,
         };
-        mockProjects.push(newProject);
+        (newProject as any).createdAt = new Date().toISOString();
+        list.push(newProject);
+        setLocalStorageData("projects", list);
         return { data: newProject };
       },
       invalidatesTags: ["Project"],
@@ -99,23 +113,27 @@ export const projectApi = baseApi.injectEndpoints({
 
 export const propertyApi = baseApi.injectEndpoints({
   endpoints: (builder) => ({
-    getUnits: builder.query<typeof mockUnits, void>({
+    getUnits: builder.query<PropertyUnit[], void>({
       queryFn: async () => {
         await delay(400);
-        return { data: mockUnits };
+        return { data: getLocalStorageData<PropertyUnit>("apartments", mockUnits) };
       },
       providesTags: ["Property"],
     }),
     createUnit: builder.mutation<PropertyUnit, CreatePropertyUnitFormData>({
       queryFn: async (data) => {
         await delay(400);
+        const list = [...getLocalStorageData<PropertyUnit>("apartments", mockUnits)];
         const newUnit: PropertyUnit = {
           id: `unit_${Math.random().toString(36).slice(2, 10)}`,
           projectId: `proj_${Math.random().toString(36).slice(2, 6)}`,
           status: "Available",
           ...data,
         };
-        mockUnits.push(newUnit);
+        (newUnit as any).createdAt = new Date().toISOString();
+        list.push(newUnit);
+        setLocalStorageData("apartments", list);
+        syncPropertyUnitSubkeys(list);
         return { data: newUnit };
       },
       invalidatesTags: ["Property"],
@@ -125,19 +143,20 @@ export const propertyApi = baseApi.injectEndpoints({
 
 export const crmApi = baseApi.injectEndpoints({
   endpoints: (builder) => ({
-    getLeads: builder.query<typeof mockLeads, void>({
+    getLeads: builder.query<Lead[], void>({
       queryFn: async () => {
         await delay(400);
-        return { data: mockLeads };
+        return { data: getLocalStorageData<Lead>("leads", mockLeads) };
       },
       providesTags: ["CRM"],
     }),
     getPipeline: builder.query<Record<string, Lead[]>, void>({
       queryFn: async () => {
         await delay(400);
+        const leads = getLocalStorageData<Lead>("leads", mockLeads);
         const pipeline: Record<string, Lead[]> = {};
         CRM_PIPELINE_STAGES.forEach((stage) => {
-          pipeline[stage] = mockLeads.filter((l) => l.stage === stage);
+          pipeline[stage] = leads.filter((l) => l.stage === stage);
         });
         return { data: pipeline };
       },
@@ -149,24 +168,30 @@ export const crmApi = baseApi.injectEndpoints({
     >({
       queryFn: async ({ id, stage }) => {
         await delay(300);
-        const lead = mockLeads.find((l) => l.id === id);
+        const leads = getLocalStorageData<Lead>("leads", mockLeads).map(l => ({ ...l }));
+        const lead = leads.find((l) => l.id === id);
         if (!lead) {
           return { error: { status: 404, data: { message: "Lead not found" } } };
         }
-        return { data: { ...lead, stage } };
+        lead.stage = stage;
+        lead.lastFollowUp = new Date().toISOString().slice(0, 10);
+        setLocalStorageData("leads", leads);
+        return { data: lead };
       },
       invalidatesTags: ["CRM"],
     }),
     createLead: builder.mutation<Lead, CreateLeadFormData>({
       queryFn: async (data) => {
         await delay(400);
+        const list = [...getLocalStorageData<Lead>("leads", mockLeads)];
         const newLead: Lead = {
           id: `lead_${Math.random().toString(36).slice(2, 10)}`,
           stage: "Lead",
           createdAt: new Date().toISOString().slice(0, 10),
           ...data,
         };
-        mockLeads.push(newLead);
+        list.push(newLead);
+        setLocalStorageData("leads", list);
         return { data: newLead };
       },
       invalidatesTags: ["CRM"],
@@ -176,17 +201,18 @@ export const crmApi = baseApi.injectEndpoints({
 
 export const bookingApi = baseApi.injectEndpoints({
   endpoints: (builder) => ({
-    getBookings: builder.query<typeof mockBookings, void>({
+    getBookings: builder.query<Booking[], void>({
       queryFn: async () => {
         await delay(400);
-        return { data: mockBookings };
+        return { data: getLocalStorageData<Booking>("bookings", mockBookings) };
       },
       providesTags: ["Booking"],
     }),
     createBooking: builder.mutation<Booking, CreateBookingFormData>({
       queryFn: async (data) => {
         await delay(400);
-        const seq = mockBookings.length + 1;
+        const list = [...getLocalStorageData<Booking>("bookings", mockBookings)];
+        const seq = list.length + 1;
         const newBooking: Booking = {
           id: `book_${Math.random().toString(36).slice(2, 10)}`,
           bookingNo: `BK-2025-${String(seq).padStart(3, "0")}`,
@@ -195,7 +221,9 @@ export const bookingApi = baseApi.injectEndpoints({
           status: "Pending",
           ...data,
         };
-        mockBookings.push(newBooking);
+        (newBooking as any).createdAt = new Date().toISOString();
+        list.push(newBooking);
+        setLocalStorageData("bookings", list);
         return { data: newBooking };
       },
       invalidatesTags: ["Booking"],
@@ -205,17 +233,18 @@ export const bookingApi = baseApi.injectEndpoints({
 
 export const collectionApi = baseApi.injectEndpoints({
   endpoints: (builder) => ({
-    getCollections: builder.query<typeof mockCollections, void>({
+    getCollections: builder.query<Collection[], void>({
       queryFn: async () => {
         await delay(400);
-        return { data: mockCollections };
+        return { data: getLocalStorageData<Collection>("collections", mockCollections) };
       },
       providesTags: ["Collection"],
     }),
     createCollection: builder.mutation<Collection, CreateCollectionFormData>({
       queryFn: async (data) => {
         await delay(400);
-        const seq = mockCollections.length + 1;
+        const list = [...getLocalStorageData<Collection>("collections", mockCollections)];
+        const seq = list.length + 1;
         const newCollection: Collection = {
           id: `coll_${Math.random().toString(36).slice(2, 10)}`,
           receiptNo: `MR-2025-${String(seq).padStart(3, "0")}`,
@@ -223,7 +252,9 @@ export const collectionApi = baseApi.injectEndpoints({
           status: "Received",
           ...data,
         };
-        mockCollections.push(newCollection);
+        (newCollection as any).createdAt = new Date().toISOString();
+        list.push(newCollection);
+        setLocalStorageData("collections", list);
         return { data: newCollection };
       },
       invalidatesTags: ["Collection"],
@@ -233,16 +264,17 @@ export const collectionApi = baseApi.injectEndpoints({
 
 export const customerApi = baseApi.injectEndpoints({
   endpoints: (builder) => ({
-    getCustomers: builder.query<typeof mockCustomers, void>({
+    getCustomers: builder.query<Customer[], void>({
       queryFn: async () => {
         await delay(400);
-        return { data: mockCustomers };
+        return { data: getLocalStorageData<Customer>("customers", mockCustomers) };
       },
       providesTags: ["Customer"],
     }),
     createCustomer: builder.mutation<Customer, CreateCustomerFormData>({
       queryFn: async (customer) => {
         await delay(400);
+        const list = [...getLocalStorageData<Customer>("customers", mockCustomers)];
         const newCustomer: Customer = {
           id: `cust_${Math.random().toString(36).slice(2, 10)}`,
           totalPaid: 0,
@@ -250,7 +282,9 @@ export const customerApi = baseApi.injectEndpoints({
           status: "Active",
           ...customer,
         };
-        mockCustomers.push(newCustomer);
+        (newCustomer as any).createdAt = new Date().toISOString();
+        list.push(newCustomer);
+        setLocalStorageData("customers", list);
         return { data: newCustomer };
       },
       invalidatesTags: ["Customer"],
@@ -272,17 +306,18 @@ export const constructionApi = baseApi.injectEndpoints({
 
 export const procurementApi = baseApi.injectEndpoints({
   endpoints: (builder) => ({
-    getOrders: builder.query<typeof mockProcurementOrders, void>({
+    getOrders: builder.query<any[], void>({
       queryFn: async () => {
         await delay(400);
-        return { data: mockProcurementOrders };
+        return { data: getLocalStorageData<any>("vendors", mockProcurementOrders) };
       },
       providesTags: ["Procurement"],
     }),
-    createOrder: builder.mutation<(typeof mockProcurementOrders)[0], CreateProcurementFormData>({
+    createOrder: builder.mutation<any, CreateProcurementFormData>({
       queryFn: async (data) => {
         await delay(400);
-        const seq = mockProcurementOrders.length + 1;
+        const list = [...getLocalStorageData<any>("vendors", mockProcurementOrders)];
+        const seq = list.length + 1;
         const newOrder = {
           id: `po_${Math.random().toString(36).slice(2, 10)}`,
           poNo: `PO-2025-${String(seq).padStart(3, "0")}`,
@@ -290,8 +325,10 @@ export const procurementApi = baseApi.injectEndpoints({
           vendor: data.vendor,
           amount: data.amount,
           date: data.date,
+          createdAt: new Date().toISOString(),
         };
-        mockProcurementOrders.push(newOrder);
+        list.push(newOrder);
+        setLocalStorageData("vendors", list);
         return { data: newOrder };
       },
       invalidatesTags: ["Procurement"],
@@ -301,21 +338,24 @@ export const procurementApi = baseApi.injectEndpoints({
 
 export const inventoryApi = baseApi.injectEndpoints({
   endpoints: (builder) => ({
-    getItems: builder.query<typeof mockInventoryItems, void>({
+    getItems: builder.query<any[], void>({
       queryFn: async () => {
         await delay(400);
-        return { data: mockInventoryItems };
+        return { data: getLocalStorageData<any>("inventory", mockInventoryItems) };
       },
       providesTags: ["Inventory"],
     }),
-    createItem: builder.mutation<(typeof mockInventoryItems)[0], CreateInventoryItemFormData>({
+    createItem: builder.mutation<any, CreateInventoryItemFormData>({
       queryFn: async (data) => {
         await delay(400);
+        const list = [...getLocalStorageData<any>("inventory", mockInventoryItems)];
         const newItem = {
           id: `inv_${Math.random().toString(36).slice(2, 10)}`,
+          createdAt: new Date().toISOString(),
           ...data,
         };
-        mockInventoryItems.push(newItem);
+        list.push(newItem);
+        setLocalStorageData("inventory", list);
         return { data: newItem };
       },
       invalidatesTags: ["Inventory"],
@@ -325,23 +365,26 @@ export const inventoryApi = baseApi.injectEndpoints({
 
 export const contractorApi = baseApi.injectEndpoints({
   endpoints: (builder) => ({
-    getContractors: builder.query<typeof mockContractors, void>({
+    getContractors: builder.query<any[], void>({
       queryFn: async () => {
         await delay(400);
-        return { data: mockContractors };
+        return { data: getLocalStorageData<any>("contractors", mockContractors) };
       },
       providesTags: ["Contractor"],
     }),
-    createContractor: builder.mutation<(typeof mockContractors)[0], CreateContractorFormData>({
+    createContractor: builder.mutation<any, CreateContractorFormData>({
       queryFn: async (data) => {
         await delay(400);
+        const list = [...getLocalStorageData<any>("contractors", mockContractors)];
         const newContractor = {
           id: `con_${Math.random().toString(36).slice(2, 10)}`,
           activeProjects: 0,
           pendingBills: 0,
+          createdAt: new Date().toISOString(),
           ...data,
         };
-        mockContractors.push(newContractor);
+        list.push(newContractor);
+        setLocalStorageData("contractors", list);
         return { data: newContractor };
       },
       invalidatesTags: ["Contractor"],
@@ -351,24 +394,27 @@ export const contractorApi = baseApi.injectEndpoints({
 
 export const financeApi = baseApi.injectEndpoints({
   endpoints: (builder) => ({
-    getAccounts: builder.query<typeof mockFinanceAccounts, void>({
+    getAccounts: builder.query<any[], void>({
       queryFn: async () => {
         await delay(400);
-        return { data: mockFinanceAccounts };
+        return { data: getLocalStorageData<any>("accounts", mockFinanceAccounts) };
       },
       providesTags: ["Finance"],
     }),
-    createJournalEntry: builder.mutation<(typeof mockFinanceAccounts)[0], CreateJournalEntryFormData>({
+    createJournalEntry: builder.mutation<any, CreateJournalEntryFormData>({
       queryFn: async (data) => {
         await delay(400);
+        const list = [...getLocalStorageData<any>("accounts", mockFinanceAccounts)];
         const newEntry = {
           id: `acc_${Math.random().toString(36).slice(2, 10)}`,
           code: data.accountCode,
           name: data.accountName,
           type: data.type,
           balance: data.balance,
+          createdAt: new Date().toISOString(),
         };
-        mockFinanceAccounts.push(newEntry);
+        list.push(newEntry);
+        setLocalStorageData("accounts", list);
         return { data: newEntry };
       },
       invalidatesTags: ["Finance"],
@@ -378,24 +424,27 @@ export const financeApi = baseApi.injectEndpoints({
 
 export const hrApi = baseApi.injectEndpoints({
   endpoints: (builder) => ({
-    getEmployees: builder.query<typeof mockEmployees, void>({
+    getEmployees: builder.query<any[], void>({
       queryFn: async () => {
         await delay(400);
-        return { data: mockEmployees };
+        return { data: getLocalStorageData<any>("employees", mockEmployees) };
       },
       providesTags: ["HR"],
     }),
-    createEmployee: builder.mutation<(typeof mockEmployees)[0], CreateEmployeeFormData>({
+    createEmployee: builder.mutation<any, CreateEmployeeFormData>({
       queryFn: async (data) => {
         await delay(400);
+        const list = [...getLocalStorageData<any>("employees", mockEmployees)];
         const newEmployee = {
           id: `emp_${Math.random().toString(36).slice(2, 10)}`,
           status: "Active",
           name: data.name,
           department: data.department,
           designation: data.designation,
+          createdAt: new Date().toISOString(),
         };
-        mockEmployees.push(newEmployee);
+        list.push(newEmployee);
+        setLocalStorageData("employees", list);
         return { data: newEmployee };
       },
       invalidatesTags: ["HR"],
@@ -405,24 +454,27 @@ export const hrApi = baseApi.injectEndpoints({
 
 export const maintenanceApi = baseApi.injectEndpoints({
   endpoints: (builder) => ({
-    getComplaints: builder.query<typeof mockComplaints, void>({
+    getComplaints: builder.query<any[], void>({
       queryFn: async () => {
         await delay(400);
-        return { data: mockComplaints };
+        return { data: getLocalStorageData<any>("complaints", mockComplaints) };
       },
       providesTags: ["Maintenance"],
     }),
-    createComplaint: builder.mutation<(typeof mockComplaints)[0], CreateComplaintFormData>({
+    createComplaint: builder.mutation<any, CreateComplaintFormData>({
       queryFn: async (data) => {
         await delay(400);
-        const seq = mockComplaints.length + 1;
+        const list = [...getLocalStorageData<any>("complaints", mockComplaints)];
+        const seq = list.length + 1;
         const newComplaint = {
           id: `comp_${Math.random().toString(36).slice(2, 10)}`,
           ticketNo: `TKT-${String(seq).padStart(3, "0")}`,
           status: "Open",
+          createdAt: new Date().toISOString(),
           ...data,
         };
-        mockComplaints.push(newComplaint);
+        list.push(newComplaint);
+        setLocalStorageData("complaints", list);
         return { data: newComplaint };
       },
       invalidatesTags: ["Maintenance"],
@@ -433,12 +485,13 @@ export const maintenanceApi = baseApi.injectEndpoints({
 export const reportApi = baseApi.injectEndpoints({
   endpoints: (builder) => ({
     getSalesReport: builder.query<
-      PaginatedResponse<(typeof mockBookings)[0]>,
+      PaginatedResponse<Booking>,
       { page?: number; pageSize?: number }
     >({
       queryFn: async ({ page = 1, pageSize = 10 }) => {
         await delay(400);
-        return { data: paginate(mockBookings, page, pageSize) };
+        const bookings = getLocalStorageData<Booking>("bookings", mockBookings);
+        return { data: paginate(bookings, page, pageSize) };
       },
       providesTags: ["Report"],
     }),
@@ -469,3 +522,5 @@ export const { useGetAccountsQuery, useCreateJournalEntryMutation } = financeApi
 export const { useGetEmployeesQuery, useCreateEmployeeMutation } = hrApi;
 export const { useGetComplaintsQuery, useCreateComplaintMutation } = maintenanceApi;
 export const { useGetSalesReportQuery } = reportApi;
+
+
