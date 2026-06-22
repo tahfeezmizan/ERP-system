@@ -2,21 +2,60 @@
 
 import { useState } from "react";
 import { Plus } from "lucide-react";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { PageHeader } from "@/components/shared/PageHeader";
 import { KanbanBoard } from "@/components/shared/KanbanBoard";
 import { DataTable, type Column } from "@/components/tables/DataTable";
 import { StatusBadge } from "@/components/shared/StatusBadge";
-import { useGetLeadsQuery, useGetPipelineQuery, useUpdateLeadStageMutation } from "@/services/moduleApis";
+import { EntityCreateModal } from "@/components/shared/EntityCreateModal";
+import {
+  useGetLeadsQuery,
+  useGetPipelineQuery,
+  useUpdateLeadStageMutation,
+  useCreateLeadMutation,
+} from "@/services/moduleApis";
+import { createLeadSchema, type CreateLeadFormData } from "@/schemas";
 import { formatBDT } from "@/lib/utils";
 import type { Lead } from "@/types";
 
+const LEAD_SOURCES = ["Facebook", "Referral", "Walk-In", "Website", "Billboard", "TV", "Other"] as const;
+
 export default function CrmPage() {
   const [view, setView] = useState<"kanban" | "list">("kanban");
-  const { data: leads = [], isLoading } = useGetLeadsQuery();
+  const [isModalOpen, setIsModalOpen] = useState(false);
+
+  const { data: leads = [], isLoading, refetch } = useGetLeadsQuery();
   const { data: pipeline = {}, isLoading: pipelineLoading } = useGetPipelineQuery();
   const [updateStage] = useUpdateLeadStageMutation();
+  const [createLead] = useCreateLeadMutation();
+
+  const {
+    register,
+    handleSubmit,
+    setValue,
+    watch,
+    formState: { errors, isSubmitting },
+    reset,
+  } = useForm<CreateLeadFormData>({
+    resolver: zodResolver(createLeadSchema),
+    defaultValues: {
+      name: "",
+      phone: "",
+      email: "",
+      source: "Walk-In",
+      projectInterest: "",
+      budget: undefined,
+      assignedTo: "",
+    },
+  });
+
+  const sourceValue = watch("source");
 
   const columns: Column<Lead>[] = [
     { key: "name", header: "Name", cell: (r) => r.name, sortable: true },
@@ -37,6 +76,18 @@ export default function CrmPage() {
     }
   };
 
+  async function onSubmit(values: CreateLeadFormData) {
+    try {
+      await createLead(values).unwrap();
+      toast.success("Lead added successfully");
+      reset();
+      setIsModalOpen(false);
+      void refetch();
+    } catch {
+      toast.error("Failed to add lead");
+    }
+  }
+
   return (
     <div className="space-y-6">
       <PageHeader title="Sales CRM" description="Lead management and sales pipeline">
@@ -47,7 +98,9 @@ export default function CrmPage() {
           <Button variant={view === "list" ? "default" : "outline"} size="sm" onClick={() => setView("list")}>
             List
           </Button>
-          <Button><Plus className="h-4 w-4 mr-1" /> New Lead</Button>
+          <Button onClick={() => setIsModalOpen(true)}>
+            <Plus className="h-4 w-4 mr-1" /> New Lead
+          </Button>
         </div>
       </PageHeader>
 
@@ -58,8 +111,69 @@ export default function CrmPage() {
           <KanbanBoard columns={pipeline} onMoveLead={handleMoveLead} />
         )
       ) : (
-        <DataTable columns={columns} data={leads} isLoading={isLoading} searchKeys={["name", "phone", "projectInterest"]} />
+        <DataTable
+          columns={columns}
+          data={leads}
+          isLoading={isLoading}
+          searchKeys={["name", "phone", "projectInterest"]}
+        />
       )}
+
+      <EntityCreateModal
+        open={isModalOpen}
+        onOpenChange={setIsModalOpen}
+        title="New Lead"
+        description="Add a new sales lead to the pipeline"
+        onSubmit={handleSubmit(onSubmit)}
+        isLoading={isSubmitting}
+      >
+        <div className="grid gap-4 sm:grid-cols-2">
+          <div className="grid gap-2">
+            <Label htmlFor="lead-name">Full Name</Label>
+            <Input id="lead-name" placeholder="e.g. Mohammad Hasan" {...register("name")} />
+            {errors.name && <p className="text-sm text-destructive">{errors.name.message}</p>}
+          </div>
+          <div className="grid gap-2">
+            <Label htmlFor="lead-phone">Phone</Label>
+            <Input id="lead-phone" placeholder="01XXXXXXXXX" {...register("phone")} />
+            {errors.phone && <p className="text-sm text-destructive">{errors.phone.message}</p>}
+          </div>
+          <div className="grid gap-2">
+            <Label htmlFor="lead-source">Lead Source</Label>
+            <Select value={sourceValue} onValueChange={(v) => setValue("source", v as CreateLeadFormData["source"])}>
+              <SelectTrigger id="lead-source">
+                <SelectValue placeholder="Select source" />
+              </SelectTrigger>
+              <SelectContent>
+                {LEAD_SOURCES.map((s) => (
+                  <SelectItem key={s} value={s}>{s}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            {errors.source && <p className="text-sm text-destructive">{errors.source.message}</p>}
+          </div>
+          <div className="grid gap-2">
+            <Label htmlFor="lead-assigned">Assigned To</Label>
+            <Input id="lead-assigned" placeholder="e.g. Karim Ahmed" {...register("assignedTo")} />
+            {errors.assignedTo && <p className="text-sm text-destructive">{errors.assignedTo.message}</p>}
+          </div>
+          <div className="grid gap-2 sm:col-span-2">
+            <Label htmlFor="lead-project">Project Interest</Label>
+            <Input id="lead-project" placeholder="e.g. Green Valley Residency" {...register("projectInterest")} />
+            {errors.projectInterest && <p className="text-sm text-destructive">{errors.projectInterest.message}</p>}
+          </div>
+          <div className="grid gap-2">
+            <Label htmlFor="lead-budget">Budget (৳)</Label>
+            <Input id="lead-budget" type="number" placeholder="e.g. 8500000" {...register("budget")} />
+            {errors.budget && <p className="text-sm text-destructive">{errors.budget.message}</p>}
+          </div>
+          <div className="grid gap-2">
+            <Label htmlFor="lead-email">Email (optional)</Label>
+            <Input id="lead-email" type="email" placeholder="lead@email.com" {...register("email")} />
+            {errors.email && <p className="text-sm text-destructive">{errors.email.message}</p>}
+          </div>
+        </div>
+      </EntityCreateModal>
     </div>
   );
 }

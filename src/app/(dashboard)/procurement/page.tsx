@@ -1,11 +1,20 @@
 "use client";
 
 import { Plus } from "lucide-react";
+import { useState } from "react";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
 import { PageHeader } from "@/components/shared/PageHeader";
 import { DataTable, type Column } from "@/components/tables/DataTable";
 import { StatusBadge } from "@/components/shared/StatusBadge";
-import { useGetOrdersQuery } from "@/services/moduleApis";
+import { EntityCreateModal } from "@/components/shared/EntityCreateModal";
+import { useGetOrdersQuery, useCreateOrderMutation } from "@/services/moduleApis";
+import { createProcurementSchema, type CreateProcurementFormData } from "@/schemas";
 import { formatBDT } from "@/lib/utils";
 
 type Order = {
@@ -18,7 +27,24 @@ type Order = {
 };
 
 export default function ProcurementPage() {
-  const { data = [], isLoading } = useGetOrdersQuery();
+  const { data = [], isLoading, refetch } = useGetOrdersQuery();
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [createOrder] = useCreateOrderMutation();
+
+  const {
+    register,
+    handleSubmit,
+    formState: { errors, isSubmitting },
+    reset,
+  } = useForm<CreateProcurementFormData>({
+    resolver: zodResolver(createProcurementSchema),
+    defaultValues: {
+      vendor: "",
+      amount: undefined,
+      date: "",
+      description: "",
+    },
+  });
 
   const columns: Column<Order>[] = [
     { key: "poNo", header: "PO No", cell: (r) => r.poNo, sortable: true },
@@ -28,12 +54,63 @@ export default function ProcurementPage() {
     { key: "status", header: "Status", cell: (r) => <StatusBadge status={r.status} /> },
   ];
 
+  async function onSubmit(values: CreateProcurementFormData) {
+    try {
+      await createOrder(values).unwrap();
+      toast.success("Purchase requisition created successfully");
+      reset();
+      setIsModalOpen(false);
+      void refetch();
+    } catch {
+      toast.error("Failed to create requisition");
+    }
+  }
+
   return (
     <div className="space-y-6">
       <PageHeader title="Procurement" description="Purchase requisitions, RFQ, PO, and goods receive">
-        <Button><Plus className="h-4 w-4 mr-1" /> New Requisition</Button>
+        <Button onClick={() => setIsModalOpen(true)}>
+          <Plus className="h-4 w-4 mr-1" /> New Requisition
+        </Button>
       </PageHeader>
       <DataTable columns={columns} data={data} isLoading={isLoading} searchKeys={["poNo", "vendor"]} />
+
+      <EntityCreateModal
+        open={isModalOpen}
+        onOpenChange={setIsModalOpen}
+        title="New Purchase Requisition"
+        description="Raise a purchase order or material requisition"
+        onSubmit={handleSubmit(onSubmit)}
+        isLoading={isSubmitting}
+      >
+        <div className="grid gap-4 sm:grid-cols-2">
+          <div className="grid gap-2 sm:col-span-2">
+            <Label htmlFor="po-vendor">Vendor / Supplier</Label>
+            <Input id="po-vendor" placeholder="e.g. BuildMart Supplies" {...register("vendor")} />
+            {errors.vendor && <p className="text-sm text-destructive">{errors.vendor.message}</p>}
+          </div>
+          <div className="grid gap-2">
+            <Label htmlFor="po-amount">Amount (৳)</Label>
+            <Input id="po-amount" type="number" placeholder="e.g. 2500000" {...register("amount")} />
+            {errors.amount && <p className="text-sm text-destructive">{errors.amount.message}</p>}
+          </div>
+          <div className="grid gap-2">
+            <Label htmlFor="po-date">Requisition Date</Label>
+            <Input id="po-date" type="date" {...register("date")} />
+            {errors.date && <p className="text-sm text-destructive">{errors.date.message}</p>}
+          </div>
+          <div className="grid gap-2 sm:col-span-2">
+            <Label htmlFor="po-description">Description / Items</Label>
+            <Textarea
+              id="po-description"
+              placeholder="e.g. Cement OPC 53 – 500 bags, Rod 60 Grade – 10 ton"
+              rows={3}
+              {...register("description")}
+            />
+            {errors.description && <p className="text-sm text-destructive">{errors.description.message}</p>}
+          </div>
+        </div>
+      </EntityCreateModal>
     </div>
   );
 }

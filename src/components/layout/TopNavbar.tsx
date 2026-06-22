@@ -92,7 +92,7 @@ export function TopNavbar() {
           value={companyId}
           onValueChange={(v) => dispatch(setCompany(v))}
         >
-          <SelectTrigger className="hidden sm:flex w-[180px] h-9">
+          <SelectTrigger className="hidden sm:flex w-20! h-9 overflow-hidden">
             <Building2 className="h-4 w-4 mr-1 shrink-0" />
             <SelectValue />
           </SelectTrigger>
