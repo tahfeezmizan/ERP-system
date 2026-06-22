@@ -1,21 +1,20 @@
 "use client";
 
-import { Plus } from "lucide-react";
-import { useState } from "react";
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { toast } from "sonner";
+import { EntityCreateModal } from "@/components/shared/EntityCreateModal";
+import { PageHeader } from "@/components/shared/PageHeader";
+import { StatusBadge } from "@/components/shared/StatusBadge";
+import { DataTable, type Column } from "@/components/tables/DataTable";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { PageHeader } from "@/components/shared/PageHeader";
-import { DataTable, type Column } from "@/components/tables/DataTable";
-import { StatusBadge } from "@/components/shared/StatusBadge";
-import { EntityCreateModal } from "@/components/shared/EntityCreateModal";
-import { useGetOrdersQuery, useCreateOrderMutation } from "@/services/moduleApis";
-import { createProcurementSchema, type CreateProcurementFormData } from "@/schemas";
 import { formatBDT } from "@/lib/utils";
+import { type CreateProcurementFormData } from "@/schemas";
+import { useCreateOrderMutation, useGetOrdersQuery } from "@/services/moduleApis";
+import { Plus } from "lucide-react";
+import { useState } from "react";
+import { useForm } from "react-hook-form";
+import { toast } from "sonner";
 
 type Order = {
   id: string;
@@ -37,7 +36,6 @@ export default function ProcurementPage() {
     formState: { errors, isSubmitting },
     reset,
   } = useForm<CreateProcurementFormData>({
-    resolver: zodResolver(createProcurementSchema),
     defaultValues: {
       vendor: "",
       amount: undefined,

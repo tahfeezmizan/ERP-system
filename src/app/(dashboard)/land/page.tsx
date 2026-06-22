@@ -1,23 +1,21 @@
 "use client";
 
-import { Plus } from "lucide-react";
-import { useState } from "react";
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { toast } from "sonner";
+import { EntityCreateModal } from "@/components/shared/EntityCreateModal";
+import { PageHeader } from "@/components/shared/PageHeader";
+import { StatusBadge } from "@/components/shared/StatusBadge";
+import { DataTable, type Column } from "@/components/tables/DataTable";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { PageHeader } from "@/components/shared/PageHeader";
-import { DataTable, type Column } from "@/components/tables/DataTable";
-import { StatusBadge } from "@/components/shared/StatusBadge";
-import { EntityCreateModal } from "@/components/shared/EntityCreateModal";
-import { useGetLandRecordsQuery, useCreateLandRecordMutation } from "@/services/moduleApis";
-import { createLandRecordSchema, type CreateLandRecordFormData } from "@/schemas";
 import { formatBDT, formatNumber } from "@/lib/utils";
+import { type CreateLandRecordFormData } from "@/schemas";
+import { useCreateLandRecordMutation, useGetLandRecordsQuery } from "@/services/moduleApis";
 import type { LandRecord } from "@/types";
-import { PermissionGate } from "@/components/shared/PermissionGate";
+import { Plus } from "lucide-react";
+import { useState } from "react";
+import { useForm } from "react-hook-form";
+import { toast } from "sonner";
 
 export default function LandPage() {
   const { data = [], isLoading, refetch } = useGetLandRecordsQuery();
@@ -32,7 +30,6 @@ export default function LandPage() {
     formState: { errors, isSubmitting },
     reset,
   } = useForm<CreateLandRecordFormData>({
-    resolver: zodResolver(createLandRecordSchema),
     defaultValues: { mouza: "", khatian: "", dag: "", area: undefined, valuation: undefined, status: "Pending" },
   });
 
@@ -63,12 +60,11 @@ export default function LandPage() {
   return (
     <div className="space-y-6">
       <PageHeader title="Land Management" description="Land acquisition, owners, and Bangladesh land records">
-        <PermissionGate permission="land.create">
-          <Button onClick={() => setIsModalOpen(true)}>
-            <Plus className="h-4 w-4 mr-1" /> Add Land Record
-          </Button>
-        </PermissionGate>
+        <Button onClick={() => setIsModalOpen(true)}>
+          <Plus className="h-4 w-4 mr-1" /> Add Land Record
+        </Button>
       </PageHeader>
+      
       <DataTable columns={columns} data={data} isLoading={isLoading} searchKeys={["mouza", "khatian", "dag"]} />
 
       <EntityCreateModal

@@ -1,20 +1,19 @@
 "use client";
 
-import { Plus } from "lucide-react";
-import { useState } from "react";
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { toast } from "sonner";
+import { EntityCreateModal } from "@/components/shared/EntityCreateModal";
+import { PageHeader } from "@/components/shared/PageHeader";
+import { DataTable, type Column } from "@/components/tables/DataTable";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { PageHeader } from "@/components/shared/PageHeader";
-import { DataTable, type Column } from "@/components/tables/DataTable";
-import { EntityCreateModal } from "@/components/shared/EntityCreateModal";
-import { useGetContractorsQuery, useCreateContractorMutation } from "@/services/moduleApis";
-import { createContractorSchema, type CreateContractorFormData } from "@/schemas";
 import { formatBDT } from "@/lib/utils";
+import { type CreateContractorFormData } from "@/schemas";
+import { useCreateContractorMutation, useGetContractorsQuery } from "@/services/moduleApis";
+import { Plus } from "lucide-react";
+import { useState } from "react";
+import { useForm } from "react-hook-form";
+import { toast } from "sonner";
 
 type Contractor = {
   id: string;
@@ -49,7 +48,6 @@ export default function ContractorsPage() {
     formState: { errors, isSubmitting },
     reset,
   } = useForm<CreateContractorFormData>({
-    resolver: zodResolver(createContractorSchema),
     defaultValues: { name: "", type: "", rating: undefined },
   });
 

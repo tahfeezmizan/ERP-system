@@ -1,28 +1,27 @@
 "use client";
 
-import { useState } from "react";
-import { Plus } from "lucide-react";
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { toast } from "sonner";
+import { EntityCreateModal } from "@/components/shared/EntityCreateModal";
+import { KanbanBoard } from "@/components/shared/KanbanBoard";
+import { PageHeader } from "@/components/shared/PageHeader";
+import { StatusBadge } from "@/components/shared/StatusBadge";
+import { DataTable, type Column } from "@/components/tables/DataTable";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { PageHeader } from "@/components/shared/PageHeader";
-import { KanbanBoard } from "@/components/shared/KanbanBoard";
-import { DataTable, type Column } from "@/components/tables/DataTable";
-import { StatusBadge } from "@/components/shared/StatusBadge";
-import { EntityCreateModal } from "@/components/shared/EntityCreateModal";
+import { formatBDT } from "@/lib/utils";
+import { type CreateLeadFormData } from "@/schemas";
 import {
+  useCreateLeadMutation,
   useGetLeadsQuery,
   useGetPipelineQuery,
   useUpdateLeadStageMutation,
-  useCreateLeadMutation,
 } from "@/services/moduleApis";
-import { createLeadSchema, type CreateLeadFormData } from "@/schemas";
-import { formatBDT } from "@/lib/utils";
 import type { Lead } from "@/types";
+import { Plus } from "lucide-react";
+import { useState } from "react";
+import { useForm } from "react-hook-form";
+import { toast } from "sonner";
 
 const LEAD_SOURCES = ["Facebook", "Referral", "Walk-In", "Website", "Billboard", "TV", "Other"] as const;
 
@@ -43,7 +42,6 @@ export default function CrmPage() {
     formState: { errors, isSubmitting },
     reset,
   } = useForm<CreateLeadFormData>({
-    resolver: zodResolver(createLeadSchema),
     defaultValues: {
       name: "",
       phone: "",
