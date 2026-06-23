@@ -1,220 +1,315 @@
 "use client";
 
 import {
-  Activity,
-  Banknote,
-  Building,
-  CalendarCheck,
-  ClipboardCheck,
-  DollarSign,
-  HardHat,
-  Home,
+  AlertTriangle,
+  Building2,
+  DoorOpen,
+  FileText,
+  TrendingDown,
   TrendingUp,
-  Users,
-  Wallet,
+  User,
+  Wrench,
   type LucideIcon,
 } from "lucide-react";
-import {
-  Area,
-  AreaChart,
-  Bar,
-  BarChart,
-  CartesianGrid,
-  Cell,
-  Legend,
-  Line,
-  LineChart,
-  Pie,
-  PieChart,
-  ResponsiveContainer,
-  Tooltip,
-  XAxis,
-  YAxis,
-} from "recharts";
-import { KpiCard } from "@/components/shared/KpiCard";
-import { ChartCard } from "@/components/charts/ChartCard";
 import { PageHeader } from "@/components/shared/PageHeader";
-import { ActivityTimeline } from "@/components/shared/ActivityTimeline";
-import { StatusBadge } from "@/components/shared/StatusBadge";
+import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import {
-  useGetCashFlowQuery,
-  useGetCollectionTrendQuery,
-  useGetKpisQuery,
-  useGetLeadConversionQuery,
-  useGetRecentActivitiesQuery,
-  useGetRecentBookingsQuery,
-  useGetRecentCollectionsQuery,
-  useGetSalesTrendQuery,
-  useGetUnitStatusQuery,
-} from "@/services/dashboardApi";
-import { formatBDT } from "@/lib/utils";
-import type { KpiMetric } from "@/types";
+import { cn } from "@/lib/utils";
 
-const KPI_ICONS: Record<string, LucideIcon> = {
-  "1": Banknote,
-  "2": Wallet,
-  "3": TrendingUp,
-  "4": Home,
-  "5": CalendarCheck,
-  "6": Building,
-  "7": DollarSign,
-  "8": Banknote,
-  "9": HardHat,
-  "10": CalendarCheck,
-  "11": Users,
-  "12": ClipboardCheck,
-};
+interface MetricCardProps {
+  label: string;
+  value: string | number;
+  subtitle?: string;
+  icon: LucideIcon;
+  iconClassName: string;
+  iconBgClassName: string;
+  progress?: number;
+  alert?: {
+    text: string;
+    variant: "warning" | "danger";
+    direction: "up" | "down";
+  };
+}
 
-const PIE_COLORS = ["#1D4ED8", "#3B82F6", "#22C55E", "#F59E0B", "#EF4444", "#8B5CF6"];
+function MetricCard({
+  label,
+  value,
+  subtitle,
+  icon: Icon,
+  iconClassName,
+  iconBgClassName,
+  progress,
+  alert,
+}: MetricCardProps) {
+  const AlertIcon = alert?.direction === "up" ? TrendingUp : TrendingDown;
+
+  return (
+    <Card>
+      <CardContent className="p-5">
+        <div className="flex items-start justify-between gap-3">
+          <div className="min-w-0 flex-1 space-y-1">
+            <p className="text-sm text-muted-foreground">{label}</p>
+            <p className="text-3xl font-bold tracking-tight">{value}</p>
+            {subtitle && (
+              <p className="text-sm text-muted-foreground">{subtitle}</p>
+            )}
+          </div>
+          <div className={cn("shrink-0 rounded-lg p-2.5", iconBgClassName)}>
+            <Icon className={cn("h-5 w-5", iconClassName)} />
+          </div>
+        </div>
+
+        {progress !== undefined && (
+          <div className="mt-4 h-1.5 w-full overflow-hidden rounded-full bg-muted">
+            <div
+              className="h-full rounded-full bg-foreground transition-all"
+              style={{ width: `${progress}%` }}
+            />
+          </div>
+        )}
+
+        {alert && (
+          <div
+            className={cn(
+              "mt-3 flex items-center gap-1 text-xs font-medium",
+              alert.variant === "warning" && "text-warning",
+              alert.variant === "danger" && "text-danger"
+            )}
+          >
+            <AlertIcon className="h-3.5 w-3.5" />
+            <span>{alert.text}</span>
+          </div>
+        )}
+      </CardContent>
+    </Card>
+  );
+}
+
+interface StatCardProps {
+  label: string;
+  value: string | number;
+  icon: LucideIcon;
+  iconClassName: string;
+  iconBgClassName: string;
+}
+
+function StatCard({ label, value, icon: Icon, iconClassName, iconBgClassName }: StatCardProps) {
+  return (
+    <Card>
+      <CardContent className="flex items-center justify-between p-5">
+        <div className="space-y-1">
+          <p className="text-sm text-muted-foreground">{label}</p>
+          <p className="text-3xl font-bold tracking-tight">{value}</p>
+        </div>
+        <div className={cn("rounded-lg p-2.5", iconBgClassName)}>
+          <Icon className={cn("h-5 w-5", iconClassName)} />
+        </div>
+      </CardContent>
+    </Card>
+  );
+}
+
+const WORK_ORDER_STATUSES = [
+  { count: 1, label: "Open" },
+  { count: 1, label: "In_progress" },
+  { count: 1, label: "Completed" },
+  { count: 1, label: "Scheduled" },
+];
+
+const EXPIRING_LEASES = [
+  {
+    id: "1",
+    tenant: "TechStart Inc",
+    location: "Grand Plaza Corporate Center - Unit Suite 102",
+    daysLeft: 36,
+    expiryDate: "2026-06-30",
+  },
+  {
+    id: "2",
+    tenant: "Jane Miller",
+    location: "Oakridge Residential Towers - Unit A-2",
+    daysLeft: 21,
+    expiryDate: "2026-06-15",
+  },
+];
+
+const RECENT_WORK_ORDERS = [
+  {
+    id: "1",
+    title: "HVAC Maintenance",
+    location: "Grand Plaza Corporate Center",
+    priority: "medium" as const,
+    status: "Completed",
+  },
+  {
+    id: "2",
+    title: "Leaking Faucet in A-1",
+    location: "Oakridge Residential Towers",
+    priority: "high" as const,
+    status: "In Progress",
+  },
+  {
+    id: "3",
+    title: "Elevator Inspection",
+    location: "Grand Plaza Corporate Center",
+    priority: "high" as const,
+    status: "Scheduled",
+  },
+  {
+    id: "4",
+    title: "lobby Light Bulbs Replacement",
+    location: "Oakridge Residential Towers",
+    priority: "low" as const,
+    status: "Open",
+  },
+];
+
+function priorityVariant(priority: "low" | "medium" | "high") {
+  if (priority === "high") return "warning";
+  return "secondary";
+}
+
+function daysLeftVariant(days: number) {
+  return days <= 30 ? "danger" : "warning";
+}
 
 export default function DashboardPage() {
-  const { data: kpis = [], isLoading: kpisLoading } = useGetKpisQuery();
-  const { data: salesTrend = [], isLoading: salesLoading } = useGetSalesTrendQuery();
-  const { data: collectionTrend = [], isLoading: collectionLoading } = useGetCollectionTrendQuery();
-  const { data: leadConversion = [], isLoading: leadLoading } = useGetLeadConversionQuery();
-  const { data: unitStatus = [], isLoading: unitLoading } = useGetUnitStatusQuery();
-  const { data: cashFlow = [], isLoading: cashFlowLoading } = useGetCashFlowQuery();
-  const { data: recentBookings = [] } = useGetRecentBookingsQuery();
-  const { data: recentCollections = [] } = useGetRecentCollectionsQuery();
-  const { data: activities = [] } = useGetRecentActivitiesQuery();
-
   return (
     <div className="space-y-6">
       <PageHeader
-        title="Executive Dashboard"
-        description="Real-time overview of your real estate business"
+        title="Dashboard"
+        description="Overview of your real estate portfolio"
       />
 
-      <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-        {kpisLoading
-          ? Array.from({ length: 12 }).map((_, i) => (
-              <div key={i} className="h-28 rounded-lg bg-muted animate-pulse" />
-            ))
-          : kpis.map((kpi: KpiMetric) => (
-              <KpiCard
-                key={kpi.id}
-                metric={kpi}
-                icon={KPI_ICONS[kpi.id] ?? Activity}
-              />
-            ))}
+      <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+        <MetricCard
+          label="Properties"
+          value={3}
+          subtitle="10 total units"
+          icon={Building2}
+          iconClassName="text-blue-600"
+          iconBgClassName="bg-blue-50"
+        />
+        <MetricCard
+          label="Occupancy Rate"
+          value="50%"
+          subtitle="5 occupied / 10 total"
+          icon={DoorOpen}
+          iconClassName="text-green-600"
+          iconBgClassName="bg-green-50"
+          progress={50}
+        />
+        <MetricCard
+          label="Active Leases"
+          value={4}
+          subtitle="2 expiring soon"
+          icon={FileText}
+          iconClassName="text-purple-600"
+          iconBgClassName="bg-purple-50"
+          alert={{ text: "2 expiring", variant: "warning", direction: "down" }}
+        />
+        <MetricCard
+          label="Open Work Orders"
+          value={2}
+          subtitle="2 overdue"
+          icon={Wrench}
+          iconClassName="text-orange-600"
+          iconBgClassName="bg-orange-50"
+          alert={{ text: "2 overdue", variant: "danger", direction: "up" }}
+        />
+      </div>
+
+      <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+        <StatCard
+          label="Outstanding Invoices"
+          value="$10,000"
+          icon={AlertTriangle}
+          iconClassName="text-red-600"
+          iconBgClassName="bg-red-50"
+        />
+        <StatCard
+          label="Total Tenants"
+          value={4}
+          icon={User}
+          iconClassName="text-blue-600"
+          iconBgClassName="bg-blue-50"
+        />
+        <Card className="md:col-span-2 xl:col-span-1">
+          <CardContent className="p-5">
+            <div className="flex items-start justify-between gap-3">
+              <p className="text-sm text-muted-foreground">Work Orders by Status</p>
+              <div className="rounded-lg bg-orange-50 p-2.5">
+                <Wrench className="h-5 w-5 text-orange-600" />
+              </div>
+            </div>
+            <div className="mt-4 grid grid-cols-4 gap-2">
+              {WORK_ORDER_STATUSES.map((item) => (
+                <div key={item.label} className="text-center">
+                  <p className="text-2xl font-bold">{item.count}</p>
+                  <p className="text-xs text-muted-foreground">{item.label}</p>
+                </div>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
       </div>
 
       <div className="grid gap-4 lg:grid-cols-2">
-        <ChartCard title="Sales Trend" isLoading={salesLoading}>
-          <ResponsiveContainer width="100%" height={250}>
-            <AreaChart data={salesTrend}>
-              <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
-              <XAxis dataKey="name" />
-              <YAxis tickFormatter={(v) => `${(v / 1000000).toFixed(0)}M`} />
-              <Tooltip formatter={(v) => formatBDT(Number(v))} />
-              <Area type="monotone" dataKey="sales" stroke="#1D4ED8" fill="#1D4ED8" fillOpacity={0.2} />
-            </AreaChart>
-          </ResponsiveContainer>
-        </ChartCard>
-
-        <ChartCard title="Collection Trend" isLoading={collectionLoading}>
-          <ResponsiveContainer width="100%" height={250}>
-            <LineChart data={collectionTrend}>
-              <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
-              <XAxis dataKey="name" />
-              <YAxis tickFormatter={(v) => `${(v / 1000000).toFixed(0)}M`} />
-              <Tooltip formatter={(v) => formatBDT(Number(v))} />
-              <Line type="monotone" dataKey="collection" stroke="#22C55E" strokeWidth={2} />
-            </LineChart>
-          </ResponsiveContainer>
-        </ChartCard>
-
-        <ChartCard title="Lead Conversion Funnel" isLoading={leadLoading}>
-          <ResponsiveContainer width="100%" height={250}>
-            <BarChart data={leadConversion} layout="vertical">
-              <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
-              <XAxis type="number" />
-              <YAxis dataKey="name" type="category" width={90} />
-              <Tooltip />
-              <Bar dataKey="value" fill="#3B82F6" radius={[0, 4, 4, 0]} />
-            </BarChart>
-          </ResponsiveContainer>
-        </ChartCard>
-
-        <ChartCard title="Unit Status Distribution" isLoading={unitLoading}>
-          <ResponsiveContainer width="100%" height={250}>
-            <PieChart>
-              <Pie
-                data={unitStatus}
-                dataKey="value"
-                nameKey="name"
-                cx="50%"
-                cy="50%"
-                outerRadius={80}
-                label={({ name, value }) => `${name}: ${value}`}
+        <Card>
+          <CardHeader className="pb-3">
+            <CardTitle className="text-base font-semibold">
+              Expiring Leases (90 days)
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            {EXPIRING_LEASES.map((lease) => (
+              <div
+                key={lease.id}
+                className="flex items-start justify-between gap-4 border-b pb-4 last:border-0 last:pb-0"
               >
-                {unitStatus.map((_, index) => (
-                  <Cell key={index} fill={PIE_COLORS[index % PIE_COLORS.length]} />
-                ))}
-              </Pie>
-              <Tooltip />
-              <Legend />
-            </PieChart>
-          </ResponsiveContainer>
-        </ChartCard>
-
-        <ChartCard title="Cash Flow" isLoading={cashFlowLoading} className="lg:col-span-2">
-          <ResponsiveContainer width="100%" height={250}>
-            <BarChart data={cashFlow}>
-              <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
-              <XAxis dataKey="name" />
-              <YAxis tickFormatter={(v) => `${(v / 1000000).toFixed(0)}M`} />
-              <Tooltip formatter={(v) => formatBDT(Number(v))} />
-              <Legend />
-              <Bar dataKey="inflow" fill="#22C55E" name="Inflow" />
-              <Bar dataKey="outflow" fill="#EF4444" name="Outflow" />
-            </BarChart>
-          </ResponsiveContainer>
-        </ChartCard>
-      </div>
-
-      <div className="grid gap-4 lg:grid-cols-3">
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-base">Recent Bookings</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-3">
-            {recentBookings.map((b) => (
-              <div key={b.id} className="flex items-center justify-between text-sm">
-                <div>
-                  <p className="font-medium">{b.bookingNo}</p>
-                  <p className="text-muted-foreground">{b.customerName}</p>
+                <div className="min-w-0">
+                  <p className="font-semibold">{lease.tenant}</p>
+                  <p className="text-sm text-muted-foreground">{lease.location}</p>
                 </div>
-                <StatusBadge status={b.status} />
+                <div className="shrink-0 text-right">
+                  <Badge variant={daysLeftVariant(lease.daysLeft)}>
+                    {lease.daysLeft} days
+                  </Badge>
+                  <p className="mt-1 text-xs text-muted-foreground">
+                    {lease.expiryDate}
+                  </p>
+                </div>
               </div>
             ))}
           </CardContent>
         </Card>
 
         <Card>
-          <CardHeader>
-            <CardTitle className="text-base">Recent Collections</CardTitle>
+          <CardHeader className="pb-3">
+            <CardTitle className="text-base font-semibold">
+              Recent Work Orders
+            </CardTitle>
           </CardHeader>
-          <CardContent className="space-y-3">
-            {recentCollections.map((c) => (
-              <div key={c.id} className="flex items-center justify-between text-sm">
-                <div>
-                  <p className="font-medium">{c.receiptNo}</p>
-                  <p className="text-muted-foreground">{c.customerName}</p>
+          <CardContent className="space-y-4">
+            {RECENT_WORK_ORDERS.map((order) => (
+              <div
+                key={order.id}
+                className="flex items-start justify-between gap-4 border-b pb-4 last:border-0 last:pb-0"
+              >
+                <div className="min-w-0">
+                  <p className="font-semibold">{order.title}</p>
+                  <p className="text-sm text-muted-foreground">{order.location}</p>
                 </div>
-                <span className="font-medium text-success">{formatBDT(c.amount)}</span>
+                <div className="shrink-0 text-right">
+                  <Badge variant={priorityVariant(order.priority)}>
+                    {order.priority}
+                  </Badge>
+                  <p className="mt-1 text-xs text-muted-foreground">
+                    {order.status}
+                  </p>
+                </div>
               </div>
             ))}
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-base">Recent Activities</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <ActivityTimeline activities={activities} />
           </CardContent>
         </Card>
       </div>
