@@ -1,20 +1,19 @@
 "use client";
 
-import { Plus } from "lucide-react";
-import { useState } from "react";
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { toast } from "sonner";
+import { EntityCreateModal } from "@/components/shared/EntityCreateModal";
+import { PageHeader } from "@/components/shared/PageHeader";
+import { StatusBadge } from "@/components/shared/StatusBadge";
+import { DataTable, type Column } from "@/components/tables/DataTable";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { PageHeader } from "@/components/shared/PageHeader";
-import { DataTable, type Column } from "@/components/tables/DataTable";
-import { StatusBadge } from "@/components/shared/StatusBadge";
-import { EntityCreateModal } from "@/components/shared/EntityCreateModal";
-import { useGetEmployeesQuery, useCreateEmployeeMutation } from "@/services/moduleApis";
-import { createEmployeeSchema, type CreateEmployeeFormData } from "@/schemas";
+import { type CreateEmployeeFormData } from "@/schemas";
+import { useCreateEmployeeMutation, useGetEmployeesQuery } from "@/services/moduleApis";
+import { Plus } from "lucide-react";
+import { useState } from "react";
+import { useForm } from "react-hook-form";
+import { toast } from "sonner";
 
 type Employee = {
   id: string;
@@ -39,7 +38,6 @@ export default function HrPage() {
     formState: { errors, isSubmitting },
     reset,
   } = useForm<CreateEmployeeFormData>({
-    resolver: zodResolver(createEmployeeSchema),
     defaultValues: { name: "", department: "", designation: "", phone: "", email: "", joiningDate: "", salary: undefined, nid: "" },
   });
 

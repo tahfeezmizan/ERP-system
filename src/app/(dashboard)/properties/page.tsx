@@ -34,7 +34,7 @@ export default function PropertiesPage() {
     formState: { errors, isSubmitting },
     reset,
   } = useForm<CreatePropertyUnitFormData>({
-    resolver: zodResolver(createPropertyUnitSchema),
+
     defaultValues: {
       projectName: "",
       building: "",

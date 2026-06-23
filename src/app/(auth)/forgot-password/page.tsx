@@ -1,16 +1,15 @@
 "use client";
 
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import Link from "next/link";
-import { Loader2 } from "lucide-react";
-import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { forgotPasswordSchema, type ForgotPasswordFormData } from "@/schemas/auth";
+import { type ForgotPasswordFormData } from "@/schemas/auth";
 import { useForgotPasswordMutation } from "@/services/authApi";
+import { Loader2 } from "lucide-react";
+import Link from "next/link";
+import { useForm } from "react-hook-form";
+import { toast } from "sonner";
 
 export default function ForgotPasswordPage() {
   const [forgotPassword, { isLoading }] = useForgotPasswordMutation();
@@ -19,7 +18,6 @@ export default function ForgotPasswordPage() {
     handleSubmit,
     formState: { errors },
   } = useForm<ForgotPasswordFormData>({
-    resolver: zodResolver(forgotPasswordSchema),
   });
 
   const onSubmit = async (data: ForgotPasswordFormData) => {

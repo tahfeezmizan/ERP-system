@@ -1,20 +1,19 @@
 "use client";
 
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import Link from "next/link";
-import { useRouter } from "next/navigation";
-import { Building2, Loader2 } from "lucide-react";
-import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { loginSchema, type LoginFormData } from "@/schemas/auth";
-import { useLoginMutation } from "@/services/authApi";
-import { useAppDispatch } from "@/hooks/redux";
-import { setCredentials } from "@/store/slices/authSlice";
 import { APP_NAME, MOCK_CREDENTIALS } from "@/constants/app";
+import { useAppDispatch } from "@/hooks/redux";
+import { type LoginFormData } from "@/schemas/auth";
+import { useLoginMutation } from "@/services/authApi";
+import { setCredentials } from "@/store/slices/authSlice";
+import { Building2, Loader2 } from "lucide-react";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { useForm } from "react-hook-form";
+import { toast } from "sonner";
 
 export default function LoginPage() {
   const router = useRouter();
@@ -26,7 +25,6 @@ export default function LoginPage() {
     handleSubmit,
     formState: { errors },
   } = useForm<LoginFormData>({
-    resolver: zodResolver(loginSchema),
     defaultValues: {
       email: MOCK_CREDENTIALS.email,
       password: MOCK_CREDENTIALS.password,

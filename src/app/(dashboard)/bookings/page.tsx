@@ -1,21 +1,20 @@
 "use client";
 
-import { Plus } from "lucide-react";
-import { useState } from "react";
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { toast } from "sonner";
+import { EntityCreateModal } from "@/components/shared/EntityCreateModal";
+import { PageHeader } from "@/components/shared/PageHeader";
+import { StatusBadge } from "@/components/shared/StatusBadge";
+import { DataTable, type Column } from "@/components/tables/DataTable";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { PageHeader } from "@/components/shared/PageHeader";
-import { DataTable, type Column } from "@/components/tables/DataTable";
-import { StatusBadge } from "@/components/shared/StatusBadge";
-import { EntityCreateModal } from "@/components/shared/EntityCreateModal";
-import { useGetBookingsQuery, useCreateBookingMutation } from "@/services/moduleApis";
-import { createBookingSchema, type CreateBookingFormData } from "@/schemas";
 import { formatBDT } from "@/lib/utils";
+import { type CreateBookingFormData } from "@/schemas";
+import { useCreateBookingMutation, useGetBookingsQuery } from "@/services/moduleApis";
 import type { Booking } from "@/types";
+import { Plus } from "lucide-react";
+import { useState } from "react";
+import { useForm } from "react-hook-form";
+import { toast } from "sonner";
 
 export default function BookingsPage() {
   const { data = [], isLoading, refetch } = useGetBookingsQuery();
@@ -28,7 +27,6 @@ export default function BookingsPage() {
     formState: { errors, isSubmitting },
     reset,
   } = useForm<CreateBookingFormData>({
-    resolver: zodResolver(createBookingSchema),
     defaultValues: {
       customerName: "",
       unitNumber: "",

@@ -22,7 +22,6 @@ export default function SettingsPage() {
     reset,
     formState: { errors },
   } = useForm<ChangePasswordFormData>({
-    resolver: zodResolver(changePasswordSchema),
   });
 
   const onSubmit = async (data: ChangePasswordFormData) => {
