@@ -8,7 +8,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { formatBDT } from "@/lib/utils";
-import { type CreateBookingFormData } from "@/schemas";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { type CreateBookingFormData, createBookingSchema } from "@/schemas";
 import { useCreateBookingMutation, useGetBookingsQuery } from "@/services/moduleApis";
 import type { Booking } from "@/types";
 import { Plus } from "lucide-react";
@@ -27,6 +28,7 @@ export default function BookingsPage() {
     formState: { errors, isSubmitting },
     reset,
   } = useForm<CreateBookingFormData>({
+    resolver: zodResolver(createBookingSchema) as any,
     defaultValues: {
       customerName: "",
       unitNumber: "",

@@ -9,7 +9,8 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { formatBDT } from "@/lib/utils";
-import { type CreateCollectionFormData } from "@/schemas";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { type CreateCollectionFormData, createCollectionSchema } from "@/schemas";
 import { useCreateCollectionMutation, useGetCollectionsQuery } from "@/services/moduleApis";
 import type { Collection } from "@/types";
 import { Plus } from "lucide-react";
@@ -33,6 +34,7 @@ export default function CollectionsPage() {
     formState: { errors, isSubmitting },
     reset,
   } = useForm<CreateCollectionFormData>({
+    resolver: zodResolver(createCollectionSchema) as any,
     defaultValues: {
       customerName: "",
       amount: undefined,

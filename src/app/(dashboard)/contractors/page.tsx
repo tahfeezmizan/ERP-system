@@ -8,7 +8,8 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { formatBDT } from "@/lib/utils";
-import { type CreateContractorFormData } from "@/schemas";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { type CreateContractorFormData, createContractorSchema } from "@/schemas";
 import { useCreateContractorMutation, useGetContractorsQuery } from "@/services/moduleApis";
 import { Plus } from "lucide-react";
 import { useState } from "react";
@@ -48,6 +49,7 @@ export default function ContractorsPage() {
     formState: { errors, isSubmitting },
     reset,
   } = useForm<CreateContractorFormData>({
+    resolver: zodResolver(createContractorSchema) as any,
     defaultValues: { name: "", type: "", rating: undefined },
   });
 
