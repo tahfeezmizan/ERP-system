@@ -9,7 +9,8 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { formatBDT } from "@/lib/utils";
-import { type CreateProcurementFormData } from "@/schemas";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { type CreateProcurementFormData, createProcurementSchema } from "@/schemas";
 import { useCreateOrderMutation, useGetOrdersQuery } from "@/services/moduleApis";
 import { Plus } from "lucide-react";
 import { useState } from "react";
@@ -36,6 +37,7 @@ export default function ProcurementPage() {
     formState: { errors, isSubmitting },
     reset,
   } = useForm<CreateProcurementFormData>({
+    resolver: zodResolver(createProcurementSchema) as any,
     defaultValues: {
       vendor: "",
       amount: undefined,

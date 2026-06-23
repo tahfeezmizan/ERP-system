@@ -8,7 +8,8 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { formatBDT } from "@/lib/utils";
-import { type CreateJournalEntryFormData } from "@/schemas";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { type CreateJournalEntryFormData, createJournalEntrySchema } from "@/schemas";
 import { useCreateJournalEntryMutation, useGetAccountsQuery } from "@/services/moduleApis";
 import { Plus } from "lucide-react";
 import { useState } from "react";
@@ -38,6 +39,7 @@ export default function FinancePage() {
     formState: { errors, isSubmitting },
     reset,
   } = useForm<CreateJournalEntryFormData>({
+    resolver: zodResolver(createJournalEntrySchema) as any,
     defaultValues: {
       accountCode: "",
       accountName: "",

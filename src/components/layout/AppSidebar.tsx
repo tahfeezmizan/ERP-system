@@ -88,7 +88,7 @@ export function AppSidebar() {
       )}
       <aside
         className={cn(
-          "fixed inset-y-0 left-0 z-50 flex flex-col border-r bg-sidebar transition-all duration-300 lg:static lg:z-auto",
+          "fixed h-dvh inset-y-0 left-0 z-50 flex flex-col border-r bg-sidebar transition-all duration-300 lg:static lg:z-auto",
           collapsed ? "w-[70px]" : "w-[260px]",
           mobileOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0"
         )}
