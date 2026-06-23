@@ -77,6 +77,19 @@ export interface LandRecord {
   mouza: string;
   khatian: string;
   dag: string;
+  // New fields
+  landId?: string; // Land ID / Land Code
+  recordType?: "CS" | "SA" | "RS" | "BRS"; // Record Type
+  district?: string;
+  jlNo?: string;
+  landType?: string;
+  sharePercent?: number;
+  acquisitionType?: string;
+  acquisitionDate?: string;
+  mutationStatus?: string;
+  developmentAgreementStatus?: string;
+  totalOwners?: number;
+  availableArea?: number;
   csRecord?: string;
   saRecord?: string;
   rsRecord?: string;

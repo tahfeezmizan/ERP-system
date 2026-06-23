@@ -60,6 +60,7 @@ export const landApi = baseApi.injectEndpoints({
       },
       providesTags: ["Land"],
     }),
+    
     createLandRecord: builder.mutation<LandRecord, CreateLandRecordFormData>({
       queryFn: async (data) => {
         await delay(400);

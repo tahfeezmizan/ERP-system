@@ -32,7 +32,7 @@ export default function LandPage() {
     reset,
   } = useForm<CreateLandRecordFormData>({
     resolver: zodResolver(createLandRecordSchema) as any,
-    defaultValues: { mouza: "", khatian: "", dag: "", area: undefined, valuation: undefined, status: "Pending" },
+    defaultValues: { mouza: "", khatian: "", dag: "", area: undefined, valuation: undefined, status: "Pending", csRecord: "", rsRecord: "" },
   });
 
   const statusValue = watch("status");
@@ -41,6 +41,8 @@ export default function LandPage() {
     { key: "mouza", header: "Mouza", cell: (r) => r.mouza, sortable: true },
     { key: "khatian", header: "Khatian", cell: (r) => r.khatian, sortable: true },
     { key: "dag", header: "Dag", cell: (r) => r.dag, sortable: true },
+    { key: "csRecord", header: "CS Record", cell: (r) => r.csRecord || "-", sortable: true },
+    { key: "rsRecord", header: "RS Record", cell: (r) => r.rsRecord || "-", sortable: true },
     { key: "area", header: "Area (Katha)", cell: (r) => formatNumber(r.area), sortable: true },
     { key: "valuation", header: "Valuation", cell: (r) => formatBDT(r.valuation), sortable: true },
     { key: "status", header: "Status", cell: (r) => <StatusBadge status={r.status} /> },
