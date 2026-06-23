@@ -2,29 +2,98 @@ import { z } from "zod";
 import { LEAD_SOURCES } from "@/constants/app";
 
 // ─── Land ─────────────────────────────────────────────────────────────────────
+// export const createLandRecordSchema = z.object({
+//   mouza: z.string().min(2, "Mouza is required"),
+//   khatian: z.string().min(1, "Khatian No. is required"),
+//   dag: z.string().min(1, "Dag No. is required"),
+//   area: z.coerce.number().positive("Area must be positive"),
+//   valuation: z.coerce.number().positive("Valuation is required"),
+//   status: z.enum(["Acquired", "Pending", "Verified"]),
+//   // New optional fields
+//   landId: z.string().optional(),
+//   recordType: z.enum(["CS", "SA", "RS", "BRS"]).optional(),
+//   district: z.string().optional(),
+//   jlNo: z.string().optional(),
+//   landType: z.string().optional(),
+//   sharePercent: z.coerce.number().optional(),
+//   acquisitionType: z.string().optional(),
+//   acquisitionDate: z.string().optional(),
+//   mutationStatus: z.string().optional(),
+//   developmentAgreementStatus: z.string().optional(),
+//   totalOwners: z.coerce.number().optional(),
+//   availableArea: z.coerce.number().optional(),
+//   csRecord: z.string().optional(),
+//   rsRecord: z.string().optional(),
+// });
+
 export const createLandRecordSchema = z.object({
+  // Core Land Information
+  landId: z.string().optional(),
+
   mouza: z.string().min(2, "Mouza is required"),
   khatian: z.string().min(1, "Khatian No. is required"),
   dag: z.string().min(1, "Dag No. is required"),
-  area: z.coerce.number().positive("Area must be positive"),
-  valuation: z.coerce.number().positive("Valuation is required"),
-  status: z.enum(["Acquired", "Pending", "Verified"]),
-  // New optional fields
-  landId: z.string().optional(),
+
   recordType: z.enum(["CS", "SA", "RS", "BRS"]).optional(),
+
   district: z.string().optional(),
+  upazila: z.string().optional(),
   jlNo: z.string().optional(),
-  landType: z.string().optional(),
-  sharePercent: z.coerce.number().optional(),
-  acquisitionType: z.string().optional(),
-  acquisitionDate: z.string().optional(),
-  mutationStatus: z.string().optional(),
-  developmentAgreementStatus: z.string().optional(),
-  totalOwners: z.coerce.number().optional(),
+
+  // Land Details
+  landType: z
+    .enum(["Residential", "Commercial", "Agricultural", "Industrial", "Mixed"])
+    .optional(),
+
+  area: z.coerce.number().positive("Area must be positive"),
+
   availableArea: z.coerce.number().optional(),
+
+  valuation: z.coerce.number().positive("Valuation is required"),
+
+  // Ownership
+  sharePercent: z
+    .coerce
+    .number()
+    .min(0, "Share percentage cannot be negative")
+    .max(100, "Share percentage cannot exceed 100")
+    .optional(),
+
+  totalOwners: z.coerce.number().int().positive().optional(),
+
+  // Acquisition
+  acquisitionType: z
+    .enum(["Purchase", "Joint Venture", "POA", "Inheritance", "Gift"])
+    .optional(),
+
+  acquisitionDate: z.string().optional(),
+
+  // Record References
   csRecord: z.string().optional(),
   rsRecord: z.string().optional(),
+
+  // Workflow Statuses
+  status: z.enum(["Acquired", "Pending", "Verified"]),
+
+  mutationStatus: z
+    .enum(["Pending", "Processing", "Approved", "Rejected"])
+    .optional(),
+
+  developmentAgreementStatus: z
+    .enum(["Signed", "Pending", "Expired"])
+    .optional(),
+
+  documentsStatus: z
+    .enum(["Complete", "Incomplete"])
+    .optional(),
+
+  // Project Information
+  estimatedProjectYield: z.string().optional(),
+
+  // Audit
+  lastUpdated: z.string().optional(),
 });
+
 export type CreateLandRecordFormData = z.infer<typeof createLandRecordSchema>;
 
 // ─── Lead ─────────────────────────────────────────────────────────────────────

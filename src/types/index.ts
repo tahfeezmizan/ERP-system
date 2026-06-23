@@ -72,32 +72,104 @@ export interface LandOwner {
   address: string;
 }
 
+// export interface LandRecord {
+//   id: string;
+//   mouza: string;
+//   khatian: string;
+//   dag: string;
+//   // New fields
+//   landId?: string; // Land ID / Land Code
+//   recordType?: "CS" | "SA" | "RS" | "BRS"; // Record Type
+//   district?: string;
+//   jlNo?: string;
+//   landType?: string;
+//   sharePercent?: number;
+//   acquisitionType?: string;
+//   acquisitionDate?: string;
+//   mutationStatus?: string;
+//   developmentAgreementStatus?: string;
+//   totalOwners?: number;
+//   availableArea?: number;
+//   csRecord?: string;
+//   saRecord?: string;
+//   rsRecord?: string;
+//   brsRecord?: string;
+//   area: number;
+//   valuation: number;
+//   status: "Acquired" | "Pending" | "Verified";
+//   owners: LandOwner[];
+//   projectId?: string;
+// }
+
+
 export interface LandRecord {
   id: string;
+
+  // Land Identification
+  landId?: string;
+  recordType?: '"CS" | "SA" | "RS" | "BRS" | undefined',
+
+  // Location
+  district?: string;
+  upazila?: string;
   mouza: string;
+  jlNo?: string;
+
+  // Land Records
   khatian: string;
   dag: string;
-  // New fields
-  landId?: string; // Land ID / Land Code
-  recordType?: "CS" | "SA" | "RS" | "BRS"; // Record Type
-  district?: string;
-  jlNo?: string;
-  landType?: string;
-  sharePercent?: number;
-  acquisitionType?: string;
-  acquisitionDate?: string;
-  mutationStatus?: string;
-  developmentAgreementStatus?: string;
-  totalOwners?: number;
-  availableArea?: number;
   csRecord?: string;
   saRecord?: string;
   rsRecord?: string;
   brsRecord?: string;
+
+  // Land Details
+  landType?: '"Residential" | "Commercial" | "Agricultural" | "Industrial" | "Mixed" | undefined';
+
   area: number;
+  availableArea?: number;
   valuation: number;
-  status: "Acquired" | "Pending" | "Verified";
+
+  // Ownership
+  sharePercent?: number;
+  totalOwners?: number;
   owners: LandOwner[];
+
+  // Acquisition
+  acquisitionType?:
+  | "Purchase"
+  | "Joint Venture"
+  | "POA"
+  | "Inheritance"
+  | "Gift";
+
+  acquisitionDate?: string;
+
+  // Statuses
+  status: "Acquired" | "Pending" | "Verified";
+
+  mutationStatus?:
+  | "Pending"
+  | "Processing"
+  | "Approved"
+  | "Rejected";
+
+  developmentAgreementStatus?:
+  | "Signed"
+  | "Pending"
+  | "Expired";
+
+  documentsStatus?:
+  | "Complete"
+  | "Incomplete";
+
+  // Project Information
+  estimatedProjectYield?: string;
+
+  // Audit
+  lastUpdated?: string;
+
+  // Relations
   projectId?: string;
 }
 
