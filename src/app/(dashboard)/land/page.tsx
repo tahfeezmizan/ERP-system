@@ -5,13 +5,37 @@ import { StatusBadge } from "@/components/shared/StatusBadge";
 import { DataTable, type Column } from "@/components/tables/DataTable";
 import { Button } from "@/components/ui/button";
 import { formatBDT, formatNumber } from "@/lib/utils";
-import { useGetLandRecordsQuery } from "@/services/moduleApis";
+import {
+  useDeleteLandRecordMutation,
+  useGetLandRecordsQuery,
+} from "@/services/moduleApis";
 import type { LandRecord } from "@/types";
 import { Plus } from "lucide-react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { toast } from "sonner";
 
 export default function LandPage() {
+  const router = useRouter();
   const { data = [], isLoading } = useGetLandRecordsQuery();
+  const [deleteLandRecord] = useDeleteLandRecordMutation();
+
+  async function handleDelete(row: LandRecord) {
+    const label = row.landId || row.mouza || row.id;
+    if (!window.confirm(`Delete land record "${label}"? This cannot be undone.`)) {
+      return;
+    }
+    try {
+      await deleteLandRecord(row.id).unwrap();
+      toast.success("Land record deleted");
+    } catch {
+      toast.error("Failed to delete land record");
+    }
+  }
+
+  function handleEdit(row: LandRecord) {
+    router.push(`/land/create-land?id=${row.id}`);
+  }
 
 
   const columns: Column<LandRecord>[] = [
@@ -141,7 +165,14 @@ export default function LandPage() {
         </Button>
       </PageHeader>
 
-      <DataTable columns={columns} data={data} isLoading={isLoading} searchKeys={["mouza", "khatian", "dag"]} />
+      <DataTable
+        columns={columns}
+        data={data}
+        isLoading={isLoading}
+        searchKeys={["mouza", "khatian", "dag"]}
+        onRowEdit={handleEdit}
+        onRowDelete={handleDelete}
+      />
     </div>
   );
 }

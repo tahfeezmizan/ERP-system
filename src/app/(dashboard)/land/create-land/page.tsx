@@ -5,23 +5,68 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { createLandRecordSchema, type CreateLandRecordFormData } from "@/schemas";
-import { useCreateLandRecordMutation, useGetLandRecordsQuery } from "@/services/moduleApis";
+import {
+    useCreateLandRecordMutation,
+    useGetLandRecordsQuery,
+    useUpdateLandRecordMutation,
+} from "@/services/moduleApis";
+import type { LandRecord } from "@/types";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { ArrowLeft, Save } from "lucide-react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
+import { useEffect } from "react";
 import { useForm, type FieldErrors } from "react-hook-form";
 import { toast } from "sonner";
 
+function landRecordToFormData(record: LandRecord): CreateLandRecordFormData {
+    return {
+        landId: record.landId ?? "",
+        mouza: record.mouza,
+        khatian: record.khatian,
+        dag: record.dag,
+        recordType: record.recordType,
+        district: record.district ?? "",
+        upazila: record.upazila ?? "",
+        jlNo: record.jlNo ?? "",
+        landType: record.landType,
+        area: record.area,
+        availableArea: record.availableArea,
+        valuation: record.valuation,
+        sharePercent: record.sharePercent,
+        totalOwners: record.totalOwners,
+        acquisitionType: record.acquisitionType,
+        acquisitionDate: record.acquisitionDate ?? "",
+        csRecord: record.csRecord ?? "",
+        rsRecord: record.rsRecord ?? "",
+        status: record.status,
+        mutationStatus: record.mutationStatus,
+        developmentAgreementStatus: record.developmentAgreementStatus,
+        documentsStatus: record.documentsStatus,
+        estimatedProjectYield: record.estimatedProjectYield ?? "",
+        lastUpdated: record.lastUpdated ?? "",
+    };
+}
+
 export default function CreateLandPage() {
     const router = useRouter();
-    const { refetch } = useGetLandRecordsQuery();
+    const searchParams = useSearchParams();
+    const editId = searchParams.get("id");
+    const isEditing = Boolean(editId);
+
+    const { data: landRecords = [], isLoading, refetch } = useGetLandRecordsQuery();
     const [createLandRecord] = useCreateLandRecordMutation();
+    const [updateLandRecord] = useUpdateLandRecordMutation();
+
+    const editingRecord = editId
+        ? landRecords.find((r) => r.id === editId)
+        : undefined;
 
     const {
         register,
         handleSubmit,
         setValue,
         watch,
+        reset,
         formState: { errors, isSubmitting },
     } = useForm<CreateLandRecordFormData>({
         resolver: zodResolver(createLandRecordSchema) as any,
@@ -53,6 +98,12 @@ export default function CreateLandPage() {
         },
     });
 
+    useEffect(() => {
+        if (editingRecord) {
+            reset(landRecordToFormData(editingRecord));
+        }
+    }, [editingRecord, reset]);
+
     const statusValue = watch("status");
 
     function onInvalid(formErrors: FieldErrors<CreateLandRecordFormData>) {
@@ -63,15 +114,40 @@ export default function CreateLandPage() {
     async function onSubmit(values: CreateLandRecordFormData) {
         console.log("Submitting land record:", values);
         try {
-            const res = await createLandRecord(values).unwrap();
-            console.log("Created land record:", res);
-            toast.success("Land record created successfully");
+            if (isEditing && editId) {
+                const res = await updateLandRecord({ id: editId, data: values }).unwrap();
+                console.log("Updated land record:", res);
+                toast.success("Land record updated successfully");
+            } else {
+                const res = await createLandRecord(values).unwrap();
+                console.log("Created land record:", res);
+                toast.success("Land record created successfully");
+            }
             void refetch();
             router.push("/land");
         } catch (error) {
-            console.error("Failed to create land record:", error);
-            toast.error("Failed to create land record");
+            console.error("Failed to save land record:", error);
+            toast.error(isEditing ? "Failed to update land record" : "Failed to create land record");
         }
+    }
+
+    if (isEditing && isLoading) {
+        return (
+            <div className="flex h-48 items-center justify-center text-muted-foreground">
+                Loading land record...
+            </div>
+        );
+    }
+
+    if (isEditing && !editingRecord) {
+        return (
+            <div className="space-y-4 text-center">
+                <p className="text-muted-foreground">Land record not found.</p>
+                <Button variant="outline" onClick={() => router.push("/land")}>
+                    Back to Land Management
+                </Button>
+            </div>
+        );
     }
 
     return (
@@ -87,9 +163,13 @@ export default function CreateLandPage() {
                         <ArrowLeft className="h-4 w-4" />
                     </Button>
                     <div>
-                        <h1 className="text-2xl font-bold tracking-tight">Add Land Record</h1>
+                        <h1 className="text-2xl font-bold tracking-tight">
+                            {isEditing ? "Edit Land Record" : "Add Land Record"}
+                        </h1>
                         <p className="text-sm text-muted-foreground">
-                            Enter Bangladesh land registry details
+                            {isEditing
+                                ? "Update Bangladesh land registry details"
+                                : "Enter Bangladesh land registry details"}
                         </p>
                     </div>
                 </div>
@@ -106,7 +186,11 @@ export default function CreateLandPage() {
                         disabled={isSubmitting}
                     >
                         <Save className="h-4 w-4 mr-2" />
-                        {isSubmitting ? "Saving..." : "Save Record"}
+                        {isSubmitting
+                            ? "Saving..."
+                            : isEditing
+                              ? "Update Record"
+                              : "Save Record"}
                     </Button>
                 </div>
             </div>
@@ -429,7 +513,11 @@ export default function CreateLandPage() {
                     </Button>
                     <Button type="submit" disabled={isSubmitting}>
                         <Save className="h-4 w-4 mr-2" />
-                        {isSubmitting ? "Saving..." : "Save Record"}
+                        {isSubmitting
+                            ? "Saving..."
+                            : isEditing
+                              ? "Update Record"
+                              : "Save Record"}
                     </Button>
                 </div>
             </form>

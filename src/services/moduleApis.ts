@@ -79,6 +79,46 @@ export const landApi = baseApi.injectEndpoints({
       },
       invalidatesTags: ["Land"],
     }),
+
+    updateLandRecord: builder.mutation<
+      LandRecord,
+      { id: string; data: CreateLandRecordFormData }
+    >({
+      queryFn: async ({ id, data }) => {
+        await delay(400);
+        const records = [...getLocalStorageData<LandRecord>("landRecords", mockLandRecords)];
+        const index = records.findIndex((r) => r.id === id);
+        if (index === -1) {
+          return { error: { status: 404, data: "Land record not found" } };
+        }
+        const updated: LandRecord = {
+          ...records[index],
+          ...data,
+          id,
+          owners: records[index].owners,
+        };
+        records[index] = updated;
+        setLocalStorageData("landRecords", records);
+        syncLandRecordSubkeys(records);
+        return { data: updated };
+      },
+      invalidatesTags: ["Land"],
+    }),
+
+    deleteLandRecord: builder.mutation<string, string>({
+      queryFn: async (id) => {
+        await delay(400);
+        const records = getLocalStorageData<LandRecord>("landRecords", mockLandRecords);
+        const filtered = records.filter((r) => r.id !== id);
+        if (filtered.length === records.length) {
+          return { error: { status: 404, data: "Land record not found" } };
+        }
+        setLocalStorageData("landRecords", filtered);
+        syncLandRecordSubkeys(filtered);
+        return { data: id };
+      },
+      invalidatesTags: ["Land"],
+    }),
   }),
 });
 
@@ -502,6 +542,8 @@ export const reportApi = baseApi.injectEndpoints({
 export const {
   useGetLandRecordsQuery,
   useCreateLandRecordMutation,
+  useUpdateLandRecordMutation,
+  useDeleteLandRecordMutation,
 } = landApi;
 
 export const { useGetProjectsQuery, useCreateProjectMutation } = projectApi;

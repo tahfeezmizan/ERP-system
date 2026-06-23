@@ -5,8 +5,10 @@ import {
   ChevronLeft,
   ChevronRight,
   Download,
+  Pencil,
   Printer,
   Search,
+  Trash2,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -26,6 +28,7 @@ export interface Column<T> {
   header: string;
   cell: (row: T) => React.ReactNode;
   sortable?: boolean;
+  width?: number;
 }
 
 interface DataTableProps<T> {
@@ -37,6 +40,8 @@ interface DataTableProps<T> {
   pageSize?: number;
   onExportCsv?: () => void;
   rowActions?: (row: T) => React.ReactNode;
+  onRowEdit?: (row: T) => void;
+  onRowDelete?: (row: T) => void;
   emptyMessage?: string;
 }
 
@@ -49,8 +54,11 @@ export function DataTable<T extends { id?: string }>({
   pageSize = 10,
   onExportCsv,
   rowActions,
+  onRowEdit,
+  onRowDelete,
   emptyMessage = "No records found.",
 }: DataTableProps<T>) {
+  const hasActions = rowActions || onRowEdit || onRowDelete;
   const [search, setSearch] = useState("");
   const [page, setPage] = useState(1);
   const [sortKey, setSortKey] = useState<string | null>(null);
@@ -59,13 +67,18 @@ export function DataTable<T extends { id?: string }>({
   const filtered = useMemo(() => {
     if (!search.trim()) return data;
     const q = search.toLowerCase();
-    return data.filter((row) =>
-      searchKeys.some((key) =>
-        String(row[key] ?? "").toLowerCase().includes(q)
-      ) ||
-      Object.values(row as object).some((v) =>
-        String(v ?? "").toLowerCase().includes(q)
-      )
+    return data.filter(
+      (row) =>
+        searchKeys.some((key) =>
+          String(row[key] ?? "")
+            .toLowerCase()
+            .includes(q),
+        ) ||
+        Object.values(row as object).some((v) =>
+          String(v ?? "")
+            .toLowerCase()
+            .includes(q),
+        ),
     );
   }, [data, search, searchKeys]);
 
@@ -133,28 +146,24 @@ export function DataTable<T extends { id?: string }>({
       </div>
 
       <div className="rounded-md border">
-        <Table>
+        <Table className="table-fixed min-w-max">
           <TableHeader>
             <TableRow>
               {columns.map((col) => (
-                <TableHead
-                  key={col.key}
-                  className={cn(col.sortable && "cursor-pointer select-none")}
-                  onClick={() => col.sortable && handleSort(col.key)}
-                >
+                <TableHead key={col.key} className={cn(col.sortable && "w-44")}>
                   {col.header}
                   {sortKey === col.key && (sortDir === "asc" ? " ↑" : " ↓")}
                 </TableHead>
               ))}
-              {rowActions && <TableHead className="w-[100px]">Actions</TableHead>}
+              {hasActions && <TableHead className="w-28">Actions</TableHead>}
             </TableRow>
           </TableHeader>
           <TableBody>
             {paginated.length === 0 ? (
               <TableRow>
                 <TableCell
-                  colSpan={columns.length + (rowActions ? 1 : 0)}
-                  className="h-24 text-center text-muted-foreground"
+                  colSpan={columns.length + (hasActions ? 1 : 0)}
+                  className="w-44 h-24 text-center text-muted-foreground"
                 >
                   {emptyMessage}
                 </TableCell>
@@ -165,7 +174,35 @@ export function DataTable<T extends { id?: string }>({
                   {columns.map((col) => (
                     <TableCell key={col.key}>{col.cell(row)}</TableCell>
                   ))}
-                  {rowActions && <TableCell>{rowActions(row)}</TableCell>}
+                  {hasActions && (
+                    <TableCell>
+                      <div className="flex items-center gap-1">
+                        {rowActions?.(row)}
+                        {onRowEdit && (
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="h-8 w-8"
+                            onClick={() => onRowEdit(row)}
+                            aria-label="Edit row"
+                          >
+                            <Pencil className="h-4 w-4" />
+                          </Button>
+                        )}
+                        {onRowDelete && (
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="h-8 w-8 text-destructive hover:text-destructive"
+                            onClick={() => onRowDelete(row)}
+                            aria-label="Delete row"
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
+                        )}
+                      </div>
+                    </TableCell>
+                  )}
                 </TableRow>
               ))
             )}
