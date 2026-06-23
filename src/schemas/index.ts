@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { LEAD_SOURCES } from "@/constants/app";
 
 // ─── Land ─────────────────────────────────────────────────────────────────────
 export const createLandRecordSchema = z.object({
@@ -18,7 +19,7 @@ export const createLeadSchema = z.object({
   name: z.string().min(2, "Name is required"),
   phone: z.string().min(10, "Phone is required"),
   email: z.string().email("Invalid email").optional().or(z.literal("")),
-  source: z.enum(["Facebook", "Referral", "Walk-In", "Website", "Billboard", "TV", "Other"]),
+  source: z.enum(LEAD_SOURCES),
   projectInterest: z.string().min(2, "Project interest is required"),
   budget: z.coerce.number().positive("Budget must be positive"),
   assignedTo: z.string().min(2, "Assigned to is required"),

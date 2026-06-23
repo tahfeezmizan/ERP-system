@@ -41,6 +41,9 @@ export const LEAD_SOURCES = [
   "Campaign",
   "Exhibition",
   "Phone Inquiry",
+  "Billboard",
+  "TV",
+  "Other",
 ] as const;
 
 export const CRM_PIPELINE_STAGES = [

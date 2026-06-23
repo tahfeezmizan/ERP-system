@@ -29,6 +29,7 @@ export default function ProjectsPage() {
     formState: { errors, isSubmitting },
     reset,
   } = useForm<CreateProjectFormData>({
+    resolver: zodResolver(createProjectSchema) as any,
     defaultValues: {
       name: "",
       code: "",

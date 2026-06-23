@@ -8,7 +8,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { type CreateEmployeeFormData } from "@/schemas";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { createEmployeeSchema, type CreateEmployeeFormData } from "@/schemas";
 import { useCreateEmployeeMutation, useGetEmployeesQuery } from "@/services/moduleApis";
 import { Plus } from "lucide-react";
 import { useState } from "react";
@@ -38,6 +39,7 @@ export default function HrPage() {
     formState: { errors, isSubmitting },
     reset,
   } = useForm<CreateEmployeeFormData>({
+    resolver: zodResolver(createEmployeeSchema) as any,
     defaultValues: { name: "", department: "", designation: "", phone: "", email: "", joiningDate: "", salary: undefined, nid: "" },
   });
 

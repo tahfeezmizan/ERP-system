@@ -10,7 +10,9 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { formatBDT } from "@/lib/utils";
-import { type CreateLeadFormData } from "@/schemas";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { LEAD_SOURCES } from "@/constants/app";
+import { createLeadSchema, type CreateLeadFormData } from "@/schemas";
 import {
   useCreateLeadMutation,
   useGetLeadsQuery,
@@ -22,8 +24,6 @@ import { Plus } from "lucide-react";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
-
-const LEAD_SOURCES = ["Facebook", "Referral", "Walk-In", "Website", "Billboard", "TV", "Other"] as const;
 
 export default function CrmPage() {
   const [view, setView] = useState<"kanban" | "list">("kanban");
@@ -42,6 +42,7 @@ export default function CrmPage() {
     formState: { errors, isSubmitting },
     reset,
   } = useForm<CreateLeadFormData>({
+    resolver: zodResolver(createLeadSchema) as any,
     defaultValues: {
       name: "",
       phone: "",

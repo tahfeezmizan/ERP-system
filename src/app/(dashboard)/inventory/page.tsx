@@ -7,7 +7,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { formatBDT, formatNumber } from "@/lib/utils";
-import { type CreateInventoryItemFormData } from "@/schemas";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { type CreateInventoryItemFormData, createInventoryItemSchema } from "@/schemas";
 import { useCreateItemMutation, useGetItemsQuery } from "@/services/moduleApis";
 import { Plus } from "lucide-react";
 import { useState } from "react";
@@ -35,6 +36,7 @@ export default function InventoryPage() {
     formState: { errors, isSubmitting },
     reset,
   } = useForm<CreateInventoryItemFormData>({
+    resolver: zodResolver(createInventoryItemSchema) as any,
     defaultValues: {
       name: "",
       category: "",

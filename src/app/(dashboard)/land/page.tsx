@@ -9,7 +9,8 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { formatBDT, formatNumber } from "@/lib/utils";
-import { type CreateLandRecordFormData } from "@/schemas";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { type CreateLandRecordFormData, createLandRecordSchema } from "@/schemas";
 import { useCreateLandRecordMutation, useGetLandRecordsQuery } from "@/services/moduleApis";
 import type { LandRecord } from "@/types";
 import { Plus } from "lucide-react";
@@ -30,6 +31,7 @@ export default function LandPage() {
     formState: { errors, isSubmitting },
     reset,
   } = useForm<CreateLandRecordFormData>({
+    resolver: zodResolver(createLandRecordSchema) as any,
     defaultValues: { mouza: "", khatian: "", dag: "", area: undefined, valuation: undefined, status: "Pending" },
   });
 
