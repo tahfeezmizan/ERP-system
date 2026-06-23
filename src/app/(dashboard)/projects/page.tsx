@@ -1,6 +1,7 @@
 "use client";
 
 import { Plus } from "lucide-react";
+import Link from "next/link";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -13,10 +14,13 @@ import { PageHeader } from "@/components/shared/PageHeader";
 import { DataTable, type Column } from "@/components/tables/DataTable";
 import { StatusBadge } from "@/components/shared/StatusBadge";
 import { EntityCreateModal } from "@/components/shared/EntityCreateModal";
-import { useGetProjectsQuery, useCreateProjectMutation } from "@/services/moduleApis";
+import {
+  useGetProjectsQuery,
+  useCreateProjectMutation,
+} from "@/services/moduleApis";
 import { createProjectSchema, type CreateProjectFormData } from "@/schemas";
 import { formatBDT } from "@/lib/utils";
-import type { Project } from "@/types";
+import { Project } from "./model";
 
 export default function ProjectsPage() {
   const { data = [], isLoading, refetch } = useGetProjectsQuery();
@@ -43,11 +47,74 @@ export default function ProjectsPage() {
 
   const columns: Column<Project>[] = [
     { key: "code", header: "Code", cell: (r) => r.code, sortable: true },
-    { key: "name", header: "Project Name", cell: (r) => r.name, sortable: true },
+    {
+      key: "name",
+      header: "Project Name",
+      cell: (r) => r.name,
+      sortable: true,
+    },
+    { key: "projectType", header: "Type", cell: (r) => r.projectType || "-" },
     { key: "location", header: "Location", cell: (r) => r.location },
-    { key: "status", header: "Status", cell: (r) => <StatusBadge status={r.status} /> },
-    { key: "budget", header: "Budget", cell: (r) => formatBDT(r.budget), sortable: true },
-    { key: "rajuk", header: "RAJUK", cell: (r) => (r.rajukApproval ? "Approved" : "Pending") },
+    { key: "landArea", header: "Land Area", cell: (r) => r.landArea ?? "-" },
+    {
+      key: "status",
+      header: "Status",
+      cell: (r) => <StatusBadge status={r.status} />,
+    },
+    {
+      key: "budget",
+      header: "Budget",
+      cell: (r) => formatBDT(r.budget),
+      sortable: true,
+    },
+    { key: "spent", header: "Actual Cost", cell: (r) => formatBDT(r.spent) },
+    {
+      key: "rajuk",
+      header: "RAJUK",
+      cell: (r) => (r.rajukApproval ? "Approved" : "Pending"),
+    },
+    {
+      key: "completionPercent",
+      header: "Progress",
+      cell: (r) => `${r.completionPercent}%`,
+      sortable: true,
+    },
+    {
+      key: "availableUnits",
+      header: "Available",
+      cell: (r) => r.availableUnits ?? 0,
+    },
+    { key: "soldUnits", header: "Sold", cell: (r) => r.soldUnits ?? 0 },
+    {
+      key: "reservedUnits",
+      header: "Reserved",
+      cell: (r) => r.reservedUnits ?? 0,
+    },
+    {
+      key: "collectionAmount",
+      header: "Collection",
+      cell: (r) => formatBDT(r.collectionAmount ?? 0),
+    },
+    {
+      key: "dueAmount",
+      header: "Due",
+      cell: (r) => formatBDT(r.dueAmount ?? 0),
+    },
+    {
+      key: "expectedCompletion",
+      header: "Expected Completion",
+      cell: (r) => r.expectedCompletion ?? "-",
+    },
+    {
+      key: "projectManager",
+      header: "Project Manager",
+      cell: (r) => r.projectManager ?? "-",
+    },
+    {
+      key: "createdAt",
+      header: "Created Date",
+      cell: (r) => r.createdAt ?? "-",
+    },
     {
       key: "progress",
       header: "Progress",
@@ -74,58 +141,22 @@ export default function ProjectsPage() {
 
   return (
     <div className="space-y-6">
-      <PageHeader title="Projects" description="Project development, approvals, and planning">
-        <Button onClick={() => setIsModalOpen(true)}>
-          <Plus className="h-4 w-4 mr-1" /> New Project
-        </Button>
-      </PageHeader>
-      <DataTable columns={columns} data={data} isLoading={isLoading} searchKeys={["name", "code", "location"]} />
-
-      <EntityCreateModal
-        open={isModalOpen}
-        onOpenChange={setIsModalOpen}
-        title="New Project"
-        description="Create a new real-estate development project"
-        onSubmit={handleSubmit(onSubmit)}
-        isLoading={isSubmitting}
+      <PageHeader
+        title="Projects"
+        description="Project development, approvals, and planning"
       >
-        <div className="grid gap-4 sm:grid-cols-2">
-          <div className="grid gap-2">
-            <Label htmlFor="proj-name">Project Name</Label>
-            <Input id="proj-name" placeholder="e.g. Skyline Tower" {...register("name")} />
-            {errors.name && <p className="text-sm text-destructive">{errors.name.message}</p>}
-          </div>
-          <div className="grid gap-2">
-            <Label htmlFor="proj-code">Project Code</Label>
-            <Input id="proj-code" placeholder="e.g. SKT-003" {...register("code")} />
-            {errors.code && <p className="text-sm text-destructive">{errors.code.message}</p>}
-          </div>
-          <div className="grid gap-2 sm:col-span-2">
-            <Label htmlFor="proj-location">Location</Label>
-            <Input id="proj-location" placeholder="e.g. Banani, Dhaka" {...register("location")} />
-            {errors.location && <p className="text-sm text-destructive">{errors.location.message}</p>}
-          </div>
-          <div className="grid gap-2 sm:col-span-2">
-            <Label htmlFor="proj-budget">Total Budget (৳)</Label>
-            <Input id="proj-budget" type="number" placeholder="e.g. 1200000000" {...register("budget")} />
-            {errors.budget && <p className="text-sm text-destructive">{errors.budget.message}</p>}
-          </div>
-          <div className="grid gap-2">
-            <Label htmlFor="proj-start">Start Date</Label>
-            <Input id="proj-start" type="date" {...register("startDate")} />
-            {errors.startDate && <p className="text-sm text-destructive">{errors.startDate.message}</p>}
-          </div>
-          <div className="grid gap-2">
-            <Label htmlFor="proj-end">Expected End Date</Label>
-            <Input id="proj-end" type="date" {...register("endDate")} />
-            {errors.endDate && <p className="text-sm text-destructive">{errors.endDate.message}</p>}
-          </div>
-          <div className="flex items-center gap-2 sm:col-span-2">
-            <input id="proj-rajuk" type="checkbox" className="h-4 w-4 accent-primary" {...register("rajukApproval")} />
-            <Label htmlFor="proj-rajuk" className="cursor-pointer">RAJUK Approval Obtained</Label>
-          </div>
-        </div>
-      </EntityCreateModal>
+        <Link href="/projects/create-project">
+          <Button>
+            <Plus className="h-4 w-4 mr-1" /> New Project
+          </Button>
+        </Link>
+      </PageHeader>
+      <DataTable
+        columns={columns}
+        data={data}
+        isLoading={isLoading}
+        searchKeys={["name", "code", "location"]}
+      />
     </div>
   );
 }

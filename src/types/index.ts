@@ -193,6 +193,8 @@ export interface Project {
   completionPercent: number;
 }
 
+// NOTE: `Project` model moved to `src/app/(dashboard)/projects/model.ts`
+
 export interface PropertyUnit {
   id: string;
   projectId: string;

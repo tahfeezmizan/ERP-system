@@ -13,7 +13,8 @@ import {
   mockProjects,
   mockUnits,
 } from "./mock-data";
-import type { LandRecord, Project, PropertyUnit, Lead, Booking, Collection, Customer } from "@/types";
+import type { LandRecord, PropertyUnit, Lead, Booking, Collection, Customer } from "@/types";
+import type { Project } from "@/app/(dashboard)/projects/model";
 
 // Helper function to safely read from localStorage
 export function getLocalStorageData<T>(key: string, fallbackData: T[]): T[] {

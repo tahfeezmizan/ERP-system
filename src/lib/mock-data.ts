@@ -12,6 +12,10 @@ import type {
   PropertyUnit,
   Task,
 } from "@/types";
+import type { Project as ProjectModel } from "@/app/(dashboard)/projects/model";
+
+// alias to keep existing Project name usage
+type Project = ProjectModel;
 
 export const mockKpis: KpiMetric[] = [
   { id: "1", label: "Today's Collection", value: "৳12,50,000", change: 8.5, trend: "up" },
@@ -81,6 +85,7 @@ export const mockProjects: Project[] = [
     name: "Green Valley Residency",
     code: "GVR-001",
     location: "Uttara, Dhaka",
+    projectType: "Residential",
     status: "Sales",
     budget: 850000000,
     spent: 620000000,
@@ -88,12 +93,22 @@ export const mockProjects: Project[] = [
     startDate: "2023-01-15",
     endDate: "2026-06-30",
     completionPercent: 78,
+    landArea: 5.2,
+    availableUnits: 142,
+    soldUnits: 256,
+    reservedUnits: 23,
+    collectionAmount: 245000000,
+    dueAmount: 185000000,
+    expectedCompletion: "2026-06-30",
+    projectManager: "Karim Ahmed",
+    createdAt: "2023-01-10",
   },
   {
     id: "proj_2",
     name: "Skyline Tower",
     code: "SKT-002",
     location: "Banani, Dhaka",
+    projectType: "Residential",
     status: "Construction",
     budget: 1200000000,
     spent: 450000000,
@@ -101,12 +116,22 @@ export const mockProjects: Project[] = [
     startDate: "2024-03-01",
     endDate: "2027-12-31",
     completionPercent: 45,
+    landArea: 3.8,
+    availableUnits: 200,
+    soldUnits: 80,
+    reservedUnits: 20,
+    collectionAmount: 120000000,
+    dueAmount: 300000000,
+    expectedCompletion: "2027-12-31",
+    projectManager: "Nusrat Jahan",
+    createdAt: "2024-02-20",
   },
   {
     id: "proj_3",
     name: "Lake View Apartments",
     code: "LVA-003",
     location: "Gulshan, Dhaka",
+    projectType: "Residential",
     status: "Planning",
     budget: 950000000,
     spent: 85000000,
@@ -114,6 +139,15 @@ export const mockProjects: Project[] = [
     startDate: "2025-06-01",
     endDate: "2028-03-31",
     completionPercent: 12,
+    landArea: 4.5,
+    availableUnits: 300,
+    soldUnits: 0,
+    reservedUnits: 0,
+    collectionAmount: 0,
+    dueAmount: 0,
+    expectedCompletion: "2028-03-31",
+    projectManager: "",
+    createdAt: "2025-05-01",
   },
 ];
 

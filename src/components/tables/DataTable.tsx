@@ -150,12 +150,12 @@ export function DataTable<T extends { id?: string }>({
           <TableHeader>
             <TableRow>
               {columns.map((col) => (
-                <TableHead key={col.key} className={cn(col.sortable && "w-44")}>
+                <TableHead key={col.key} className={cn(col.sortable && "w-48")}>
                   {col.header}
                   {sortKey === col.key && (sortDir === "asc" ? " ↑" : " ↓")}
                 </TableHead>
               ))}
-              {hasActions && <TableHead className="w-28">Actions</TableHead>}
+              {hasActions && <TableHead className="w-48">Actions</TableHead>}
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -163,7 +163,7 @@ export function DataTable<T extends { id?: string }>({
               <TableRow>
                 <TableCell
                   colSpan={columns.length + (hasActions ? 1 : 0)}
-                  className="w-44 h-24 text-center text-muted-foreground"
+                  className="w-48 h-24 text-center text-muted-foreground"
                 >
                   {emptyMessage}
                 </TableCell>
@@ -172,36 +172,12 @@ export function DataTable<T extends { id?: string }>({
               paginated.map((row, idx) => (
                 <TableRow key={row.id ?? idx}>
                   {columns.map((col) => (
-                    <TableCell key={col.key}>{col.cell(row)}</TableCell>
-                  ))}
-                  {hasActions && (
-                    <TableCell>
-                      <div className="flex items-center gap-1">
-                        {rowActions?.(row)}
-                        {onRowEdit && (
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            className="h-8 w-8"
-                            onClick={() => onRowEdit(row)}
-                            aria-label="Edit row"
-                          >
-                            <Pencil className="h-4 w-4" />
-                          </Button>
-                        )}
-                        {onRowDelete && (
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            className="h-8 w-8 text-destructive hover:text-destructive"
-                            onClick={() => onRowDelete(row)}
-                            aria-label="Delete row"
-                          >
-                            <Trash2 className="h-4 w-4" />
-                          </Button>
-                        )}
-                      </div>
+                    <TableCell className="w-48! " key={col.key}>
+                      {col.cell(row)}
                     </TableCell>
+                  ))}
+                  {rowActions && (
+                    <TableCell className="w-48!">{rowActions(row)}</TableCell>
                   )}
                 </TableRow>
               ))

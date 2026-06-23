@@ -16,7 +16,8 @@ import {
   mockProjects,
   mockUnits,
 } from "@/lib/mock-data";
-import type { Booking, Collection, Customer, Lead, LandRecord, PaginatedResponse, PropertyUnit, Project } from "@/types";
+import type { Booking, Collection, Customer, Lead, LandRecord, PaginatedResponse, PropertyUnit } from "@/types";
+import type { Project } from "@/app/(dashboard)/projects/model";
 import type { CreateCustomerFormData } from "@/schemas/customer";
 import type {
   CreateLandRecordFormData,
@@ -138,8 +139,17 @@ export const projectApi = baseApi.injectEndpoints({
         const newProject: Project = {
           id: `proj_${Math.random().toString(36).slice(2, 10)}`,
           status: "Planning",
-          spent: 0,
+          spent: (data as any).actualCost ?? 0,
           completionPercent: 0,
+          projectType: (data as any).projectType,
+          landArea: (data as any).landArea,
+          availableUnits: (data as any).availableUnits ?? 0,
+          soldUnits: (data as any).soldUnits ?? 0,
+          reservedUnits: (data as any).reservedUnits ?? 0,
+          collectionAmount: (data as any).collectionAmount ?? 0,
+          dueAmount: (data as any).dueAmount ?? 0,
+          expectedCompletion: (data as any).expectedCompletion,
+          projectManager: (data as any).projectManager,
           ...data,
         };
         (newProject as any).createdAt = new Date().toISOString();
