@@ -26,6 +26,12 @@ import { LEAD_SOURCES } from "@/constants/app";
 //   rsRecord: z.string().optional(),
 // });
 
+const emptyToUndefined = <T extends z.ZodTypeAny>(schema: T) =>
+  z
+    .union([z.literal(""), schema])
+    .optional()
+    .transform((val) => (val === "" || val === undefined ? undefined : val));
+
 export const createLandRecordSchema = z.object({
   // Core Land Information
   landId: z.string().optional(),
@@ -34,7 +40,7 @@ export const createLandRecordSchema = z.object({
   khatian: z.string().min(1, "Khatian No. is required"),
   dag: z.string().min(1, "Dag No. is required"),
 
-  recordType: z.enum(["CS", "SA", "RS", "BRS"]).optional(),
+  recordType: z.enum(["CS", "SA", "RS", "BRS", "Other"]).optional(),
 
   district: z.string().optional(),
   upazila: z.string().optional(),
@@ -47,23 +53,27 @@ export const createLandRecordSchema = z.object({
 
   area: z.coerce.number().positive("Area must be positive"),
 
-  availableArea: z.coerce.number().optional(),
+  availableArea: emptyToUndefined(
+    z.coerce.number().positive("Available area must be positive"),
+  ),
 
   valuation: z.coerce.number().positive("Valuation is required"),
 
   // Ownership
-  sharePercent: z
-    .coerce
-    .number()
-    .min(0, "Share percentage cannot be negative")
-    .max(100, "Share percentage cannot exceed 100")
-    .optional(),
+  sharePercent: emptyToUndefined(
+    z.coerce
+      .number()
+      .min(0, "Share percentage cannot be negative")
+      .max(100, "Share percentage cannot exceed 100"),
+  ),
 
-  totalOwners: z.coerce.number().int().positive().optional(),
+  totalOwners: emptyToUndefined(
+    z.coerce.number().int().positive("Total owners must be at least 1"),
+  ),
 
   // Acquisition
   acquisitionType: z
-    .enum(["Purchase", "Joint Venture", "POA", "Inheritance", "Gift"])
+    .enum(["Purchase", "Joint Venture", "POA", "Inheritance", "Gift", "Lease", "Other"])
     .optional(),
 
   acquisitionDate: z.string().optional(),
@@ -76,15 +86,15 @@ export const createLandRecordSchema = z.object({
   status: z.enum(["Acquired", "Pending", "Verified"]),
 
   mutationStatus: z
-    .enum(["Pending", "Processing", "Approved", "Rejected"])
+    .enum(["Pending", "Processing", "Approved", "Rejected", "In Progress", "Completed"])
     .optional(),
 
   developmentAgreementStatus: z
-    .enum(["Signed", "Pending", "Expired"])
+    .enum(["Signed", "Pending", "Expired", "Active", "Completed", "Terminated"])
     .optional(),
 
   documentsStatus: z
-    .enum(["Complete", "Incomplete"])
+    .enum(["Complete", "Incomplete", "Partial", "Missing"])
     .optional(),
 
   // Project Information

@@ -9,7 +9,7 @@ import { useCreateLandRecordMutation, useGetLandRecordsQuery } from "@/services/
 import { zodResolver } from "@hookform/resolvers/zod";
 import { ArrowLeft, Save } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { useForm } from "react-hook-form";
+import { useForm, type FieldErrors } from "react-hook-form";
 import { toast } from "sonner";
 
 export default function CreateLandPage() {
@@ -55,13 +55,21 @@ export default function CreateLandPage() {
 
     const statusValue = watch("status");
 
+    function onInvalid(formErrors: FieldErrors<CreateLandRecordFormData>) {
+        console.log("Validation errors:", formErrors);
+        toast.error("Please fix the highlighted errors before saving");
+    }
+
     async function onSubmit(values: CreateLandRecordFormData) {
+        console.log("Submitting land record:", values);
         try {
-            await createLandRecord(values).unwrap();
+            const res = await createLandRecord(values).unwrap();
+            console.log("Created land record:", res);
             toast.success("Land record created successfully");
             void refetch();
             router.push("/land");
-        } catch {
+        } catch (error) {
+            console.error("Failed to create land record:", error);
             toast.error("Failed to create land record");
         }
     }
@@ -93,7 +101,8 @@ export default function CreateLandPage() {
                         Cancel
                     </Button>
                     <Button
-                        onClick={handleSubmit(onSubmit)}
+                        type="button"
+                        onClick={handleSubmit(onSubmit, onInvalid)}
                         disabled={isSubmitting}
                     >
                         <Save className="h-4 w-4 mr-2" />
@@ -103,7 +112,7 @@ export default function CreateLandPage() {
             </div>
 
             {/* Form */}
-            <form onSubmit={handleSubmit(onSubmit)} className="space-y-6 border p-4 rounded-lg">
+            <form onSubmit={handleSubmit(onSubmit, onInvalid)} className="space-y-6 border p-4 rounded-lg">
                 <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
                     {/* Land ID */}
                     <div className="grid gap-2">
@@ -117,7 +126,7 @@ export default function CreateLandPage() {
                         <Label htmlFor="recordType">Record Type</Label>
                         <Select
                             value={watch("recordType")}
-                            onValueChange={(v) => setValue("recordType", v as CreateLandRecordFormData["recordType"])}
+                            onValueChange={(v) => setValue("recordType", v as CreateLandRecordFormData["recordType"], { shouldValidate: true })}
                         >
                             <SelectTrigger id="recordType">
                                 <SelectValue placeholder="Select record type" />

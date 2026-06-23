@@ -107,7 +107,7 @@ export interface LandRecord {
 
   // Land Identification
   landId?: string;
-  recordType?: '"CS" | "SA" | "RS" | "BRS" | undefined',
+  recordType?: "CS" | "SA" | "RS" | "BRS" | "Other";
 
   // Location
   district?: string;
@@ -124,7 +124,7 @@ export interface LandRecord {
   brsRecord?: string;
 
   // Land Details
-  landType?: '"Residential" | "Commercial" | "Agricultural" | "Industrial" | "Mixed" | undefined';
+  landType?: "Residential" | "Commercial" | "Agricultural" | "Industrial" | "Mixed";
 
   area: number;
   availableArea?: number;
@@ -137,11 +137,13 @@ export interface LandRecord {
 
   // Acquisition
   acquisitionType?:
-  | "Purchase"
-  | "Joint Venture"
-  | "POA"
-  | "Inheritance"
-  | "Gift";
+    | "Purchase"
+    | "Joint Venture"
+    | "POA"
+    | "Inheritance"
+    | "Gift"
+    | "Lease"
+    | "Other";
 
   acquisitionDate?: string;
 
@@ -149,19 +151,22 @@ export interface LandRecord {
   status: "Acquired" | "Pending" | "Verified";
 
   mutationStatus?:
-  | "Pending"
-  | "Processing"
-  | "Approved"
-  | "Rejected";
+    | "Pending"
+    | "Processing"
+    | "Approved"
+    | "Rejected"
+    | "In Progress"
+    | "Completed";
 
   developmentAgreementStatus?:
-  | "Signed"
-  | "Pending"
-  | "Expired";
+    | "Signed"
+    | "Pending"
+    | "Expired"
+    | "Active"
+    | "Completed"
+    | "Terminated";
 
-  documentsStatus?:
-  | "Complete"
-  | "Incomplete";
+  documentsStatus?: "Complete" | "Incomplete" | "Partial" | "Missing";
 
   // Project Information
   estimatedProjectYield?: string;
