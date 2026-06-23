@@ -121,35 +121,67 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { MOCK_CREDENTIALS } from "@/constants/app";
+import { useAppDispatch } from "@/hooks/redux";
+import { useLoginMutation } from "@/services/authApi";
+import { setCredentials } from "@/store/slices/authSlice";
 import { Building2, Loader2, ChevronDown } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
+import { toast } from "sonner";
 
-interface LoginFormData {
+interface LoginPageFormData {
   workspace: string;
   email: string;
   password: string;
+  rememberMe?: boolean;
 }
 
 export default function LoginPage() {
   const router = useRouter();
+  const dispatch = useAppDispatch();
+
+  const [login, { isLoading }] = useLoginMutation();
 
   const {
     register,
     handleSubmit,
     formState: { errors },
-  } = useForm<LoginFormData>();
+  } = useForm<LoginPageFormData>({
+    defaultValues: {
+      workspace: "main",
+      email: MOCK_CREDENTIALS.email,
+      password: MOCK_CREDENTIALS.password,
+      rememberMe: true,
+    },
+  });
 
-  const onSubmit = async (data: LoginFormData) => {
-    console.log(data);
+  const onSubmit = async (data: LoginPageFormData) => {
+    const { email, password, rememberMe = true } = data;
 
-    setTimeout(() => {
+    try {
+      const result = await login({ email, password, rememberMe }).unwrap();
+
+      dispatch(
+        setCredentials({
+          user: result.user,
+          tokens: result.tokens,
+          rememberMe,
+        }),
+      );
+
+      toast.success("Welcome back!");
       router.push("/dashboard");
-    }, 1000);
-  };
+    } catch (err: unknown) {
+      const message =
+        err && typeof err === "object" && "data" in err
+          ? (err as { data?: { message?: string } }).data?.message
+          : "Login failed";
 
-  const isLoading = false;
+      toast.error(message ?? "Login failed");
+    }
+  };
 
   return (
     <div>
@@ -191,7 +223,9 @@ export default function LoginPage() {
                 <div className="relative">
                   <select
                     id="workspace"
-                    {...register("workspace")}
+                    {...register("workspace", {
+                      required: "Workspace is required",
+                    })}
                     className="
                       h-11
                       w-full
@@ -216,6 +250,12 @@ export default function LoginPage() {
 
                   <ChevronDown className="absolute right-4 top-1/2 h-5 w-5 -translate-y-1/2 text-slate-400" />
                 </div>
+
+                {errors.workspace && (
+                  <p className="mt-1 text-sm text-red-500">
+                    {errors.workspace.message}
+                  </p>
+                )}
               </div>
 
               {/* Email */}
@@ -230,7 +270,6 @@ export default function LoginPage() {
                 <Input
                   id="email"
                   type="email"
-                  placeholder=""
                   {...register("email", {
                     required: "Email is required",
                   })}
@@ -260,7 +299,6 @@ export default function LoginPage() {
                 <Input
                   id="password"
                   type="password"
-                  placeholder=""
                   {...register("password", {
                     required: "Password is required",
                   })}
@@ -310,6 +348,10 @@ export default function LoginPage() {
                 Get Started
               </Link>
             </div>
+
+            <p className="mt-4 text-center text-xs text-muted-foreground">
+              Demo: {MOCK_CREDENTIALS.email} / {MOCK_CREDENTIALS.password}
+            </p>
           </CardContent>
         </Card>
       </div>
