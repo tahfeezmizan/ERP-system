@@ -195,6 +195,20 @@ export interface Project {
 
 // NOTE: `Project` model moved to `src/app/(dashboard)/projects/model.ts`
 
+export type PropertyType = "Commercial" | "Residential" | "Industrial";
+export type PropertyStatus = "active" | "inactive";
+
+export interface Property {
+  id: string;
+  name: string;
+  code: string;
+  type: PropertyType;
+  location: string;
+  status: PropertyStatus;
+  occupancy: number;
+  value: number;
+}
+
 export interface PropertyUnit {
   id: string;
   projectId: string;

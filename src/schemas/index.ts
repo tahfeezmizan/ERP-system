@@ -160,6 +160,18 @@ export const createEmployeeSchema = z.object({
 });
 export type CreateEmployeeFormData = z.infer<typeof createEmployeeSchema>;
 
+// ─── Property (Portfolio) ─────────────────────────────────────────────────────
+export const propertySchema = z.object({
+  name: z.string().min(2, "Property name is required"),
+  code: z.string().min(2, "Property code is required"),
+  type: z.enum(["Commercial", "Residential", "Industrial"]),
+  location: z.string().min(2, "Location is required"),
+  status: z.enum(["active", "inactive"]),
+  occupancy: z.coerce.number().min(0, "Occupancy must be at least 0").max(100, "Occupancy cannot exceed 100"),
+  value: z.coerce.number().positive("Value must be positive"),
+});
+export type PropertyFormData = z.infer<typeof propertySchema>;
+
 // ─── Property Unit ────────────────────────────────────────────────────────────
 export const createPropertyUnitSchema = z.object({
   projectName: z.string().min(2, "Project is required"),

@@ -14,9 +14,10 @@ import {
   mockLeads,
   mockProcurementOrders,
   mockProjects,
+  mockProperties,
   mockUnits,
 } from "@/lib/mock-data";
-import type { Booking, Collection, Customer, Lead, LandRecord, PaginatedResponse, PropertyUnit } from "@/types";
+import type { Booking, Collection, Customer, Lead, LandRecord, PaginatedResponse, Property, PropertyUnit } from "@/types";
 import type { Project } from "@/app/(dashboard)/projects/model";
 import type { CreateCustomerFormData } from "@/schemas/customer";
 import type {
@@ -27,6 +28,7 @@ import type {
   CreateContractorFormData,
   CreateEmployeeFormData,
   CreatePropertyUnitFormData,
+  PropertyFormData,
   CreateProjectFormData,
   CreateProcurementFormData,
   CreateInventoryItemFormData,
@@ -164,6 +166,55 @@ export const projectApi = baseApi.injectEndpoints({
 
 export const propertyApi = baseApi.injectEndpoints({
   endpoints: (builder) => ({
+    getProperties: builder.query<Property[], void>({
+      queryFn: async () => {
+        await delay(400);
+        return { data: getLocalStorageData<Property>("properties", mockProperties) };
+      },
+      providesTags: ["Property"],
+    }),
+    createProperty: builder.mutation<Property, PropertyFormData>({
+      queryFn: async (data) => {
+        await delay(400);
+        const list = [...getLocalStorageData<Property>("properties", mockProperties)];
+        const newProperty: Property = {
+          id: `prop_${Math.random().toString(36).slice(2, 10)}`,
+          ...data,
+        };
+        list.push(newProperty);
+        setLocalStorageData("properties", list);
+        return { data: newProperty };
+      },
+      invalidatesTags: ["Property"],
+    }),
+    updateProperty: builder.mutation<Property, { id: string; data: PropertyFormData }>({
+      queryFn: async ({ id, data }) => {
+        await delay(400);
+        const list = [...getLocalStorageData<Property>("properties", mockProperties)];
+        const index = list.findIndex((p) => p.id === id);
+        if (index === -1) {
+          return { error: { status: 404, data: "Property not found" } };
+        }
+        const updated: Property = { ...list[index], ...data, id };
+        list[index] = updated;
+        setLocalStorageData("properties", list);
+        return { data: updated };
+      },
+      invalidatesTags: ["Property"],
+    }),
+    deleteProperty: builder.mutation<string, string>({
+      queryFn: async (id) => {
+        await delay(400);
+        const list = getLocalStorageData<Property>("properties", mockProperties);
+        const filtered = list.filter((p) => p.id !== id);
+        if (filtered.length === list.length) {
+          return { error: { status: 404, data: "Property not found" } };
+        }
+        setLocalStorageData("properties", filtered);
+        return { data: id };
+      },
+      invalidatesTags: ["Property"],
+    }),
     getUnits: builder.query<PropertyUnit[], void>({
       queryFn: async () => {
         await delay(400);
@@ -557,7 +608,14 @@ export const {
 } = landApi;
 
 export const { useGetProjectsQuery, useCreateProjectMutation } = projectApi;
-export const { useGetUnitsQuery, useCreateUnitMutation } = propertyApi;
+export const {
+  useGetPropertiesQuery,
+  useCreatePropertyMutation,
+  useUpdatePropertyMutation,
+  useDeletePropertyMutation,
+  useGetUnitsQuery,
+  useCreateUnitMutation,
+} = propertyApi;
 export const {
   useGetLeadsQuery,
   useGetPipelineQuery,

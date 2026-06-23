@@ -10,6 +10,7 @@ import type {
   Notification,
   Project,
   PropertyUnit,
+  Property,
   Task,
 } from "@/types";
 import type { Project as ProjectModel } from "@/app/(dashboard)/projects/model";
@@ -148,6 +149,39 @@ export const mockProjects: Project[] = [
     expectedCompletion: "2028-03-31",
     projectManager: "",
     createdAt: "2025-05-01",
+  },
+];
+
+export const mockProperties: Property[] = [
+  {
+    id: "prop_1",
+    name: "Grand Plaza Corporate Center",
+    code: "PROP-GP",
+    type: "Commercial",
+    location: "Seattle, WA",
+    status: "active",
+    occupancy: 90,
+    value: 12500000,
+  },
+  {
+    id: "prop_2",
+    name: "Oakridge Residential Towers",
+    code: "PROP-OR",
+    type: "Residential",
+    location: "Bellevue, WA",
+    status: "active",
+    occupancy: 75,
+    value: 18000000,
+  },
+  {
+    id: "prop_3",
+    name: "Skyline Industrial Park",
+    code: "PROP-SL",
+    type: "Industrial",
+    location: "Kent, WA",
+    status: "active",
+    occupancy: 100,
+    value: 15000000,
   },
 ];
 

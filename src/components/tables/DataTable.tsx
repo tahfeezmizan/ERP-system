@@ -42,6 +42,8 @@ interface DataTableProps<T> {
   rowActions?: (row: T) => React.ReactNode;
   onRowEdit?: (row: T) => void;
   onRowDelete?: (row: T) => void;
+  toolbarExtra?: React.ReactNode;
+  hideExportPrint?: boolean;
   emptyMessage?: string;
 }
 
@@ -56,6 +58,8 @@ export function DataTable<T extends { id?: string }>({
   rowActions,
   onRowEdit,
   onRowDelete,
+  toolbarExtra,
+  hideExportPrint = false,
   emptyMessage = "No records found.",
 }: DataTableProps<T>) {
   const hasActions = rowActions || onRowEdit || onRowDelete;
@@ -119,30 +123,35 @@ export function DataTable<T extends { id?: string }>({
   return (
     <div className="space-y-4">
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-        <div className="relative max-w-sm flex-1">
-          <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-          <Input
-            placeholder={searchPlaceholder}
-            value={search}
-            onChange={(e) => {
-              setSearch(e.target.value);
-              setPage(1);
-            }}
-            className="pl-9"
-          />
+        <div className="flex flex-1 flex-col gap-3 sm:flex-row sm:items-center">
+          <div className="relative max-w-sm flex-1">
+            <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+            <Input
+              placeholder={searchPlaceholder}
+              value={search}
+              onChange={(e) => {
+                setSearch(e.target.value);
+                setPage(1);
+              }}
+              className="pl-9"
+            />
+          </div>
+          {toolbarExtra}
         </div>
-        <div className="flex gap-2">
-          {onExportCsv && (
-            <Button variant="outline" size="sm" onClick={onExportCsv}>
-              <Download className="h-4 w-4 mr-1" />
-              Export
+        {!hideExportPrint && (
+          <div className="flex gap-2">
+            {onExportCsv && (
+              <Button variant="outline" size="sm" onClick={onExportCsv}>
+                <Download className="h-4 w-4 mr-1" />
+                Export
+              </Button>
+            )}
+            <Button variant="outline" size="sm" onClick={() => window.print()}>
+              <Printer className="h-4 w-4 mr-1" />
+              Print
             </Button>
-          )}
-          <Button variant="outline" size="sm" onClick={() => window.print()}>
-            <Printer className="h-4 w-4 mr-1" />
-            Print
-          </Button>
-        </div>
+          </div>
+        )}
       </div>
 
       <div className="rounded-md border">
@@ -176,8 +185,39 @@ export function DataTable<T extends { id?: string }>({
                       {col.cell(row)}
                     </TableCell>
                   ))}
-                  {rowActions && (
-                    <TableCell className="w-48!">{rowActions(row)}</TableCell>
+                  {hasActions && (
+                    <TableCell className="w-48!">
+                      {rowActions ? (
+                        rowActions(row)
+                      ) : (
+                        <div className="flex items-center gap-1">
+                          {onRowEdit && (
+                            <Button
+                              type="button"
+                              variant="ghost"
+                              size="icon"
+                              className="h-8 w-8 text-blue-600 hover:text-blue-700 hover:bg-blue-50"
+                              onClick={() => onRowEdit(row)}
+                              aria-label="Edit"
+                            >
+                              <Pencil className="h-4 w-4" />
+                            </Button>
+                          )}
+                          {onRowDelete && (
+                            <Button
+                              type="button"
+                              variant="ghost"
+                              size="icon"
+                              className="h-8 w-8 text-red-600 hover:text-red-700 hover:bg-red-50"
+                              onClick={() => onRowDelete(row)}
+                              aria-label="Delete"
+                            >
+                              <Trash2 className="h-4 w-4" />
+                            </Button>
+                          )}
+                        </div>
+                      )}
+                    </TableCell>
                   )}
                 </TableRow>
               ))

@@ -11,9 +11,10 @@ import {
   mockLeads,
   mockProcurementOrders,
   mockProjects,
+  mockProperties,
   mockUnits,
 } from "./mock-data";
-import type { LandRecord, PropertyUnit, Lead, Booking, Collection, Customer } from "@/types";
+import type { LandRecord, Property, PropertyUnit, Lead, Booking, Collection, Customer } from "@/types";
 import type { Project } from "@/app/(dashboard)/projects/model";
 
 // Helper function to safely read from localStorage
@@ -55,6 +56,9 @@ export function initializeStorage() {
 
   // 2. Projects
   getLocalStorageData<Project>("projects", mockProjects);
+
+  // 2b. Portfolio properties
+  getLocalStorageData<Property>("properties", mockProperties);
 
   // 3. Property units (apartments) and buildings
   const units = getLocalStorageData<PropertyUnit>("apartments", mockUnits);
