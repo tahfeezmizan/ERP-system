@@ -19,6 +19,7 @@ import {
   Settings,
   Shield,
   type LucideIcon,
+  FileTextIcon,
 } from "lucide-react";
 
 export interface NavItem {
@@ -80,6 +81,12 @@ export const MAIN_NAV: NavItem[] = [
     href: "/vendors",
     icon: Truck,
     permission: "procurement.view",
+  },
+  {
+    title: "Documents",
+    href: "/documents",
+    icon: FileTextIcon,
+    permission: "property.view",
   },
   {
     title: "Finance",

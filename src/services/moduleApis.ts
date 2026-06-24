@@ -23,6 +23,7 @@ import {
   mockInvoices,
   mockTransactions,
   mockChartOfAccounts,
+  mockDocuments,
 } from "@/lib/mock-data";
 import {
   getLocalStorageData,
@@ -48,10 +49,11 @@ import type {
   TenantFormData,
   UnitFormData,
   VendorFormData,
-  WorkOrderFormData
+  WorkOrderFormData,
+  CreateDocumentFormData
 } from "@/schemas";
 import type { CreateCustomerFormData } from "@/schemas/customer";
-import type { Booking, Collection, Customer, LandRecord, Lead, Lease, PaginatedResponse, Project, Property, PropertyUnit, Tenant, Vendor, WorkOrder } from "@/types";
+import type { Booking, Collection, Customer, Document, LandRecord, Lead, Lease, PaginatedResponse, Project, Property, PropertyUnit, Tenant, Vendor, WorkOrder } from "@/types";
 import { baseApi } from "./baseApi";
 
 function paginate<T>(data: T[], page = 1, pageSize = 10): PaginatedResponse<T> {
@@ -1165,5 +1167,72 @@ export const {
   useUpdateWorkOrderMutation,
   useDeleteWorkOrderMutation,
 } = workOrderApi;
+
+export const documentApi = baseApi.injectEndpoints({
+  endpoints: (builder) => ({
+    getDocuments: builder.query<Document[], void>({
+      queryFn: async () => {
+        await delay(400);
+        return { data: getLocalStorageData<Document>("documents", mockDocuments) };
+      },
+      providesTags: ["Document"],
+    }),
+    createDocument: builder.mutation<Document, CreateDocumentFormData>({
+      queryFn: async (data) => {
+        await delay(400);
+        const list = [...getLocalStorageData<Document>("documents", mockDocuments)];
+        const newDoc: Document = {
+          id: `doc_${Math.random().toString(36).slice(2, 10)}`,
+          ...data,
+          createdAt: new Date().toISOString(),
+        };
+        list.push(newDoc);
+        setLocalStorageData("documents", list);
+        return { data: newDoc };
+      },
+      invalidatesTags: ["Document"],
+    }),
+    updateDocument: builder.mutation<Document, { id: string; data: CreateDocumentFormData }>({
+      queryFn: async ({ id, data }) => {
+        await delay(400);
+        const list = [...getLocalStorageData<Document>("documents", mockDocuments)];
+        const index = list.findIndex((doc) => doc.id === id);
+        if (index === -1) {
+          return { error: { status: 404, data: "Document not found" } };
+        }
+        const updatedDoc: Document = {
+          ...list[index],
+          ...data,
+          id,
+        };
+        list[index] = updatedDoc;
+        setLocalStorageData("documents", list);
+        return { data: updatedDoc };
+      },
+      invalidatesTags: ["Document"],
+    }),
+    deleteDocument: builder.mutation<string, string>({
+      queryFn: async (id) => {
+        await delay(400);
+        const list = [...getLocalStorageData<Document>("documents", mockDocuments)];
+        const filtered = list.filter((doc) => doc.id !== id);
+        if (filtered.length === list.length) {
+          return { error: { status: 404, data: "Document not found" } };
+        }
+        setLocalStorageData("documents", filtered);
+        return { data: id };
+      },
+      invalidatesTags: ["Document"],
+    }),
+  }),
+});
+
+export const {
+  useGetDocumentsQuery,
+  useCreateDocumentMutation,
+  useUpdateDocumentMutation,
+  useDeleteDocumentMutation,
+} = documentApi;
+
 
 

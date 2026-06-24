@@ -4,6 +4,7 @@ import type {
   ChartDataPoint,
   Collection,
   Customer,
+  Document,
   KpiMetric,
   LandRecord,
   Lead,
@@ -865,4 +866,30 @@ export const mockWorkOrders: WorkOrder[] = [
     cost: 0,
   },
 ];
+
+export const mockDocuments: Document[] = [
+  {
+    id: "doc_1",
+    title: "Standard Commercial Lease Agreement",
+    category: "Lease",
+    fileName: "comm_lease_template.pdf",
+    fileSize: "1.4 MB",
+    version: "v2",
+    expiresAt: "Never",
+    isConfidential: false,
+    createdAt: "2026-06-01T10:00:00Z",
+  },
+  {
+    id: "doc_2",
+    title: "Grand Plaza Building Blueprints",
+    category: "Building_plan",
+    fileName: "grandplaza_blueprints.dwg",
+    fileSize: "14.8 MB",
+    version: "v1",
+    expiresAt: "Never",
+    isConfidential: true,
+    createdAt: "2026-05-15T14:30:00Z",
+  },
+];
+
 

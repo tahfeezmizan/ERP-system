@@ -351,3 +351,16 @@ export const workOrderSchema = z.object({
   cost: z.coerce.number().min(0, "Cost must be a positive number"),
 });
 export type WorkOrderFormData = z.infer<typeof workOrderSchema>;
+
+// ─── Document ────────────────────────────────────────────────────────────────
+export const createDocumentSchema = z.object({
+  title: z.string().min(2, "Title must be at least 2 characters"),
+  category: z.string().min(1, "Category is required"),
+  fileName: z.string().min(1, "File name is required"),
+  fileSize: z.string().default("1.0 MB"),
+  version: z.string().min(1, "Version is required").default("v1"),
+  expiresAt: z.string().default("Never"),
+  isConfidential: z.boolean().default(false),
+});
+export type CreateDocumentFormData = z.infer<typeof createDocumentSchema>;
+

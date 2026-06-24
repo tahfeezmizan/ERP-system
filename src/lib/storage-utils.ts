@@ -1,10 +1,11 @@
-import type { Booking, Collection, Customer, LandRecord, Lead, Project, Property, PropertyUnit, WorkOrder } from "@/types";
+import type { Booking, Collection, Customer, Document, LandRecord, Lead, Project, Property, PropertyUnit, WorkOrder } from "@/types";
 import {
   mockBookings,
   mockCollections,
   mockComplaints,
   mockContractors,
   mockCustomers,
+  mockDocuments,
   mockEmployees,
   mockFinanceAccounts,
   mockInventoryItems,
@@ -97,6 +98,9 @@ export function initializeStorage() {
 
   // 14. Work Orders
   getLocalStorageData<WorkOrder>("workOrders", mockWorkOrders);
+
+  // 15. Documents
+  getLocalStorageData<Document>("documents", mockDocuments);
 }
 
 // Helper to sync land record fields with their individual storage keys

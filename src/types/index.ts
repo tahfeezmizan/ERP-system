@@ -380,3 +380,16 @@ export interface WorkOrder {
   cost: number;
 }
 
+export interface Document {
+  id: string;
+  title: string;
+  category: string;
+  fileName: string;
+  fileSize: string;
+  version: string;
+  expiresAt: string; // "Never" or date string
+  isConfidential: boolean;
+  createdAt?: string;
+}
+
+
