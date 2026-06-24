@@ -1,164 +1,358 @@
 "use client";
 
 import { Plus } from "lucide-react";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Badge } from "@/components/ui/badge";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { PageHeader } from "@/components/shared/PageHeader";
-import { DataTable, type Column } from "@/components/tables/DataTable";
-import { StatusBadge } from "@/components/shared/StatusBadge";
 import { EntityCreateModal } from "@/components/shared/EntityCreateModal";
-import { useGetUnitsQuery, useCreateUnitMutation } from "@/services/moduleApis";
-import { createPropertyUnitSchema, type CreatePropertyUnitFormData } from "@/schemas";
-import { formatBDT, formatNumber } from "@/lib/utils";
-import type { PropertyUnit } from "@/types";
+import { DataTable, type Column } from "@/components/tables/DataTable";
+import {
+  useCreatePropertyMutation,
+  useDeletePropertyMutation,
+  useGetPropertiesQuery,
+  useUpdatePropertyMutation,
+} from "@/services/moduleApis";
+import { propertySchema, type PropertyFormData } from "@/schemas";
+import { formatUSD } from "@/lib/utils";
+import type { Property, PropertyType } from "@/types";
 
-const UNIT_TYPES = ["Apartment", "Commercial", "Parking", "Shop", "Roof Rights"] as const;
-const FACING_OPTIONS = ["East", "West", "North", "South", "North-East", "North-West", "South-East", "South-West"];
+const PROPERTY_TYPES: PropertyType[] = [
+  "Commercial",
+  "Residential",
+  "Industrial",
+];
+const TYPE_FILTER_OPTIONS = ["All Types", ...PROPERTY_TYPES] as const;
+
+const defaultFormValues: PropertyFormData = {
+  name: "",
+  code: "",
+  type: "Commercial",
+  location: "",
+  status: "active",
+  occupancy: 0,
+  value: 0,
+};
 
 export default function PropertiesPage() {
-  const { data = [], isLoading, refetch } = useGetUnitsQuery();
+  const { data = [], isLoading } = useGetPropertiesQuery();
+  const [createProperty] = useCreatePropertyMutation();
+  const [updateProperty] = useUpdatePropertyMutation();
+  const [deleteProperty] = useDeletePropertyMutation();
+
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [createUnit] = useCreateUnitMutation();
+  const [editingProperty, setEditingProperty] = useState<Property | null>(null);
+  const [typeFilter, setTypeFilter] =
+    useState<(typeof TYPE_FILTER_OPTIONS)[number]>("All Types");
 
   const {
     register,
     handleSubmit,
     setValue,
     watch,
-    formState: { errors, isSubmitting },
     reset,
-  } = useForm<CreatePropertyUnitFormData>({
-    resolver: zodResolver(createPropertyUnitSchema) as any,
-    defaultValues: {
-      projectName: "",
-      building: "",
-      block: "",
-      floor: undefined,
-      unitNumber: "",
-      unitType: "Apartment",
-      area: undefined,
-      facing: "",
-      price: undefined,
-    },
+    formState: { errors, isSubmitting },
+  } = useForm<PropertyFormData>({
+    defaultValues: defaultFormValues,
   });
 
-  const unitTypeValue = watch("unitType");
-  const facingValue = watch("facing");
+  const typeValue = watch("type");
+  const statusValue = watch("status");
 
-  const columns: Column<PropertyUnit>[] = [
-    { key: "unitNumber", header: "Unit", cell: (r) => r.unitNumber, sortable: true },
-    { key: "projectName", header: "Project", cell: (r) => r.projectName, sortable: true },
-    { key: "building", header: "Building", cell: (r) => r.building },
-    { key: "unitType", header: "Type", cell: (r) => r.unitType },
-    { key: "area", header: "Area (sqft)", cell: (r) => formatNumber(r.area), sortable: true },
-    { key: "facing", header: "Facing", cell: (r) => r.facing },
-    { key: "price", header: "Price", cell: (r) => formatBDT(r.price), sortable: true },
-    { key: "status", header: "Status", cell: (r) => <StatusBadge status={r.status} /> },
+  const filteredData = useMemo(() => {
+    if (typeFilter === "All Types") return data;
+    return data.filter((property) => property.type === typeFilter);
+  }, [data, typeFilter]);
+
+  const columns: Column<Property>[] = [
+    {
+      key: "name",
+      header: "Property Name",
+      cell: (row) => <span className="font-semibold">{row.name}</span>,
+      sortable: true,
+    },
+    { key: "code", header: "Code", cell: (row) => row.code, sortable: true },
+    { key: "type", header: "Type", cell: (row) => row.type, sortable: true },
+    {
+      key: "location",
+      header: "Location",
+      cell: (row) => row.location,
+      sortable: true,
+    },
+    {
+      key: "status",
+      header: "Status",
+      cell: (row) => (
+        <Badge
+          variant={row.status === "active" ? "success" : "secondary"}
+          className="rounded-full px-2.5 py-0.5 font-normal capitalize"
+        >
+          {row.status}
+        </Badge>
+      ),
+    },
+    {
+      key: "occupancy",
+      header: "Occupancy",
+      cell: (row) => `${row.occupancy}%`,
+      sortable: true,
+    },
+    {
+      key: "value",
+      header: "Value",
+      cell: (row) => formatUSD(row.value),
+      sortable: true,
+    },
   ];
 
-  async function onSubmit(values: CreatePropertyUnitFormData) {
+  function openCreateModal() {
+    setEditingProperty(null);
+    reset(defaultFormValues);
+    setIsModalOpen(true);
+  }
+
+  function openEditModal(property: Property) {
+    setEditingProperty(property);
+    reset({
+      name: property.name,
+      code: property.code,
+      type: property.type,
+      location: property.location,
+      status: property.status,
+      occupancy: property.occupancy,
+      value: property.value,
+    });
+    setIsModalOpen(true);
+  }
+
+  function handleModalChange(open: boolean) {
+    setIsModalOpen(open);
+    if (!open) {
+      setEditingProperty(null);
+      reset(defaultFormValues);
+    }
+  }
+
+  async function onSubmit(values: PropertyFormData) {
     try {
-      await createUnit(values).unwrap();
-      toast.success("Unit added successfully");
-      reset();
-      setIsModalOpen(false);
-      void refetch();
+      if (editingProperty) {
+        await updateProperty({ id: editingProperty.id, data: values }).unwrap();
+        toast.success("Property updated successfully");
+      } else {
+        await createProperty(values).unwrap();
+        toast.success("Property added successfully");
+      }
+      handleModalChange(false);
     } catch {
-      toast.error("Failed to add unit");
+      toast.error(
+        editingProperty
+          ? "Failed to update property"
+          : "Failed to add property",
+      );
+    }
+  }
+
+  async function handleDelete(property: Property) {
+    if (
+      !window.confirm(
+        `Delete "${property.name}"? This action cannot be undone.`,
+      )
+    ) {
+      return;
+    }
+
+    try {
+      await deleteProperty(property.id).unwrap();
+      toast.success("Property deleted successfully");
+    } catch {
+      toast.error("Failed to delete property");
     }
   }
 
   return (
     <div className="space-y-6">
-      <PageHeader title="Properties" description="Unit inventory — Project → Building → Block → Floor → Unit">
-        <Button onClick={() => setIsModalOpen(true)}>
-          <Plus className="h-4 w-4 mr-1" /> Add Unit
+      <PageHeader
+        title="Properties"
+        description="Manage your real estate portfolio"
+      >
+        <Button onClick={openCreateModal}>
+          <Plus className="mr-1 h-4 w-4" /> Add Property
         </Button>
       </PageHeader>
+
       <DataTable
         columns={columns}
-        data={data}
+        data={filteredData}
         isLoading={isLoading}
-        searchKeys={["unitNumber", "projectName", "unitType"]}
+        searchKeys={["name", "code", "type", "location"]}
+        hideExportPrint
+        onRowEdit={openEditModal}
+        onRowDelete={handleDelete}
+        toolbarExtra={
+          <Select
+            value={typeFilter}
+            onValueChange={(value) =>
+              setTypeFilter(value as (typeof TYPE_FILTER_OPTIONS)[number])
+            }
+          >
+            <SelectTrigger className="w-[160px]">
+              <SelectValue placeholder="All Types" />
+            </SelectTrigger>
+            <SelectContent>
+              {TYPE_FILTER_OPTIONS.map((type) => (
+                <SelectItem key={type} value={type}>
+                  {type}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        }
       />
 
       <EntityCreateModal
         open={isModalOpen}
-        onOpenChange={setIsModalOpen}
-        title="Add Property Unit"
-        description="Add a new unit to the inventory"
+        onOpenChange={handleModalChange}
+        title={editingProperty ? "Edit Property" : "Add Property"}
+        description={
+          editingProperty
+            ? "Update property details in your portfolio"
+            : "Add a new property to your portfolio"
+        }
+        submitLabel={editingProperty ? "Update" : "Save"}
         onSubmit={handleSubmit(onSubmit)}
         isLoading={isSubmitting}
       >
         <div className="grid gap-4 sm:grid-cols-2">
           <div className="grid gap-2 sm:col-span-2">
-            <Label htmlFor="unit-project">Project Name</Label>
-            <Input id="unit-project" placeholder="e.g. Green Valley Residency" {...register("projectName")} />
-            {errors.projectName && <p className="text-sm text-destructive">{errors.projectName.message}</p>}
+            <Label htmlFor="property-name">Property Name</Label>
+            <Input
+              id="property-name"
+              placeholder="e.g. Grand Plaza Corporate Center"
+              {...register("name")}
+            />
+            {errors.name && (
+              <p className="text-sm text-destructive">{errors.name.message}</p>
+            )}
           </div>
+
           <div className="grid gap-2">
-            <Label htmlFor="unit-building">Building</Label>
-            <Input id="unit-building" placeholder="e.g. Tower A" {...register("building")} />
-            {errors.building && <p className="text-sm text-destructive">{errors.building.message}</p>}
+            <Label htmlFor="property-code">Code</Label>
+            <Input
+              id="property-code"
+              placeholder="e.g. PROP-GP"
+              {...register("code")}
+            />
+            {errors.code && (
+              <p className="text-sm text-destructive">{errors.code.message}</p>
+            )}
           </div>
+
           <div className="grid gap-2">
-            <Label htmlFor="unit-block">Block</Label>
-            <Input id="unit-block" placeholder="e.g. Block 1" {...register("block")} />
-            {errors.block && <p className="text-sm text-destructive">{errors.block.message}</p>}
-          </div>
-          <div className="grid gap-2">
-            <Label htmlFor="unit-floor">Floor</Label>
-            <Input id="unit-floor" type="number" min={0} placeholder="e.g. 5" {...register("floor")} />
-            {errors.floor && <p className="text-sm text-destructive">{errors.floor.message}</p>}
-          </div>
-          <div className="grid gap-2">
-            <Label htmlFor="unit-number">Unit Number</Label>
-            <Input id="unit-number" placeholder="e.g. A-501" {...register("unitNumber")} />
-            {errors.unitNumber && <p className="text-sm text-destructive">{errors.unitNumber.message}</p>}
-          </div>
-          <div className="grid gap-2">
-            <Label htmlFor="unit-type">Unit Type</Label>
-            <Select value={unitTypeValue} onValueChange={(v) => setValue("unitType", v as CreatePropertyUnitFormData["unitType"])}>
-              <SelectTrigger id="unit-type">
+            <Label htmlFor="property-type">Type</Label>
+            <Select
+              value={typeValue}
+              onValueChange={(value) =>
+                setValue("type", value as PropertyType, {
+                  shouldValidate: true,
+                })
+              }
+            >
+              <SelectTrigger id="property-type">
                 <SelectValue placeholder="Select type" />
               </SelectTrigger>
               <SelectContent>
-                {UNIT_TYPES.map((t) => (
-                  <SelectItem key={t} value={t}>{t}</SelectItem>
+                {PROPERTY_TYPES.map((type) => (
+                  <SelectItem key={type} value={type}>
+                    {type}
+                  </SelectItem>
                 ))}
               </SelectContent>
             </Select>
-            {errors.unitType && <p className="text-sm text-destructive">{errors.unitType.message}</p>}
+            {errors.type && (
+              <p className="text-sm text-destructive">{errors.type.message}</p>
+            )}
           </div>
-          <div className="grid gap-2">
-            <Label htmlFor="unit-area">Area (sqft)</Label>
-            <Input id="unit-area" type="number" placeholder="e.g. 1250" {...register("area")} />
-            {errors.area && <p className="text-sm text-destructive">{errors.area.message}</p>}
+
+          <div className="grid gap-2 sm:col-span-2">
+            <Label htmlFor="property-location">Location</Label>
+            <Input
+              id="property-location"
+              placeholder="e.g. Seattle, WA"
+              {...register("location")}
+            />
+            {errors.location && (
+              <p className="text-sm text-destructive">
+                {errors.location.message}
+              </p>
+            )}
           </div>
+
           <div className="grid gap-2">
-            <Label htmlFor="unit-facing">Facing</Label>
-            <Select value={facingValue} onValueChange={(v) => setValue("facing", v)}>
-              <SelectTrigger id="unit-facing">
-                <SelectValue placeholder="Select facing" />
+            <Label htmlFor="property-status">Status</Label>
+            <Select
+              value={statusValue}
+              onValueChange={(value) =>
+                setValue("status", value as PropertyFormData["status"], {
+                  shouldValidate: true,
+                })
+              }
+            >
+              <SelectTrigger id="property-status">
+                <SelectValue placeholder="Select status" />
               </SelectTrigger>
               <SelectContent>
-                {FACING_OPTIONS.map((f) => (
-                  <SelectItem key={f} value={f}>{f}</SelectItem>
-                ))}
+                <SelectItem value="active">Active</SelectItem>
+                <SelectItem value="inactive">Inactive</SelectItem>
               </SelectContent>
             </Select>
-            {errors.facing && <p className="text-sm text-destructive">{errors.facing.message}</p>}
+            {errors.status && (
+              <p className="text-sm text-destructive">
+                {errors.status.message}
+              </p>
+            )}
           </div>
+
+          <div className="grid gap-2">
+            <Label htmlFor="property-occupancy">Occupancy (%)</Label>
+            <Input
+              id="property-occupancy"
+              type="number"
+              min={0}
+              max={100}
+              placeholder="e.g. 90"
+              {...register("occupancy")}
+            />
+            {errors.occupancy && (
+              <p className="text-sm text-destructive">
+                {errors.occupancy.message}
+              </p>
+            )}
+          </div>
+
           <div className="grid gap-2 sm:col-span-2">
-            <Label htmlFor="unit-price">Price (৳)</Label>
-            <Input id="unit-price" type="number" placeholder="e.g. 8000000" {...register("price")} />
-            {errors.price && <p className="text-sm text-destructive">{errors.price.message}</p>}
+            <Label htmlFor="property-value">Value ($)</Label>
+            <Input
+              id="property-value"
+              type="number"
+              min={0}
+              placeholder="e.g. 12500000"
+              {...register("value")}
+            />
+            {errors.value && (
+              <p className="text-sm text-destructive">{errors.value.message}</p>
+            )}
           </div>
         </div>
       </EntityCreateModal>

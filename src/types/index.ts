@@ -10,6 +10,8 @@ export interface User {
   avatar?: string;
   companyId: string;
   department?: string;
+  phone?: string;
+  jobTitle?: string;
 }
 
 export interface AuthTokens {
@@ -183,6 +185,7 @@ export interface Project {
   name: string;
   code: string;
   location: string;
+  propertyName?: string;
   landId?: string;
   status: "Planning" | "Approved" | "Construction" | "Sales" | "Completed";
   budget: number;
@@ -191,34 +194,107 @@ export interface Project {
   startDate: string;
   endDate: string;
   completionPercent: number;
+  projectType?: string;
+  landArea?: number;
+  actualCost?: number;
+  availableUnits?: number;
+  soldUnits?: number;
+  reservedUnits?: number;
+  collectionAmount?: number;
+  dueAmount?: number;
+  projectManager?: string;
+  expectedCompletion?: string;
+  createdAt?: string;
 }
 
 // NOTE: `Project` model moved to `src/app/(dashboard)/projects/model.ts`
 
+export type PropertyType = "Commercial" | "Residential" | "Industrial";
+export type PropertyStatus = "active" | "inactive";
+
+export interface Property {
+  id: string;
+  name: string;
+  code: string;
+  type: PropertyType;
+  location: string;
+  status: PropertyStatus;
+  occupancy: number;
+  value: number;
+}
+
+export type UnitOccupancyStatus = "occupied" | "vacant";
+export type UnitSpaceType = "Office" | "Apartment";
+
 export interface PropertyUnit {
   id: string;
-  projectId: string;
-  projectName: string;
-  building: string;
-  block: string;
+  unit: string;
+  propertyName: string;
+  propertyId?: string;
+  type: UnitSpaceType;
   floor: number;
-  unitNumber: string;
-  unitType: "Apartment" | "Commercial" | "Parking" | "Shop" | "Roof Rights";
   area: number;
-  facing: string;
-  price: number;
-  status: UnitStatus;
+  status: UnitOccupancyStatus;
+  marketRent: number;
+}
+
+export type LeaseType = "Commercial" | "Residential";
+export type LeaseStatus = "active" | "expiring" | "expired" | "terminated";
+
+export interface Lease {
+  id: string;
+  leaseNumber: string;
+  tenant: string;
+  propertyName: string;
+  unit: string;
+  type: LeaseType;
+  baseRent: number;
+  startDate: string;
+  endDate: string;
+  status: LeaseStatus;
+}
+
+export type TenantType = "Commercial" | "Residential";
+export type TenantStatus = "active" | "inactive";
+
+export interface Tenant {
+  id: string;
+  company: string;
+  contact: string;
+  email: string;
+  phone: string;
+  type: TenantType;
+  credit: number;
+  status: TenantStatus;
+}
+
+export type VendorStatus = "active" | "inactive";
+
+export interface Vendor {
+  id: string;
+  company: string;
+  contact: string;
+  email: string;
+  phone: string;
+  type: string;
+  rating: number;
+  status: VendorStatus;
 }
 
 export interface Lead {
   id: string;
   name: string;
+  company: string;
   phone: string;
   email?: string;
   source: LeadSource;
   stage: PipelineStage;
   assignedTo: string;
   projectInterest: string;
+  targetProperty: string;
+  leadType: "Commercial" | "Residential";
+  probability: number;
+  expectedCloseDate?: string;
   budget: number;
   createdAt: string;
   lastFollowUp?: string;
@@ -294,3 +370,28 @@ export interface Task {
   status: "Pending" | "In Progress" | "Completed";
   assignedTo: string;
 }
+
+export interface WorkOrder {
+  id: string;
+  woNumber: string;
+  title: string;
+  property: string;
+  category: string;
+  priority: "low" | "medium" | "high";
+  status: "open" | "in progress" | "completed" | "scheduled";
+  cost: number;
+}
+
+export interface Document {
+  id: string;
+  title: string;
+  category: string;
+  fileName: string;
+  fileSize: string;
+  version: string;
+  expiresAt: string; // "Never" or date string
+  isConfidential: boolean;
+  createdAt?: string;
+}
+
+

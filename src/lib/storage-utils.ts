@@ -1,9 +1,11 @@
+import type { Booking, Collection, Customer, Document, LandRecord, Lead, Project, Property, PropertyUnit, WorkOrder } from "@/types";
 import {
   mockBookings,
   mockCollections,
   mockComplaints,
   mockContractors,
   mockCustomers,
+  mockDocuments,
   mockEmployees,
   mockFinanceAccounts,
   mockInventoryItems,
@@ -11,10 +13,11 @@ import {
   mockLeads,
   mockProcurementOrders,
   mockProjects,
+  mockProperties,
   mockUnits,
+  mockVendors,
+  mockWorkOrders,
 } from "./mock-data";
-import type { LandRecord, PropertyUnit, Lead, Booking, Collection, Customer } from "@/types";
-import type { Project } from "@/app/(dashboard)/projects/model";
 
 // Helper function to safely read from localStorage
 export function getLocalStorageData<T>(key: string, fallbackData: T[]): T[] {
@@ -56,8 +59,11 @@ export function initializeStorage() {
   // 2. Projects
   getLocalStorageData<Project>("projects", mockProjects);
 
-  // 3. Property units (apartments) and buildings
-  const units = getLocalStorageData<PropertyUnit>("apartments", mockUnits);
+  // 2b. Portfolio properties
+  getLocalStorageData<Property>("properties", mockProperties);
+
+  // 3. Property units
+  const units = getLocalStorageData<PropertyUnit>("units", mockUnits);
   syncPropertyUnitSubkeys(units);
 
   // 4. Customers
@@ -72,8 +78,8 @@ export function initializeStorage() {
   // 7. Collections
   getLocalStorageData<Collection>("collections", mockCollections);
 
-  // 8. Vendors (procurement orders)
-  getLocalStorageData<any>("vendors", mockProcurementOrders);
+  // 8. Vendors
+  getLocalStorageData<any>("vendorContacts", mockVendors);
 
   // 9. Contractors
   getLocalStorageData<any>("contractors", mockContractors);
@@ -89,12 +95,18 @@ export function initializeStorage() {
 
   // 13. Accounts/Finance
   getLocalStorageData<any>("accounts", mockFinanceAccounts);
+
+  // 14. Work Orders
+  getLocalStorageData<WorkOrder>("workOrders", mockWorkOrders);
+
+  // 15. Documents
+  getLocalStorageData<Document>("documents", mockDocuments);
 }
 
 // Helper to sync land record fields with their individual storage keys
 export function syncLandRecordSubkeys(records: LandRecord[]) {
   if (typeof window === "undefined") return;
-  
+
   // Extract unique land owners
   const ownersMap = new Map();
   records.forEach((r) => {
@@ -120,6 +132,8 @@ export function syncLandRecordSubkeys(records: LandRecord[]) {
 // Helper to sync unit fields with building storage keys
 export function syncPropertyUnitSubkeys(units: PropertyUnit[]) {
   if (typeof window === "undefined") return;
-  const buildings = Array.from(new Set(units.map((u) => u.building).filter(Boolean)));
-  setLocalStorageData("buildings", buildings);
+  const propertyNames = Array.from(
+    new Set(units.map((u) => u.propertyName).filter(Boolean))
+  );
+  setLocalStorageData("unitPropertyNames", propertyNames);
 }

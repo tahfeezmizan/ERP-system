@@ -18,6 +18,14 @@ export function formatBDT(amount: number): string {
   return `${sign}৳${formatted}${decimal !== "00" ? `.${decimal}` : ""}`;
 }
 
+export function formatUSD(amount: number): string {
+  return new Intl.NumberFormat("en-US", {
+    style: "currency",
+    currency: "USD",
+    maximumFractionDigits: 0,
+  }).format(amount);
+}
+
 export function formatNumber(value: number): string {
   const [whole, decimal = ""] = value.toString().split(".");
   const lastThree = whole.slice(-3);

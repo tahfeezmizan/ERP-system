@@ -24,6 +24,9 @@ export const baseApi = createApi({
     "Land",
     "Project",
     "Property",
+    "Lease",
+    "Tenant",
+    "Vendor",
     "CRM",
     "Booking",
     "Collection",
@@ -38,6 +41,7 @@ export const baseApi = createApi({
     "Report",
     "Notification",
     "Task",
+    "Document",
   ],
   endpoints: () => ({}),
 });

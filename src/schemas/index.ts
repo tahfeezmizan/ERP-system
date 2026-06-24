@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { LEAD_SOURCES } from "@/constants/app";
+import { CRM_PIPELINE_STAGES, LEAD_SOURCES } from "@/constants/app";
 
 // ─── Land ─────────────────────────────────────────────────────────────────────
 // export const createLandRecordSchema = z.object({
@@ -73,7 +73,15 @@ export const createLandRecordSchema = z.object({
 
   // Acquisition
   acquisitionType: z
-    .enum(["Purchase", "Joint Venture", "POA", "Inheritance", "Gift", "Lease", "Other"])
+    .enum([
+      "Purchase",
+      "Joint Venture",
+      "POA",
+      "Inheritance",
+      "Gift",
+      "Lease",
+      "Other",
+    ])
     .optional(),
 
   acquisitionDate: z.string().optional(),
@@ -86,7 +94,14 @@ export const createLandRecordSchema = z.object({
   status: z.enum(["Acquired", "Pending", "Verified"]),
 
   mutationStatus: z
-    .enum(["Pending", "Processing", "Approved", "Rejected", "In Progress", "Completed"])
+    .enum([
+      "Pending",
+      "Processing",
+      "Approved",
+      "Rejected",
+      "In Progress",
+      "Completed",
+    ])
     .optional(),
 
   developmentAgreementStatus: z
@@ -109,12 +124,21 @@ export type CreateLandRecordFormData = z.infer<typeof createLandRecordSchema>;
 // ─── Lead ─────────────────────────────────────────────────────────────────────
 export const createLeadSchema = z.object({
   name: z.string().min(2, "Name is required"),
+  company: z.string().min(2, "Company name is required"),
   phone: z.string().min(10, "Phone is required"),
   email: z.string().email("Invalid email").optional().or(z.literal("")),
   source: z.enum(LEAD_SOURCES),
   projectInterest: z.string().min(2, "Project interest is required"),
   budget: z.coerce.number().positive("Budget must be positive"),
   assignedTo: z.string().min(2, "Assigned to is required"),
+  targetProperty: z.string().min(2, "Target property is required"),
+  leadType: z.enum(["Commercial", "Residential"]),
+  stage: z.enum(CRM_PIPELINE_STAGES),
+  probability: z.coerce
+    .number()
+    .min(0, "Probability cannot be negative")
+    .max(100, "Probability cannot exceed 100"),
+  expectedCloseDate: z.string().optional(),
 });
 export type CreateLeadFormData = z.infer<typeof createLeadSchema>;
 
@@ -160,25 +184,71 @@ export const createEmployeeSchema = z.object({
 });
 export type CreateEmployeeFormData = z.infer<typeof createEmployeeSchema>;
 
-// ─── Property Unit ────────────────────────────────────────────────────────────
-export const createPropertyUnitSchema = z.object({
-  projectName: z.string().min(2, "Project is required"),
-  building: z.string().min(1, "Building is required"),
-  block: z.string().min(1, "Block is required"),
-  floor: z.coerce.number().int().min(0, "Floor is required"),
-  unitNumber: z.string().min(1, "Unit number is required"),
-  unitType: z.enum(["Apartment", "Commercial", "Parking", "Shop", "Roof Rights"]),
-  area: z.coerce.number().positive("Area must be positive"),
-  facing: z.string().min(1, "Facing is required"),
-  price: z.coerce.number().positive("Price must be positive"),
+// ─── Property (Portfolio) ─────────────────────────────────────────────────────
+export const propertySchema = z.object({
+  name: z.string().min(2, "Property name is required"),
+  code: z.string().min(2, "Property code is required"),
+  type: z.enum(["Commercial", "Residential", "Industrial"]),
+  location: z.string().min(2, "Location is required"),
+  status: z.enum(["active", "inactive"]),
+  occupancy: z.coerce
+    .number()
+    .min(0, "Occupancy must be at least 0")
+    .max(100, "Occupancy cannot exceed 100"),
+  value: z.coerce.number().positive("Value must be positive"),
 });
-export type CreatePropertyUnitFormData = z.infer<typeof createPropertyUnitSchema>;
+export type PropertyFormData = z.infer<typeof propertySchema>;
+
+// ─── Unit ─────────────────────────────────────────────────────────────────────
+export const unitSchema = z.object({
+  unit: z.string().min(1, "Unit is required"),
+  propertyName: z.string().min(2, "Property is required"),
+  type: z.enum(["Office", "Apartment"]),
+  floor: z.coerce.number().int().min(0, "Floor is required"),
+  area: z.coerce.number().positive("Area must be positive"),
+  status: z.enum(["occupied", "vacant"]),
+  marketRent: z.coerce.number().positive("Market rent must be positive"),
+});
+export type UnitFormData = z.infer<typeof unitSchema>;
+
+// Legacy alias
+export const createPropertyUnitSchema = unitSchema;
+export type CreatePropertyUnitFormData = UnitFormData;
+
+// ─── Lease ────────────────────────────────────────────────────────────────────
+export const leaseSchema = z.object({
+  tenant: z.string().min(2, "Tenant is required"),
+  propertyName: z.string().min(2, "Property is required"),
+  unit: z.string().min(1, "Unit is required"),
+  type: z.enum(["Commercial", "Residential"]),
+  baseRent: z.coerce.number().positive("Base rent must be positive"),
+  startDate: z.string().min(1, "Start date is required"),
+  endDate: z.string().min(1, "End date is required"),
+  status: z.enum(["active", "expiring", "expired", "terminated"]),
+});
+export type LeaseFormData = z.infer<typeof leaseSchema>;
+
+// ─── Tenant ───────────────────────────────────────────────────────────────────
+export const tenantSchema = z.object({
+  company: z.string().min(2, "Company is required"),
+  contact: z.string().min(2, "Contact is required"),
+  email: z.string().email("Invalid email"),
+  phone: z.string().min(10, "Phone is required"),
+  type: z.enum(["Commercial", "Residential"]),
+  credit: z.coerce
+    .number()
+    .min(300, "Credit score must be at least 300")
+    .max(850, "Credit score cannot exceed 850"),
+  status: z.enum(["active", "inactive"]),
+});
+export type TenantFormData = z.infer<typeof tenantSchema>;
 
 // ─── Project ──────────────────────────────────────────────────────────────────
 export const createProjectSchema = z.object({
   name: z.string().min(2, "Project name is required"),
   code: z.string().min(2, "Project code is required"),
   location: z.string().min(2, "Location is required"),
+  propertyName: z.string().min(2, "Associated property is required"),
   projectType: z.string().optional(),
   landArea: z.coerce.number().optional(),
   budget: z.coerce.number().positive("Budget must be positive"),
@@ -190,9 +260,20 @@ export const createProjectSchema = z.object({
   dueAmount: z.coerce.number().optional(),
   startDate: z.string().min(1, "Start date is required"),
   endDate: z.string().min(1, "End date is required"),
+  expectedCompletion: z.string().optional(),
+  completionPercent: z.coerce
+    .number()
+    .min(0, "Progress must be at least 0")
+    .max(100, "Progress cannot exceed 100"),
+  status: z.enum([
+    "Planning",
+    "Approved",
+    "Construction",
+    "Sales",
+    "Completed",
+  ]),
   rajukApproval: z.boolean().default(false),
   projectManager: z.string().optional(),
-  expectedCompletion: z.string().optional(),
 });
 export type CreateProjectFormData = z.infer<typeof createProjectSchema>;
 
@@ -205,6 +286,20 @@ export const createProcurementSchema = z.object({
 });
 export type CreateProcurementFormData = z.infer<typeof createProcurementSchema>;
 
+export const vendorSchema = z.object({
+  company: z.string().min(2, "Company name is required"),
+  contact: z.string().min(2, "Contact person is required"),
+  email: z.string().email("Invalid email"),
+  phone: z.string().min(7, "Phone is required"),
+  type: z.string().min(2, "Type is required"),
+  rating: z.coerce
+    .number()
+    .min(1, "Rating must be at least 1")
+    .max(5, "Rating cannot exceed 5"),
+  status: z.enum(["active", "inactive"]),
+});
+export type VendorFormData = z.infer<typeof vendorSchema>;
+
 // ─── Inventory Stock-In ───────────────────────────────────────────────────────
 export const createInventoryItemSchema = z.object({
   name: z.string().min(2, "Item name is required"),
@@ -214,7 +309,9 @@ export const createInventoryItemSchema = z.object({
   reorderLevel: z.coerce.number().min(0, "Reorder level is required"),
   value: z.coerce.number().min(0, "Value is required"),
 });
-export type CreateInventoryItemFormData = z.infer<typeof createInventoryItemSchema>;
+export type CreateInventoryItemFormData = z.infer<
+  typeof createInventoryItemSchema
+>;
 
 // ─── Finance – Journal Entry ──────────────────────────────────────────────────
 export const createJournalEntrySchema = z.object({
@@ -223,7 +320,9 @@ export const createJournalEntrySchema = z.object({
   type: z.enum(["Asset", "Liability", "Revenue", "Expense", "Equity"]),
   balance: z.coerce.number().min(0, "Balance is required"),
 });
-export type CreateJournalEntryFormData = z.infer<typeof createJournalEntrySchema>;
+export type CreateJournalEntryFormData = z.infer<
+  typeof createJournalEntrySchema
+>;
 
 // ─── Maintenance Ticket ───────────────────────────────────────────────────────
 export const createComplaintSchema = z.object({
@@ -242,3 +341,27 @@ export const createMilestoneSchema = z.object({
   notes: z.string().optional(),
 });
 export type CreateMilestoneFormData = z.infer<typeof createMilestoneSchema>;
+
+// ─── Work Order ──────────────────────────────────────────────────────────────
+export const workOrderSchema = z.object({
+  title: z.string().min(2, "Title is required"),
+  property: z.string().min(2, "Property is required"),
+  category: z.string().min(2, "Category is required"),
+  priority: z.enum(["low", "medium", "high"]),
+  status: z.enum(["open", "in progress", "completed", "scheduled"]),
+  cost: z.coerce.number().min(0, "Cost must be a positive number"),
+});
+export type WorkOrderFormData = z.infer<typeof workOrderSchema>;
+
+// ─── Document ────────────────────────────────────────────────────────────────
+export const createDocumentSchema = z.object({
+  title: z.string().min(2, "Title must be at least 2 characters"),
+  category: z.string().min(1, "Category is required"),
+  fileName: z.string().min(1, "File name is required"),
+  fileSize: z.string().default("1.0 MB"),
+  version: z.string().min(1, "Version is required").default("v1"),
+  expiresAt: z.string().default("Never"),
+  isConfidential: z.boolean().default(false),
+});
+export type CreateDocumentFormData = z.infer<typeof createDocumentSchema>;
+

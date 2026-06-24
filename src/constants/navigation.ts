@@ -5,6 +5,7 @@ import {
   Home,
   Users,
   CalendarCheck,
+  FileText,
   Wallet,
   UserCircle,
   HardHat,
@@ -18,6 +19,7 @@ import {
   Settings,
   Shield,
   type LucideIcon,
+  FileTextIcon,
 } from "lucide-react";
 
 export interface NavItem {
@@ -29,90 +31,76 @@ export interface NavItem {
 
 export const MAIN_NAV: NavItem[] = [
   { title: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
-  {
-    title: "Land Management",
-    href: "/land",
-    icon: Map,
-    permission: "land.view",
-  },
-  {
-    title: "Projects",
-    href: "/projects",
-    icon: Building2,
-    permission: "project.view",
-  },
+
   {
     title: "Properties",
     href: "/properties",
     icon: Home,
     permission: "property.view",
   },
+
   {
-    title: "Sales CRM",
-    href: "/crm",
+    title: "Units",
+    href: "/units",
+    icon: Building2,
+    permission: "property.view",
+  },
+
+  {
+    title: "Leases",
+    href: "/leases",
+    icon: FileText,
+    permission: "property.view",
+  },
+
+  {
+    title: "Tenants",
+    href: "/tenants",
     icon: Users,
-    permission: "crm.view",
+    permission: "property.view",
   },
+
   {
-    title: "Bookings",
-    href: "/bookings",
-    icon: CalendarCheck,
-    permission: "booking.view",
+    title: "Work Orders",
+    href: "/dashboard/work-orders",
+    icon: Wrench,
+    permission: "maintenance.view",
   },
+
   {
-    title: "Collections",
-    href: "/collections",
-    icon: Wallet,
-    permission: "collection.view",
-  },
-  {
-    title: "Customers",
-    href: "/customers",
-    icon: UserCircle,
-    permission: "customer.view",
-  },
-  {
-    title: "Construction",
-    href: "/construction",
-    icon: HardHat,
-    permission: "construction.view",
-  },
-  {
-    title: "Procurement",
-    href: "/procurement",
-    icon: ShoppingCart,
-    permission: "procurement.view",
-  },
-  {
-    title: "Inventory",
-    href: "/inventory",
-    icon: Package,
-    permission: "inventory.view",
-  },
-  {
-    title: "Contractors",
-    href: "/contractors",
-    icon: Truck,
-    permission: "contractor.view",
-  },
-  {
-    title: "Accounts & Finance",
+    title: "Finance",
     href: "/finance",
     icon: Landmark,
     permission: "finance.view",
   },
+
   {
-    title: "HR & Payroll",
-    href: "/hr",
-    icon: Briefcase,
-    permission: "hr.view",
+    title: "Vendors",
+    href: "/vendors",
+    icon: Truck,
+    permission: "procurement.view",
+  },
+
+  {
+    title: "Projects",
+    href: "/projects",
+    icon: Map,
+    permission: "project.view",
+  },
+
+  {
+    title: "Leads / CRM",
+    href: "/leads",
+    icon: UserCircle,
+    permission: "crm.view",
   },
   {
-    title: "Maintenance",
-    href: "/maintenance",
-    icon: Wrench,
-    permission: "maintenance.view",
+    title: "Documents",
+    href: "/documents",
+    icon: FileTextIcon,
+    permission: "property.view",
   },
+
   {
     title: "Reports",
     href: "/reports",
@@ -124,11 +112,5 @@ export const MAIN_NAV: NavItem[] = [
     href: "/settings",
     icon: Settings,
     permission: "settings.view",
-  },
-  {
-    title: "Administration",
-    href: "/administration",
-    icon: Shield,
-    permission: "admin.view",
   },
 ];
