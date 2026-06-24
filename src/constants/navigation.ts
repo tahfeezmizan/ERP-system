@@ -53,12 +53,18 @@ export const MAIN_NAV: NavItem[] = [
   },
 
   {
+    title: "Tenants",
+    href: "/tenants",
+    icon: Users,
+    permission: "property.view",
+  },
+
+  {
     title: "Finance",
     href: "/finance",
     icon: Landmark,
     permission: "finance.view",
   },
-
 
   {
     title: "Reports",

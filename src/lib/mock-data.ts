@@ -12,6 +12,7 @@ import type {
   PropertyUnit,
   Property,
   Lease,
+  Tenant,
   Task,
 } from "@/types";
 import type { Project as ProjectModel } from "@/app/(dashboard)/projects/model";
@@ -346,6 +347,59 @@ export const mockLeases: Lease[] = [
     startDate: "2022-03-01",
     endDate: "2025-03-01",
     status: "expired",
+  },
+];
+
+export const mockTenants: Tenant[] = [
+  {
+    id: "tenant_1",
+    company: "Acme Corporation",
+    contact: "Sarah Johnson",
+    email: "sarah.johnson@acme.com",
+    phone: "206-555-0101",
+    type: "Commercial",
+    credit: 750,
+    status: "active",
+  },
+  {
+    id: "tenant_2",
+    company: "TechStart Inc",
+    contact: "Michael Chen",
+    email: "michael.chen@techstart.com",
+    phone: "206-555-0102",
+    type: "Commercial",
+    credit: 720,
+    status: "active",
+  },
+  {
+    id: "tenant_3",
+    company: "John Doe",
+    contact: "John Doe",
+    email: "john.doe@email.com",
+    phone: "206-555-0103",
+    type: "Residential",
+    credit: 710,
+    status: "active",
+  },
+  {
+    id: "tenant_4",
+    company: "Jane Miller",
+    contact: "Jane Miller",
+    email: "jane.miller@email.com",
+    phone: "206-555-0104",
+    type: "Residential",
+    credit: 680,
+    status: "active",
+  },
+  {
+    id: "tenant_5",
+    company: "Pacific Logistics LLC",
+    contact: "Robert Hayes",
+    email: "robert.hayes@pacificlogistics.com",
+    phone: "206-555-0105",
+    type: "Commercial",
+    credit: 690,
+    status: "inactive",
   },
 ];
 

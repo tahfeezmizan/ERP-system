@@ -240,6 +240,20 @@ export interface Lease {
   status: LeaseStatus;
 }
 
+export type TenantType = "Commercial" | "Residential";
+export type TenantStatus = "active" | "inactive";
+
+export interface Tenant {
+  id: string;
+  company: string;
+  contact: string;
+  email: string;
+  phone: string;
+  type: TenantType;
+  credit: number;
+  status: TenantStatus;
+}
+
 export interface Lead {
   id: string;
   name: string;

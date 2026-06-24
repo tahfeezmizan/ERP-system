@@ -25,6 +25,7 @@ export const baseApi = createApi({
     "Project",
     "Property",
     "Lease",
+    "Tenant",
     "CRM",
     "Booking",
     "Collection",

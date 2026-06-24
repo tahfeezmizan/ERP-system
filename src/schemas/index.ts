@@ -201,6 +201,21 @@ export const leaseSchema = z.object({
 });
 export type LeaseFormData = z.infer<typeof leaseSchema>;
 
+// ─── Tenant ───────────────────────────────────────────────────────────────────
+export const tenantSchema = z.object({
+  company: z.string().min(2, "Company is required"),
+  contact: z.string().min(2, "Contact is required"),
+  email: z.string().email("Invalid email"),
+  phone: z.string().min(10, "Phone is required"),
+  type: z.enum(["Commercial", "Residential"]),
+  credit: z.coerce
+    .number()
+    .min(300, "Credit score must be at least 300")
+    .max(850, "Credit score cannot exceed 850"),
+  status: z.enum(["active", "inactive"]),
+});
+export type TenantFormData = z.infer<typeof tenantSchema>;
+
 // ─── Project ──────────────────────────────────────────────────────────────────
 export const createProjectSchema = z.object({
   name: z.string().min(2, "Project name is required"),
