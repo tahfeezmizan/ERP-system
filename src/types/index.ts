@@ -191,6 +191,17 @@ export interface Project {
   startDate: string;
   endDate: string;
   completionPercent: number;
+  projectType?: string;
+  landArea?: number;
+  actualCost?: number;
+  availableUnits?: number;
+  soldUnits?: number;
+  reservedUnits?: number;
+  collectionAmount?: number;
+  dueAmount?: number;
+  projectManager?: string;
+  expectedCompletion?: string;
+  createdAt?: string;
 }
 
 // NOTE: `Project` model moved to `src/app/(dashboard)/projects/model.ts`
@@ -338,3 +349,15 @@ export interface Task {
   status: "Pending" | "In Progress" | "Completed";
   assignedTo: string;
 }
+
+export interface WorkOrder {
+  id: string;
+  woNumber: string;
+  title: string;
+  property: string;
+  category: string;
+  priority: "low" | "medium" | "high";
+  status: "open" | "in progress" | "completed" | "scheduled";
+  cost: number;
+}
+

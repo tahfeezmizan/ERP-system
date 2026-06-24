@@ -7,18 +7,17 @@ import type {
   KpiMetric,
   LandRecord,
   Lead,
+  Lease,
   Notification,
   Project,
-  PropertyUnit,
   Property,
-  Lease,
-  Tenant,
+  PropertyUnit,
   Task,
+  Tenant,
+  WorkOrder,
 } from "@/types";
-import type { Project as ProjectModel } from "@/app/(dashboard)/projects/model";
 
-// alias to keep existing Project name usage
-type Project = ProjectModel;
+
 
 export const mockKpis: KpiMetric[] = [
   { id: "1", label: "Today's Collection", value: "৳12,50,000", change: 8.5, trend: "up" },
@@ -638,3 +637,47 @@ export const mockFinanceAccounts = [
   { id: "acc_2", code: "1002", name: "Bank - DBBL", type: "Asset", balance: 45000000 },
   { id: "acc_3", code: "4001", name: "Sales Revenue", type: "Revenue", balance: 125000000 },
 ];
+
+export const mockWorkOrders: WorkOrder[] = [
+  {
+    id: "wo_1",
+    woNumber: "WO-001",
+    title: "HVAC Maintenance",
+    property: "Grand Plaza Corporate Center",
+    category: "Hvac",
+    priority: "medium",
+    status: "completed",
+    cost: 450,
+  },
+  {
+    id: "wo_2",
+    woNumber: "WO-002",
+    title: "Leaking Faucet in A-1",
+    property: "Oakridge Residential Towers",
+    category: "Plumbing",
+    priority: "high",
+    status: "in progress",
+    cost: 0,
+  },
+  {
+    id: "wo_3",
+    woNumber: "WO-003",
+    title: "Elevator Inspection",
+    property: "Grand Plaza Corporate Center",
+    category: "Elevator",
+    priority: "high",
+    status: "scheduled",
+    cost: 0,
+  },
+  {
+    id: "wo_4",
+    woNumber: "WO-004",
+    title: "lobby Light Bulbs Replacement",
+    property: "Oakridge Residential Towers",
+    category: "Electrical",
+    priority: "low",
+    status: "open",
+    cost: 0,
+  },
+];
+

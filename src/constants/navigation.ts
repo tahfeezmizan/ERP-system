@@ -58,7 +58,12 @@ export const MAIN_NAV: NavItem[] = [
     icon: Users,
     permission: "property.view",
   },
-
+  {
+    title: "Work Orders",
+    href: "/dashboard/work-orders",
+    icon: Wrench,
+    permission: "maintenance.view",
+  },
   {
     title: "Finance",
     href: "/finance",

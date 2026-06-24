@@ -1,5 +1,5 @@
-import { baseApi } from "./baseApi";
-import { delay } from "@/lib/utils";
+
+import { CRM_PIPELINE_STAGES } from "@/constants/app";
 import {
   mockBookings,
   mockCollections,
@@ -12,42 +12,42 @@ import {
   mockInventoryItems,
   mockLandRecords,
   mockLeads,
+  mockLeases,
   mockProcurementOrders,
   mockProjects,
   mockProperties,
-  mockUnits,
-  mockLeases,
   mockTenants,
+  mockUnits,
+  mockWorkOrders,
 } from "@/lib/mock-data";
-import type { Booking, Collection, Customer, Lead, LandRecord, Lease, PaginatedResponse, Property, PropertyUnit, Tenant } from "@/types";
-import type { Project } from "@/app/(dashboard)/projects/model";
-import type { CreateCustomerFormData } from "@/schemas/customer";
-import type {
-  CreateLandRecordFormData,
-  CreateLeadFormData,
-  CreateBookingFormData,
-  CreateCollectionFormData,
-  CreateContractorFormData,
-  CreateEmployeeFormData,
-  CreatePropertyUnitFormData,
-  UnitFormData,
-  PropertyFormData,
-  LeaseFormData,
-  TenantFormData,
-  CreateProjectFormData,
-  CreateProcurementFormData,
-  CreateInventoryItemFormData,
-  CreateJournalEntryFormData,
-  CreateComplaintFormData,
-  CreateMilestoneFormData,
-} from "@/schemas";
-import { CRM_PIPELINE_STAGES } from "@/constants/app";
 import {
   getLocalStorageData,
   setLocalStorageData,
   syncLandRecordSubkeys,
   syncPropertyUnitSubkeys,
 } from "@/lib/storage-utils";
+import { delay } from "@/lib/utils";
+import type {
+  CreateBookingFormData,
+  CreateCollectionFormData,
+  CreateComplaintFormData,
+  CreateContractorFormData,
+  CreateEmployeeFormData,
+  CreateInventoryItemFormData,
+  CreateJournalEntryFormData,
+  CreateLandRecordFormData,
+  CreateLeadFormData,
+  CreateProcurementFormData,
+  CreateProjectFormData,
+  LeaseFormData,
+  PropertyFormData,
+  TenantFormData,
+  UnitFormData,
+  WorkOrderFormData
+} from "@/schemas";
+import type { CreateCustomerFormData } from "@/schemas/customer";
+import type { Booking, Collection, Customer, LandRecord, Lead, Lease, PaginatedResponse, Project, Property, PropertyUnit, Tenant, WorkOrder } from "@/types";
+import { baseApi } from "./baseApi";
 
 function paginate<T>(data: T[], page = 1, pageSize = 10): PaginatedResponse<T> {
   const start = (page - 1) * pageSize;
@@ -68,7 +68,7 @@ export const landApi = baseApi.injectEndpoints({
       },
       providesTags: ["Land"],
     }),
-    
+
     createLandRecord: builder.mutation<LandRecord, CreateLandRecordFormData>({
       queryFn: async (data) => {
         await delay(400);
@@ -804,5 +804,72 @@ export const { useGetAccountsQuery, useCreateJournalEntryMutation } = financeApi
 export const { useGetEmployeesQuery, useCreateEmployeeMutation } = hrApi;
 export const { useGetComplaintsQuery, useCreateComplaintMutation } = maintenanceApi;
 export const { useGetSalesReportQuery } = reportApi;
+
+export const workOrderApi = baseApi.injectEndpoints({
+  endpoints: (builder) => ({
+    getWorkOrders: builder.query<WorkOrder[], void>({
+      queryFn: async () => {
+        await delay(400);
+        return { data: getLocalStorageData<WorkOrder>("workOrders", mockWorkOrders) };
+      },
+      providesTags: ["Maintenance"],
+    }),
+    createWorkOrder: builder.mutation<WorkOrder, WorkOrderFormData>({
+      queryFn: async (data) => {
+        await delay(400);
+        const list = [...getLocalStorageData<WorkOrder>("workOrders", mockWorkOrders)];
+        const seq = list.length + 1;
+        const newOrder: WorkOrder = {
+          id: `wo_${Math.random().toString(36).slice(2, 10)}`,
+          woNumber: `WO-${String(seq).padStart(3, "0")}`,
+          ...data,
+        };
+        list.push(newOrder);
+        setLocalStorageData("workOrders", list);
+        return { data: newOrder };
+      },
+      invalidatesTags: ["Maintenance"],
+    }),
+    updateWorkOrder: builder.mutation<WorkOrder, { id: string; data: WorkOrderFormData }>({
+      queryFn: async ({ id, data }) => {
+        await delay(400);
+        const list = [...getLocalStorageData<WorkOrder>("workOrders", mockWorkOrders)];
+        const index = list.findIndex((w) => w.id === id);
+        if (index === -1) {
+          return { error: { status: 404, data: "Work order not found" } };
+        }
+        const updated: WorkOrder = {
+          ...list[index],
+          ...data,
+          id,
+        };
+        list[index] = updated;
+        setLocalStorageData("workOrders", list);
+        return { data: updated };
+      },
+      invalidatesTags: ["Maintenance"],
+    }),
+    deleteWorkOrder: builder.mutation<string, string>({
+      queryFn: async (id) => {
+        await delay(400);
+        const list = getLocalStorageData<WorkOrder>("workOrders", mockWorkOrders);
+        const filtered = list.filter((w) => w.id !== id);
+        if (filtered.length === list.length) {
+          return { error: { status: 404, data: "Work order not found" } };
+        }
+        setLocalStorageData("workOrders", filtered);
+        return { data: id };
+      },
+      invalidatesTags: ["Maintenance"],
+    }),
+  }),
+});
+
+export const {
+  useGetWorkOrdersQuery,
+  useCreateWorkOrderMutation,
+  useUpdateWorkOrderMutation,
+  useDeleteWorkOrderMutation,
+} = workOrderApi;
 
 

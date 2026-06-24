@@ -62,7 +62,8 @@ export function AppSidebar() {
       <nav className="flex-1 overflow-y-auto p-3 space-y-1 scrollbar-thin">
         {filteredNav.map((item) => {
           const isActive =
-            pathname === item.href || pathname.startsWith(`${item.href}/`);
+            pathname === item.href ||
+            (item.href !== "/dashboard" && pathname.startsWith(`${item.href}/`));
           const Icon = item.icon;
           return (
             <Link

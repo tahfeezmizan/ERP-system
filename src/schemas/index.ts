@@ -284,3 +284,15 @@ export const createMilestoneSchema = z.object({
   notes: z.string().optional(),
 });
 export type CreateMilestoneFormData = z.infer<typeof createMilestoneSchema>;
+
+// ─── Work Order ──────────────────────────────────────────────────────────────
+export const workOrderSchema = z.object({
+  title: z.string().min(2, "Title is required"),
+  property: z.string().min(2, "Property is required"),
+  category: z.string().min(2, "Category is required"),
+  priority: z.enum(["low", "medium", "high"]),
+  status: z.enum(["open", "in progress", "completed", "scheduled"]),
+  cost: z.coerce.number().min(0, "Cost must be a positive number"),
+});
+export type WorkOrderFormData = z.infer<typeof workOrderSchema>;
+

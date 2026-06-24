@@ -1,3 +1,4 @@
+import type { Booking, Collection, Customer, LandRecord, Lead, Project, Property, PropertyUnit, WorkOrder } from "@/types";
 import {
   mockBookings,
   mockCollections,
@@ -13,9 +14,8 @@ import {
   mockProjects,
   mockProperties,
   mockUnits,
+  mockWorkOrders,
 } from "./mock-data";
-import type { LandRecord, Property, PropertyUnit, Lead, Booking, Collection, Customer } from "@/types";
-import type { Project } from "@/app/(dashboard)/projects/model";
 
 // Helper function to safely read from localStorage
 export function getLocalStorageData<T>(key: string, fallbackData: T[]): T[] {
@@ -93,12 +93,15 @@ export function initializeStorage() {
 
   // 13. Accounts/Finance
   getLocalStorageData<any>("accounts", mockFinanceAccounts);
+
+  // 14. Work Orders
+  getLocalStorageData<WorkOrder>("workOrders", mockWorkOrders);
 }
 
 // Helper to sync land record fields with their individual storage keys
 export function syncLandRecordSubkeys(records: LandRecord[]) {
   if (typeof window === "undefined") return;
-  
+
   // Extract unique land owners
   const ownersMap = new Map();
   records.forEach((r) => {
