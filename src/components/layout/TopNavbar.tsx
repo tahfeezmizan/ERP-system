@@ -21,9 +21,7 @@ import {
 } from "@/components/ui/select";
 import { COMPANIES } from "@/constants/app";
 import { useAppDispatch, useAppSelector } from "@/hooks/redux";
-import {
-  useGetNotificationsQuery
-} from "@/services/dashboardApi";
+import { useGetNotificationsQuery } from "@/services/dashboardApi";
 import { logout, setCompany } from "@/store/slices/authSlice";
 import { setSidebarMobileOpen } from "@/store/slices/uiSlice";
 import { Bell, Building2, LogOut, Menu, Search, User } from "lucide-react";

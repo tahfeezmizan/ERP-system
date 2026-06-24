@@ -38,18 +38,7 @@ export const MAIN_NAV: NavItem[] = [
     icon: Home,
     permission: "property.view",
   },
-  {
-    title: "Projects",
-    href: "/projects",
-    icon: Map,
-    permission: "project.view",
-  },
-  {
-    title: "Leads / CRM",
-    href: "/leads",
-    icon: UserCircle,
-    permission: "crm.view",
-  },
+
   {
     title: "Units",
     href: "/units",
@@ -70,29 +59,46 @@ export const MAIN_NAV: NavItem[] = [
     icon: Users,
     permission: "property.view",
   },
+
   {
     title: "Work Orders",
     href: "/dashboard/work-orders",
     icon: Wrench,
     permission: "maintenance.view",
   },
+
+  {
+    title: "Finance",
+    href: "/finance",
+    icon: Landmark,
+    permission: "finance.view",
+  },
+
   {
     title: "Vendors",
     href: "/vendors",
     icon: Truck,
     permission: "procurement.view",
   },
+
+  {
+    title: "Projects",
+    href: "/projects",
+    icon: Map,
+    permission: "project.view",
+  },
+
+  {
+    title: "Leads / CRM",
+    href: "/leads",
+    icon: UserCircle,
+    permission: "crm.view",
+  },
   {
     title: "Documents",
     href: "/documents",
     icon: FileTextIcon,
     permission: "property.view",
-  },
-  {
-    title: "Finance",
-    href: "/finance",
-    icon: Landmark,
-    permission: "finance.view",
   },
 
   {
@@ -106,11 +112,5 @@ export const MAIN_NAV: NavItem[] = [
     href: "/settings",
     icon: Settings,
     permission: "settings.view",
-  },
-  {
-    title: "Administration",
-    href: "/administration",
-    icon: Shield,
-    permission: "admin.view",
   },
 ];

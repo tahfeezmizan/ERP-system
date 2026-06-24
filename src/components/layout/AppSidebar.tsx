@@ -27,7 +27,7 @@ export function AppSidebar() {
 
   const sidebarContent = (
     <>
-      <div className="flex h-16 items-center gap-2 border-b px-4">
+      <div className="flex h-16 items-center gap-2 border-b border-gray-800 px-4">
         <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary">
           <Building2 className="h-5 w-5 text-white" />
         </div>
@@ -63,7 +63,8 @@ export function AppSidebar() {
         {filteredNav.map((item) => {
           const isActive =
             pathname === item.href ||
-            (item.href !== "/dashboard" && pathname.startsWith(`${item.href}/`));
+            (item.href !== "/dashboard" &&
+              pathname.startsWith(`${item.href}/`));
           const Icon = item.icon;
           return (
             <Link

@@ -1,120 +1,19 @@
 "use client";
 
+import { MetricCard } from "@/components/dashboard/metric-card";
+import { StatCard } from "@/components/dashboard/stat-card";
+import { PageHeader } from "@/components/shared/PageHeader";
+import { Badge } from "@/components/ui/badge";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   AlertTriangle,
   Building2,
   DoorOpen,
   FileText,
-  TrendingDown,
   TrendingUp,
   User,
   Wrench,
-  type LucideIcon,
 } from "lucide-react";
-import { PageHeader } from "@/components/shared/PageHeader";
-import { Badge } from "@/components/ui/badge";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { cn } from "@/lib/utils";
-
-interface MetricCardProps {
-  label: string;
-  value: string | number;
-  subtitle?: string;
-  icon: LucideIcon;
-  iconClassName: string;
-  iconBgClassName: string;
-  progress?: number;
-  alert?: {
-    text: string;
-    variant: "warning" | "danger";
-    direction: "up" | "down";
-  };
-}
-
-function MetricCard({
-  label,
-  value,
-  subtitle,
-  icon: Icon,
-  iconClassName,
-  iconBgClassName,
-  progress,
-  alert,
-}: MetricCardProps) {
-  const AlertIcon = alert?.direction === "up" ? TrendingUp : TrendingDown;
-
-  return (
-    <Card>
-      <CardContent className="p-5">
-        <div className="flex items-start justify-between gap-3">
-          <div className="min-w-0 flex-1 space-y-1">
-            <p className="text-sm text-muted-foreground">{label}</p>
-            <p className="text-3xl font-bold tracking-tight">{value}</p>
-            {subtitle && (
-              <p className="text-sm text-muted-foreground">{subtitle}</p>
-            )}
-          </div>
-          <div className={cn("shrink-0 rounded-lg p-2.5", iconBgClassName)}>
-            <Icon className={cn("h-5 w-5", iconClassName)} />
-          </div>
-        </div>
-
-        {progress !== undefined && (
-          <div className="mt-4 h-1.5 w-full overflow-hidden rounded-full bg-muted">
-            <div
-              className="h-full rounded-full bg-foreground transition-all"
-              style={{ width: `${progress}%` }}
-            />
-          </div>
-        )}
-
-        {alert && (
-          <div
-            className={cn(
-              "mt-3 flex items-center gap-1 text-xs font-medium",
-              alert.variant === "warning" && "text-warning",
-              alert.variant === "danger" && "text-danger"
-            )}
-          >
-            <AlertIcon className="h-3.5 w-3.5" />
-            <span>{alert.text}</span>
-          </div>
-        )}
-      </CardContent>
-    </Card>
-  );
-}
-
-interface StatCardProps {
-  label: string;
-  value: string | number;
-  icon: LucideIcon;
-  iconClassName: string;
-  iconBgClassName: string;
-}
-
-function StatCard({ label, value, icon: Icon, iconClassName, iconBgClassName }: StatCardProps) {
-  return (
-    <Card>
-      <CardContent className="flex items-center justify-between p-5">
-        <div className="space-y-1">
-          <p className="text-sm text-muted-foreground">{label}</p>
-          <p className="text-3xl font-bold tracking-tight">{value}</p>
-        </div>
-        <div className={cn("rounded-lg p-2.5", iconBgClassName)}>
-          <Icon className={cn("h-5 w-5", iconClassName)} />
-        </div>
-      </CardContent>
-    </Card>
-  );
-}
-
-const WORK_ORDER_STATUSES = [
-  { count: 1, label: "Open" },
-  { count: 1, label: "In_progress" },
-  { count: 1, label: "Completed" },
-  { count: 1, label: "Scheduled" },
-];
 
 const EXPIRING_LEASES = [
   {
@@ -173,6 +72,76 @@ function daysLeftVariant(days: number) {
   return days <= 30 ? "danger" : "warning";
 }
 
+const METRIC_CARDS = [
+  {
+    label: "Properties",
+    value: 3,
+    subtitle: "10 total units",
+    icon: Building2,
+    iconClassName: "text-blue-600",
+    iconBgClassName: "bg-blue-50",
+  },
+  {
+    label: "Occupancy Rate",
+    value: "50%",
+    subtitle: "5 occupied / 10 total",
+    icon: DoorOpen,
+    iconClassName: "text-green-600",
+    iconBgClassName: "bg-green-50",
+    progress: 50,
+  },
+  {
+    label: "Active Leases",
+    value: 4,
+    subtitle: "2 expiring soon",
+    icon: FileText,
+    iconClassName: "text-purple-600",
+    iconBgClassName: "bg-purple-50",
+    alert: {
+      text: "2 expiring",
+      variant: "warning" as const,
+      direction: "down" as const,
+    },
+  },
+  {
+    label: "Open Work Orders",
+    value: 2,
+    subtitle: "2 overdue",
+    icon: Wrench,
+    iconClassName: "text-orange-600",
+    iconBgClassName: "bg-orange-50",
+    alert: {
+      text: "2 overdue",
+      variant: "danger" as const,
+      direction: "up" as const,
+    },
+  },
+];
+
+const STAT_CARDS = [
+  {
+    label: "Outstanding Invoices",
+    value: "$10,000",
+    icon: AlertTriangle,
+    iconClassName: "text-red-600",
+    iconBgClassName: "bg-red-50",
+  },
+  {
+    label: "Total Tenants",
+    value: 4,
+    icon: User,
+    iconClassName: "text-blue-600",
+    iconBgClassName: "bg-blue-50",
+  },
+  {
+    label: "Monthly Revenue",
+    value: "$24,500",
+    icon: TrendingUp,
+    iconClassName: "text-green-600",
+    iconBgClassName: "bg-green-50",
+  },
+];
+
 export default function DashboardPage() {
   return (
     <div className="space-y-6">
@@ -182,76 +151,15 @@ export default function DashboardPage() {
       />
 
       <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-        <MetricCard
-          label="Properties"
-          value={3}
-          subtitle="10 total units"
-          icon={Building2}
-          iconClassName="text-blue-600"
-          iconBgClassName="bg-blue-50"
-        />
-        <MetricCard
-          label="Occupancy Rate"
-          value="50%"
-          subtitle="5 occupied / 10 total"
-          icon={DoorOpen}
-          iconClassName="text-green-600"
-          iconBgClassName="bg-green-50"
-          progress={50}
-        />
-        <MetricCard
-          label="Active Leases"
-          value={4}
-          subtitle="2 expiring soon"
-          icon={FileText}
-          iconClassName="text-purple-600"
-          iconBgClassName="bg-purple-50"
-          alert={{ text: "2 expiring", variant: "warning", direction: "down" }}
-        />
-        <MetricCard
-          label="Open Work Orders"
-          value={2}
-          subtitle="2 overdue"
-          icon={Wrench}
-          iconClassName="text-orange-600"
-          iconBgClassName="bg-orange-50"
-          alert={{ text: "2 overdue", variant: "danger", direction: "up" }}
-        />
+        {METRIC_CARDS.map((card) => (
+          <MetricCard key={card.label} {...card} />
+        ))}
       </div>
 
       <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
-        <StatCard
-          label="Outstanding Invoices"
-          value="$10,000"
-          icon={AlertTriangle}
-          iconClassName="text-red-600"
-          iconBgClassName="bg-red-50"
-        />
-        <StatCard
-          label="Total Tenants"
-          value={4}
-          icon={User}
-          iconClassName="text-blue-600"
-          iconBgClassName="bg-blue-50"
-        />
-        <Card className="md:col-span-2 xl:col-span-1">
-          <CardContent className="p-5">
-            <div className="flex items-start justify-between gap-3">
-              <p className="text-sm text-muted-foreground">Work Orders by Status</p>
-              <div className="rounded-lg bg-orange-50 p-2.5">
-                <Wrench className="h-5 w-5 text-orange-600" />
-              </div>
-            </div>
-            <div className="mt-4 grid grid-cols-4 gap-2">
-              {WORK_ORDER_STATUSES.map((item) => (
-                <div key={item.label} className="text-center">
-                  <p className="text-2xl font-bold">{item.count}</p>
-                  <p className="text-xs text-muted-foreground">{item.label}</p>
-                </div>
-              ))}
-            </div>
-          </CardContent>
-        </Card>
+        {STAT_CARDS.map((card) => (
+          <StatCard key={card.label} {...card} />
+        ))}
       </div>
 
       <div className="grid gap-4 lg:grid-cols-2">
@@ -269,7 +177,9 @@ export default function DashboardPage() {
               >
                 <div className="min-w-0">
                   <p className="font-semibold">{lease.tenant}</p>
-                  <p className="text-sm text-muted-foreground">{lease.location}</p>
+                  <p className="text-sm text-muted-foreground">
+                    {lease.location}
+                  </p>
                 </div>
                 <div className="shrink-0 text-right">
                   <Badge variant={daysLeftVariant(lease.daysLeft)}>
@@ -298,7 +208,9 @@ export default function DashboardPage() {
               >
                 <div className="min-w-0">
                   <p className="font-semibold">{order.title}</p>
-                  <p className="text-sm text-muted-foreground">{order.location}</p>
+                  <p className="text-sm text-muted-foreground">
+                    {order.location}
+                  </p>
                 </div>
                 <div className="shrink-0 text-right">
                   <Badge variant={priorityVariant(order.priority)}>
