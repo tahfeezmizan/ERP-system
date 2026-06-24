@@ -5,6 +5,7 @@ import {
   Home,
   Users,
   CalendarCheck,
+  FileText,
   Wallet,
   UserCircle,
   HardHat,
@@ -41,6 +42,13 @@ export const MAIN_NAV: NavItem[] = [
     title: "Units",
     href: "/units",
     icon: Building2,
+    permission: "property.view",
+  },
+
+  {
+    title: "Leases",
+    href: "/leases",
+    icon: FileText,
     permission: "property.view",
   },
 

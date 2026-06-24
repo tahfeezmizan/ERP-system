@@ -16,8 +16,9 @@ import {
   mockProjects,
   mockProperties,
   mockUnits,
+  mockLeases,
 } from "@/lib/mock-data";
-import type { Booking, Collection, Customer, Lead, LandRecord, PaginatedResponse, Property, PropertyUnit } from "@/types";
+import type { Booking, Collection, Customer, Lead, LandRecord, Lease, PaginatedResponse, Property, PropertyUnit } from "@/types";
 import type { Project } from "@/app/(dashboard)/projects/model";
 import type { CreateCustomerFormData } from "@/schemas/customer";
 import type {
@@ -30,6 +31,7 @@ import type {
   CreatePropertyUnitFormData,
   UnitFormData,
   PropertyFormData,
+  LeaseFormData,
   CreateProjectFormData,
   CreateProcurementFormData,
   CreateInventoryItemFormData,
@@ -277,6 +279,67 @@ export const propertyApi = baseApi.injectEndpoints({
         return { data: id };
       },
       invalidatesTags: ["Property"],
+    }),
+  }),
+});
+
+export const leaseApi = baseApi.injectEndpoints({
+  endpoints: (builder) => ({
+    getLeases: builder.query<Lease[], void>({
+      queryFn: async () => {
+        await delay(400);
+        return { data: getLocalStorageData<Lease>("leases", mockLeases) };
+      },
+      providesTags: ["Lease"],
+    }),
+    createLease: builder.mutation<Lease, LeaseFormData>({
+      queryFn: async (data) => {
+        await delay(400);
+        const list = [...getLocalStorageData<Lease>("leases", mockLeases)];
+        const seq = list.length + 1;
+        const newLease: Lease = {
+          id: `lease_${Math.random().toString(36).slice(2, 10)}`,
+          leaseNumber: `LEASE-${String(seq).padStart(3, "0")}`,
+          ...data,
+        };
+        list.push(newLease);
+        setLocalStorageData("leases", list);
+        return { data: newLease };
+      },
+      invalidatesTags: ["Lease"],
+    }),
+    updateLease: builder.mutation<Lease, { id: string; data: LeaseFormData }>({
+      queryFn: async ({ id, data }) => {
+        await delay(400);
+        const list = [...getLocalStorageData<Lease>("leases", mockLeases)];
+        const index = list.findIndex((l) => l.id === id);
+        if (index === -1) {
+          return { error: { status: 404, data: "Lease not found" } };
+        }
+        const updated: Lease = {
+          ...list[index],
+          ...data,
+          id,
+          leaseNumber: list[index].leaseNumber,
+        };
+        list[index] = updated;
+        setLocalStorageData("leases", list);
+        return { data: updated };
+      },
+      invalidatesTags: ["Lease"],
+    }),
+    deleteLease: builder.mutation<string, string>({
+      queryFn: async (id) => {
+        await delay(400);
+        const list = getLocalStorageData<Lease>("leases", mockLeases);
+        const filtered = list.filter((l) => l.id !== id);
+        if (filtered.length === list.length) {
+          return { error: { status: 404, data: "Lease not found" } };
+        }
+        setLocalStorageData("leases", filtered);
+        return { data: id };
+      },
+      invalidatesTags: ["Lease"],
     }),
   }),
 });
@@ -656,6 +719,12 @@ export const {
   useUpdateUnitMutation,
   useDeleteUnitMutation,
 } = propertyApi;
+export const {
+  useGetLeasesQuery,
+  useCreateLeaseMutation,
+  useUpdateLeaseMutation,
+  useDeleteLeaseMutation,
+} = leaseApi;
 export const {
   useGetLeadsQuery,
   useGetPipelineQuery,

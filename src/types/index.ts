@@ -224,6 +224,22 @@ export interface PropertyUnit {
   marketRent: number;
 }
 
+export type LeaseType = "Commercial" | "Residential";
+export type LeaseStatus = "active" | "expiring" | "expired" | "terminated";
+
+export interface Lease {
+  id: string;
+  leaseNumber: string;
+  tenant: string;
+  propertyName: string;
+  unit: string;
+  type: LeaseType;
+  baseRent: number;
+  startDate: string;
+  endDate: string;
+  status: LeaseStatus;
+}
+
 export interface Lead {
   id: string;
   name: string;

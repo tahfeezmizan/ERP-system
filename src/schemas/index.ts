@@ -188,6 +188,19 @@ export type UnitFormData = z.infer<typeof unitSchema>;
 export const createPropertyUnitSchema = unitSchema;
 export type CreatePropertyUnitFormData = UnitFormData;
 
+// ─── Lease ────────────────────────────────────────────────────────────────────
+export const leaseSchema = z.object({
+  tenant: z.string().min(2, "Tenant is required"),
+  propertyName: z.string().min(2, "Property is required"),
+  unit: z.string().min(1, "Unit is required"),
+  type: z.enum(["Commercial", "Residential"]),
+  baseRent: z.coerce.number().positive("Base rent must be positive"),
+  startDate: z.string().min(1, "Start date is required"),
+  endDate: z.string().min(1, "End date is required"),
+  status: z.enum(["active", "expiring", "expired", "terminated"]),
+});
+export type LeaseFormData = z.infer<typeof leaseSchema>;
+
 // ─── Project ──────────────────────────────────────────────────────────────────
 export const createProjectSchema = z.object({
   name: z.string().min(2, "Project name is required"),
