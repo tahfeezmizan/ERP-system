@@ -1,14 +1,12 @@
 "use client";
 
-import { Plus } from "lucide-react";
-import { useMemo, useState } from "react";
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { toast } from "sonner";
+import { EntityCreateModal } from "@/components/shared/EntityCreateModal";
+import { PageHeader } from "@/components/shared/PageHeader";
+import { DataTable, type Column } from "@/components/tables/DataTable";
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Badge } from "@/components/ui/badge";
 import {
   Select,
   SelectContent,
@@ -16,9 +14,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { PageHeader } from "@/components/shared/PageHeader";
-import { EntityCreateModal } from "@/components/shared/EntityCreateModal";
-import { DataTable, type Column } from "@/components/tables/DataTable";
+import { cn, formatUSD } from "@/lib/utils";
+import { type LeaseFormData } from "@/schemas";
 import {
   useCreateLeaseMutation,
   useDeleteLeaseMutation,
@@ -27,9 +24,11 @@ import {
   useGetUnitsQuery,
   useUpdateLeaseMutation,
 } from "@/services/moduleApis";
-import { leaseSchema, type LeaseFormData } from "@/schemas";
-import { cn, formatUSD } from "@/lib/utils";
 import type { Lease, LeaseStatus, LeaseType } from "@/types";
+import { Plus } from "lucide-react";
+import { useMemo, useState } from "react";
+import { useForm } from "react-hook-form";
+import { toast } from "sonner";
 
 const LEASE_TYPES: LeaseType[] = ["Commercial", "Residential"];
 const STATUS_FILTER_OPTIONS = [
@@ -99,7 +98,6 @@ export default function LeasesPage() {
     reset,
     formState: { errors, isSubmitting },
   } = useForm<LeaseFormData>({
-    resolver: zodResolver(leaseSchema),
     defaultValues: defaultFormValues,
   });
 

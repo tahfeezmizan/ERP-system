@@ -15,6 +15,7 @@ import type {
   PropertyUnit,
   Task,
   Tenant,
+  Vendor,
   WorkOrder,
 } from "@/types";
 
@@ -649,7 +650,7 @@ export const mockProcurementOrders = [
   { id: "po_2", poNo: "PO-2025-002", vendor: "Steel Corp BD", amount: 8500000, status: "Pending", date: "2025-06-15" },
 ];
 
-export const mockVendors = [
+export const mockVendors: Vendor[] = [
   { id: "ven_1", company: "Apex HVAC Services", contact: "Mark Miller", email: "mark@apexhvac.com", phone: "206-555-0201", type: "HVAC", rating: 4.8, status: "active" },
   { id: "ven_2", company: "Seattle Plumbing Pros", contact: "Danielle Davis", email: "davis@seattleplumbing.com", phone: "206-555-0202", type: "Plumbing", rating: 4.6, status: "active" },
   { id: "ven_3", company: "Elevate Lift Corp", contact: "Eric Evans", email: "eevans@elevatelift.com", phone: "206-555-0203", type: "Elevator", rating: 4.4, status: "active" },

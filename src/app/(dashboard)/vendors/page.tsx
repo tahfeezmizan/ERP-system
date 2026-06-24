@@ -47,9 +47,8 @@ export default function VendorsPage() {
 
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingVendor, setEditingVendor] = useState<Vendor | null>(null);
-  const [statusFilter, setStatusFilter] = useState<(typeof STATUS_FILTER_OPTIONS)[number]>(
-    "All Status"
-  );
+  const [statusFilter, setStatusFilter] =
+    useState<(typeof STATUS_FILTER_OPTIONS)[number]>("All Status");
 
   const {
     register,
@@ -59,7 +58,6 @@ export default function VendorsPage() {
     reset,
     formState: { errors, isSubmitting },
   } = useForm<VendorFormData>({
-    resolver: zodResolver(vendorSchema),
     defaultValues: defaultFormValues,
   });
 
@@ -160,12 +158,18 @@ export default function VendorsPage() {
       }
       handleModalChange(false);
     } catch {
-      toast.error(editingVendor ? "Failed to update vendor" : "Failed to add vendor");
+      toast.error(
+        editingVendor ? "Failed to update vendor" : "Failed to add vendor",
+      );
     }
   }
 
   async function handleDelete(vendor: Vendor) {
-    if (!window.confirm(`Delete "${vendor.company}"? This action cannot be undone.`)) {
+    if (
+      !window.confirm(
+        `Delete "${vendor.company}"? This action cannot be undone.`,
+      )
+    ) {
       return;
     }
 
@@ -179,7 +183,10 @@ export default function VendorsPage() {
 
   return (
     <div className="space-y-6">
-      <PageHeader title="Vendors" description="Manage vendors and service providers">
+      <PageHeader
+        title="Vendors"
+        description="Manage vendors and service providers"
+      >
         <Button onClick={openCreateModal}>
           <Plus className="mr-1 h-4 w-4" /> Add Vendor
         </Button>
@@ -238,7 +245,9 @@ export default function VendorsPage() {
               {...register("company")}
             />
             {errors.company && (
-              <p className="text-sm text-destructive">{errors.company.message}</p>
+              <p className="text-sm text-destructive">
+                {errors.company.message}
+              </p>
             )}
           </div>
 
@@ -250,7 +259,9 @@ export default function VendorsPage() {
               {...register("contact")}
             />
             {errors.contact && (
-              <p className="text-sm text-destructive">{errors.contact.message}</p>
+              <p className="text-sm text-destructive">
+                {errors.contact.message}
+              </p>
             )}
           </div>
 
@@ -280,7 +291,11 @@ export default function VendorsPage() {
 
           <div className="grid gap-2">
             <Label htmlFor="vendor-type">Type</Label>
-            <Input id="vendor-type" placeholder="e.g. HVAC" {...register("type")} />
+            <Input
+              id="vendor-type"
+              placeholder="e.g. HVAC"
+              {...register("type")}
+            />
             {errors.type && (
               <p className="text-sm text-destructive">{errors.type.message}</p>
             )}
@@ -298,7 +313,9 @@ export default function VendorsPage() {
               {...register("rating", { valueAsNumber: true })}
             />
             {errors.rating && (
-              <p className="text-sm text-destructive">{errors.rating.message}</p>
+              <p className="text-sm text-destructive">
+                {errors.rating.message}
+              </p>
             )}
           </div>
 
@@ -307,7 +324,9 @@ export default function VendorsPage() {
             <Select
               value={statusValue}
               onValueChange={(value) =>
-                setValue("status", value as VendorStatus, { shouldValidate: true })
+                setValue("status", value as VendorStatus, {
+                  shouldValidate: true,
+                })
               }
             >
               <SelectTrigger id="vendor-status">
@@ -319,7 +338,9 @@ export default function VendorsPage() {
               </SelectContent>
             </Select>
             {errors.status && (
-              <p className="text-sm text-destructive">{errors.status.message}</p>
+              <p className="text-sm text-destructive">
+                {errors.status.message}
+              </p>
             )}
           </div>
         </div>

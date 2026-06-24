@@ -124,6 +124,7 @@ export type CreateLandRecordFormData = z.infer<typeof createLandRecordSchema>;
 // ─── Lead ─────────────────────────────────────────────────────────────────────
 export const createLeadSchema = z.object({
   name: z.string().min(2, "Name is required"),
+  company: z.string().min(2, "Company name is required"),
   phone: z.string().min(10, "Phone is required"),
   email: z.string().email("Invalid email").optional().or(z.literal("")),
   source: z.enum(LEAD_SOURCES),

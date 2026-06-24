@@ -60,7 +60,6 @@ export default function TenantsPage() {
     reset,
     formState: { errors, isSubmitting },
   } = useForm<TenantFormData>({
-    resolver: zodResolver(tenantSchema),
     defaultValues: defaultFormValues,
   });
 

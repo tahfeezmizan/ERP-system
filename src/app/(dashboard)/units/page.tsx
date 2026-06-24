@@ -63,7 +63,6 @@ export default function UnitsPage() {
     reset,
     formState: { errors, isSubmitting },
   } = useForm<UnitFormData>({
-    resolver: zodResolver(unitSchema),
     defaultValues: defaultFormValues,
   });
 
@@ -117,7 +116,9 @@ export default function UnitsPage() {
             {row.status}
           </Badge>
         ) : (
-          <span className="text-sm capitalize text-muted-foreground">{row.status}</span>
+          <span className="text-sm capitalize text-muted-foreground">
+            {row.status}
+          </span>
         ),
     },
     {
@@ -175,7 +176,11 @@ export default function UnitsPage() {
   }
 
   async function handleDelete(unit: PropertyUnit) {
-    if (!window.confirm(`Delete unit "${unit.unit}"? This action cannot be undone.`)) {
+    if (
+      !window.confirm(
+        `Delete unit "${unit.unit}"? This action cannot be undone.`,
+      )
+    ) {
       return;
     }
 
@@ -216,7 +221,9 @@ export default function UnitsPage() {
             <SelectContent>
               {STATUS_FILTER_OPTIONS.map((status) => (
                 <SelectItem key={status} value={status}>
-                  {status === "All Status" ? status : status.charAt(0).toUpperCase() + status.slice(1)}
+                  {status === "All Status"
+                    ? status
+                    : status.charAt(0).toUpperCase() + status.slice(1)}
                 </SelectItem>
               ))}
             </SelectContent>
@@ -240,7 +247,11 @@ export default function UnitsPage() {
         <div className="grid gap-4 sm:grid-cols-2">
           <div className="grid gap-2">
             <Label htmlFor="unit-name">Unit</Label>
-            <Input id="unit-name" placeholder="e.g. Suite 101" {...register("unit")} />
+            <Input
+              id="unit-name"
+              placeholder="e.g. Suite 101"
+              {...register("unit")}
+            />
             {errors.unit && (
               <p className="text-sm text-destructive">{errors.unit.message}</p>
             )}
@@ -266,7 +277,9 @@ export default function UnitsPage() {
               </SelectContent>
             </Select>
             {errors.propertyName && (
-              <p className="text-sm text-destructive">{errors.propertyName.message}</p>
+              <p className="text-sm text-destructive">
+                {errors.propertyName.message}
+              </p>
             )}
           </div>
 
@@ -275,7 +288,9 @@ export default function UnitsPage() {
             <Select
               value={typeValue}
               onValueChange={(value) =>
-                setValue("type", value as UnitSpaceType, { shouldValidate: true })
+                setValue("type", value as UnitSpaceType, {
+                  shouldValidate: true,
+                })
               }
             >
               <SelectTrigger id="unit-type">
@@ -341,7 +356,9 @@ export default function UnitsPage() {
               </SelectContent>
             </Select>
             {errors.status && (
-              <p className="text-sm text-destructive">{errors.status.message}</p>
+              <p className="text-sm text-destructive">
+                {errors.status.message}
+              </p>
             )}
           </div>
 
@@ -355,7 +372,9 @@ export default function UnitsPage() {
               {...register("marketRent")}
             />
             {errors.marketRent && (
-              <p className="text-sm text-destructive">{errors.marketRent.message}</p>
+              <p className="text-sm text-destructive">
+                {errors.marketRent.message}
+              </p>
             )}
           </div>
         </div>

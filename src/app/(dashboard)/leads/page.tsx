@@ -1,14 +1,12 @@
 "use client";
 
-import { Plus } from "lucide-react";
-import { useMemo, useState } from "react";
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { toast } from "sonner";
+import { EntityCreateModal } from "@/components/shared/EntityCreateModal";
+import { PageHeader } from "@/components/shared/PageHeader";
+import { DataTable, type Column } from "@/components/tables/DataTable";
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Badge } from "@/components/ui/badge";
 import {
   Select,
   SelectContent,
@@ -16,10 +14,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { PageHeader } from "@/components/shared/PageHeader";
-import { EntityCreateModal } from "@/components/shared/EntityCreateModal";
-import { DataTable, type Column } from "@/components/tables/DataTable";
-import { createLeadSchema, type CreateLeadFormData } from "@/schemas";
+import { formatUSD } from "@/lib/utils";
+import { type CreateLeadFormData } from "@/schemas";
 import {
   useCreateLeadMutation,
   useDeleteLeadMutation,
@@ -27,7 +23,10 @@ import {
   useUpdateLeadMutation,
 } from "@/services/moduleApis";
 import type { Lead } from "@/types";
-import { formatUSD } from "@/lib/utils";
+import { Plus } from "lucide-react";
+import { useMemo, useState } from "react";
+import { useForm } from "react-hook-form";
+import { toast } from "sonner";
 
 const LEAD_FILTER_OPTIONS = ["All Status", ...["Lead", "Interested", "Site Visit", "Negotiation", "Booking", "Agreement", "Registration", "Handover"]] as const;
 const LEAD_TYPES = ["Commercial", "Residential"] as const;
@@ -68,7 +67,6 @@ export default function LeadsPage() {
     reset,
     formState: { errors, isSubmitting },
   } = useForm<CreateLeadFormData>({
-    resolver: zodResolver(createLeadSchema),
     defaultValues: defaultFormValues,
   });
 

@@ -29,7 +29,11 @@ import { propertySchema, type PropertyFormData } from "@/schemas";
 import { formatUSD } from "@/lib/utils";
 import type { Property, PropertyType } from "@/types";
 
-const PROPERTY_TYPES: PropertyType[] = ["Commercial", "Residential", "Industrial"];
+const PROPERTY_TYPES: PropertyType[] = [
+  "Commercial",
+  "Residential",
+  "Industrial",
+];
 const TYPE_FILTER_OPTIONS = ["All Types", ...PROPERTY_TYPES] as const;
 
 const defaultFormValues: PropertyFormData = {
@@ -50,7 +54,8 @@ export default function PropertiesPage() {
 
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingProperty, setEditingProperty] = useState<Property | null>(null);
-  const [typeFilter, setTypeFilter] = useState<(typeof TYPE_FILTER_OPTIONS)[number]>("All Types");
+  const [typeFilter, setTypeFilter] =
+    useState<(typeof TYPE_FILTER_OPTIONS)[number]>("All Types");
 
   const {
     register,
@@ -60,7 +65,6 @@ export default function PropertiesPage() {
     reset,
     formState: { errors, isSubmitting },
   } = useForm<PropertyFormData>({
-    resolver: zodResolver(propertySchema),
     defaultValues: defaultFormValues,
   });
 
@@ -81,7 +85,12 @@ export default function PropertiesPage() {
     },
     { key: "code", header: "Code", cell: (row) => row.code, sortable: true },
     { key: "type", header: "Type", cell: (row) => row.type, sortable: true },
-    { key: "location", header: "Location", cell: (row) => row.location, sortable: true },
+    {
+      key: "location",
+      header: "Location",
+      cell: (row) => row.location,
+      sortable: true,
+    },
     {
       key: "status",
       header: "Status",
@@ -147,14 +156,18 @@ export default function PropertiesPage() {
       }
       handleModalChange(false);
     } catch {
-      toast.error(editingProperty ? "Failed to update property" : "Failed to add property");
+      toast.error(
+        editingProperty
+          ? "Failed to update property"
+          : "Failed to add property",
+      );
     }
   }
 
   async function handleDelete(property: Property) {
     if (
       !window.confirm(
-        `Delete "${property.name}"? This action cannot be undone.`
+        `Delete "${property.name}"? This action cannot be undone.`,
       )
     ) {
       return;
@@ -236,7 +249,11 @@ export default function PropertiesPage() {
 
           <div className="grid gap-2">
             <Label htmlFor="property-code">Code</Label>
-            <Input id="property-code" placeholder="e.g. PROP-GP" {...register("code")} />
+            <Input
+              id="property-code"
+              placeholder="e.g. PROP-GP"
+              {...register("code")}
+            />
             {errors.code && (
               <p className="text-sm text-destructive">{errors.code.message}</p>
             )}
@@ -247,7 +264,9 @@ export default function PropertiesPage() {
             <Select
               value={typeValue}
               onValueChange={(value) =>
-                setValue("type", value as PropertyType, { shouldValidate: true })
+                setValue("type", value as PropertyType, {
+                  shouldValidate: true,
+                })
               }
             >
               <SelectTrigger id="property-type">
@@ -274,7 +293,9 @@ export default function PropertiesPage() {
               {...register("location")}
             />
             {errors.location && (
-              <p className="text-sm text-destructive">{errors.location.message}</p>
+              <p className="text-sm text-destructive">
+                {errors.location.message}
+              </p>
             )}
           </div>
 
@@ -297,7 +318,9 @@ export default function PropertiesPage() {
               </SelectContent>
             </Select>
             {errors.status && (
-              <p className="text-sm text-destructive">{errors.status.message}</p>
+              <p className="text-sm text-destructive">
+                {errors.status.message}
+              </p>
             )}
           </div>
 
@@ -312,7 +335,9 @@ export default function PropertiesPage() {
               {...register("occupancy")}
             />
             {errors.occupancy && (
-              <p className="text-sm text-destructive">{errors.occupancy.message}</p>
+              <p className="text-sm text-destructive">
+                {errors.occupancy.message}
+              </p>
             )}
           </div>
 
