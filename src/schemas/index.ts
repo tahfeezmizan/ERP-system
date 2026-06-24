@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { LEAD_SOURCES } from "@/constants/app";
+import { CRM_PIPELINE_STAGES, LEAD_SOURCES } from "@/constants/app";
 
 // ─── Land ─────────────────────────────────────────────────────────────────────
 // export const createLandRecordSchema = z.object({
@@ -73,7 +73,15 @@ export const createLandRecordSchema = z.object({
 
   // Acquisition
   acquisitionType: z
-    .enum(["Purchase", "Joint Venture", "POA", "Inheritance", "Gift", "Lease", "Other"])
+    .enum([
+      "Purchase",
+      "Joint Venture",
+      "POA",
+      "Inheritance",
+      "Gift",
+      "Lease",
+      "Other",
+    ])
     .optional(),
 
   acquisitionDate: z.string().optional(),
@@ -86,7 +94,14 @@ export const createLandRecordSchema = z.object({
   status: z.enum(["Acquired", "Pending", "Verified"]),
 
   mutationStatus: z
-    .enum(["Pending", "Processing", "Approved", "Rejected", "In Progress", "Completed"])
+    .enum([
+      "Pending",
+      "Processing",
+      "Approved",
+      "Rejected",
+      "In Progress",
+      "Completed",
+    ])
     .optional(),
 
   developmentAgreementStatus: z
@@ -115,6 +130,14 @@ export const createLeadSchema = z.object({
   projectInterest: z.string().min(2, "Project interest is required"),
   budget: z.coerce.number().positive("Budget must be positive"),
   assignedTo: z.string().min(2, "Assigned to is required"),
+  targetProperty: z.string().min(2, "Target property is required"),
+  leadType: z.enum(["Commercial", "Residential"]),
+  stage: z.enum(CRM_PIPELINE_STAGES),
+  probability: z.coerce
+    .number()
+    .min(0, "Probability cannot be negative")
+    .max(100, "Probability cannot exceed 100"),
+  expectedCloseDate: z.string().optional(),
 });
 export type CreateLeadFormData = z.infer<typeof createLeadSchema>;
 
@@ -167,7 +190,10 @@ export const propertySchema = z.object({
   type: z.enum(["Commercial", "Residential", "Industrial"]),
   location: z.string().min(2, "Location is required"),
   status: z.enum(["active", "inactive"]),
-  occupancy: z.coerce.number().min(0, "Occupancy must be at least 0").max(100, "Occupancy cannot exceed 100"),
+  occupancy: z.coerce
+    .number()
+    .min(0, "Occupancy must be at least 0")
+    .max(100, "Occupancy cannot exceed 100"),
   value: z.coerce.number().positive("Value must be positive"),
 });
 export type PropertyFormData = z.infer<typeof propertySchema>;
@@ -234,8 +260,17 @@ export const createProjectSchema = z.object({
   startDate: z.string().min(1, "Start date is required"),
   endDate: z.string().min(1, "End date is required"),
   expectedCompletion: z.string().optional(),
-  completionPercent: z.coerce.number().min(0, "Progress must be at least 0").max(100, "Progress cannot exceed 100"),
-  status: z.enum(["Planning", "Approved", "Construction", "Sales", "Completed"]),
+  completionPercent: z.coerce
+    .number()
+    .min(0, "Progress must be at least 0")
+    .max(100, "Progress cannot exceed 100"),
+  status: z.enum([
+    "Planning",
+    "Approved",
+    "Construction",
+    "Sales",
+    "Completed",
+  ]),
   rajukApproval: z.boolean().default(false),
   projectManager: z.string().optional(),
 });
@@ -256,7 +291,10 @@ export const vendorSchema = z.object({
   email: z.string().email("Invalid email"),
   phone: z.string().min(7, "Phone is required"),
   type: z.string().min(2, "Type is required"),
-  rating: z.coerce.number().min(1, "Rating must be at least 1").max(5, "Rating cannot exceed 5"),
+  rating: z.coerce
+    .number()
+    .min(1, "Rating must be at least 1")
+    .max(5, "Rating cannot exceed 5"),
   status: z.enum(["active", "inactive"]),
 });
 export type VendorFormData = z.infer<typeof vendorSchema>;
@@ -270,7 +308,9 @@ export const createInventoryItemSchema = z.object({
   reorderLevel: z.coerce.number().min(0, "Reorder level is required"),
   value: z.coerce.number().min(0, "Value is required"),
 });
-export type CreateInventoryItemFormData = z.infer<typeof createInventoryItemSchema>;
+export type CreateInventoryItemFormData = z.infer<
+  typeof createInventoryItemSchema
+>;
 
 // ─── Finance – Journal Entry ──────────────────────────────────────────────────
 export const createJournalEntrySchema = z.object({
@@ -279,7 +319,9 @@ export const createJournalEntrySchema = z.object({
   type: z.enum(["Asset", "Liability", "Revenue", "Expense", "Equity"]),
   balance: z.coerce.number().min(0, "Balance is required"),
 });
-export type CreateJournalEntryFormData = z.infer<typeof createJournalEntrySchema>;
+export type CreateJournalEntryFormData = z.infer<
+  typeof createJournalEntrySchema
+>;
 
 // ─── Maintenance Ticket ───────────────────────────────────────────────────────
 export const createComplaintSchema = z.object({
@@ -309,4 +351,3 @@ export const workOrderSchema = z.object({
   cost: z.coerce.number().min(0, "Cost must be a positive number"),
 });
 export type WorkOrderFormData = z.infer<typeof workOrderSchema>;
-

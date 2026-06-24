@@ -493,13 +493,46 @@ export const crmApi = baseApi.injectEndpoints({
         const list = [...getLocalStorageData<Lead>("leads", mockLeads)];
         const newLead: Lead = {
           id: `lead_${Math.random().toString(36).slice(2, 10)}`,
-          stage: "Lead",
           createdAt: new Date().toISOString().slice(0, 10),
           ...data,
         };
         list.push(newLead);
         setLocalStorageData("leads", list);
         return { data: newLead };
+      },
+      invalidatesTags: ["CRM"],
+    }),
+    updateLead: builder.mutation<Lead, { id: string; data: CreateLeadFormData }>(
+      {
+        queryFn: async ({ id, data }) => {
+          await delay(400);
+          const list = [...getLocalStorageData<Lead>("leads", mockLeads)];
+          const index = list.findIndex((lead) => lead.id === id);
+          if (index === -1) {
+            return { error: { status: 404, data: "Lead not found" } };
+          }
+          const updatedLead: Lead = {
+            ...list[index],
+            ...data,
+            id,
+          };
+          list[index] = updatedLead;
+          setLocalStorageData("leads", list);
+          return { data: updatedLead };
+        },
+        invalidatesTags: ["CRM"],
+      },
+    ),
+    deleteLead: builder.mutation<string, string>({
+      queryFn: async (id) => {
+        await delay(400);
+        const list = [...getLocalStorageData<Lead>("leads", mockLeads)];
+        const filtered = list.filter((lead) => lead.id !== id);
+        if (filtered.length === list.length) {
+          return { error: { status: 404, data: "Lead not found" } };
+        }
+        setLocalStorageData("leads", filtered);
+        return { data: id };
       },
       invalidatesTags: ["CRM"],
     }),
@@ -1035,6 +1068,8 @@ export const {
   useGetPipelineQuery,
   useUpdateLeadStageMutation,
   useCreateLeadMutation,
+  useUpdateLeadMutation,
+  useDeleteLeadMutation,
 } = crmApi;
 export const { useGetBookingsQuery, useCreateBookingMutation } = bookingApi;
 export const { useGetCollectionsQuery, useCreateCollectionMutation } = collectionApi;

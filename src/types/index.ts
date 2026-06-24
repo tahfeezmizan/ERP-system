@@ -282,12 +282,17 @@ export interface Vendor {
 export interface Lead {
   id: string;
   name: string;
+  company: string;
   phone: string;
   email?: string;
   source: LeadSource;
   stage: PipelineStage;
   assignedTo: string;
   projectInterest: string;
+  targetProperty: string;
+  leadType: "Commercial" | "Residential";
+  probability: number;
+  expectedCloseDate?: string;
   budget: number;
   createdAt: string;
   lastFollowUp?: string;

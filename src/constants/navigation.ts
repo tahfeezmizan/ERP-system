@@ -44,6 +44,12 @@ export const MAIN_NAV: NavItem[] = [
     permission: "project.view",
   },
   {
+    title: "Leads / CRM",
+    href: "/leads",
+    icon: UserCircle,
+    permission: "crm.view",
+  },
+  {
     title: "Units",
     href: "/units",
     icon: Building2,
