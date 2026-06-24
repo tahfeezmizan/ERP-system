@@ -221,6 +221,7 @@ export const createProjectSchema = z.object({
   name: z.string().min(2, "Project name is required"),
   code: z.string().min(2, "Project code is required"),
   location: z.string().min(2, "Location is required"),
+  propertyName: z.string().min(2, "Associated property is required"),
   projectType: z.string().optional(),
   landArea: z.coerce.number().optional(),
   budget: z.coerce.number().positive("Budget must be positive"),
@@ -232,9 +233,11 @@ export const createProjectSchema = z.object({
   dueAmount: z.coerce.number().optional(),
   startDate: z.string().min(1, "Start date is required"),
   endDate: z.string().min(1, "End date is required"),
+  expectedCompletion: z.string().optional(),
+  completionPercent: z.coerce.number().min(0, "Progress must be at least 0").max(100, "Progress cannot exceed 100"),
+  status: z.enum(["Planning", "Approved", "Construction", "Sales", "Completed"]),
   rajukApproval: z.boolean().default(false),
   projectManager: z.string().optional(),
-  expectedCompletion: z.string().optional(),
 });
 export type CreateProjectFormData = z.infer<typeof createProjectSchema>;
 

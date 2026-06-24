@@ -37,7 +37,12 @@ export const MAIN_NAV: NavItem[] = [
     icon: Home,
     permission: "property.view",
   },
-
+  {
+    title: "Projects",
+    href: "/projects",
+    icon: Map,
+    permission: "project.view",
+  },
   {
     title: "Units",
     href: "/units",

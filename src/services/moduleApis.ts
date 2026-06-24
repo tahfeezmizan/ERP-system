@@ -171,6 +171,49 @@ export const projectApi = baseApi.injectEndpoints({
       },
       invalidatesTags: ["Project"],
     }),
+    updateProject: builder.mutation<Project, { id: string; data: CreateProjectFormData }>({
+      queryFn: async ({ id, data }) => {
+        await delay(400);
+        const list = [...getLocalStorageData<Project>("projects", mockProjects)];
+        const index = list.findIndex((project) => project.id === id);
+        if (index === -1) {
+          return { error: { status: 404, data: "Project not found" } };
+        }
+        const updatedProject: Project = {
+          ...list[index],
+          ...data,
+          id,
+          spent: data.actualCost ?? list[index].spent,
+          completionPercent: data.completionPercent ?? list[index].completionPercent,
+          projectType: data.projectType ?? list[index].projectType,
+          landArea: data.landArea ?? list[index].landArea,
+          availableUnits: data.availableUnits ?? list[index].availableUnits,
+          soldUnits: data.soldUnits ?? list[index].soldUnits,
+          reservedUnits: data.reservedUnits ?? list[index].reservedUnits,
+          collectionAmount: data.collectionAmount ?? list[index].collectionAmount,
+          dueAmount: data.dueAmount ?? list[index].dueAmount,
+          expectedCompletion: data.expectedCompletion ?? list[index].expectedCompletion,
+          projectManager: data.projectManager ?? list[index].projectManager,
+        };
+        list[index] = updatedProject;
+        setLocalStorageData("projects", list);
+        return { data: updatedProject };
+      },
+      invalidatesTags: ["Project"],
+    }),
+    deleteProject: builder.mutation<string, string>({
+      queryFn: async (id) => {
+        await delay(400);
+        const list = [...getLocalStorageData<Project>("projects", mockProjects)];
+        const filtered = list.filter((project) => project.id !== id);
+        if (filtered.length === list.length) {
+          return { error: { status: 404, data: "Project not found" } };
+        }
+        setLocalStorageData("projects", filtered);
+        return { data: id };
+      },
+      invalidatesTags: ["Project"],
+    }),
   }),
 });
 
@@ -964,7 +1007,7 @@ export const {
   useDeleteLandRecordMutation,
 } = landApi;
 
-export const { useGetProjectsQuery, useCreateProjectMutation } = projectApi;
+export const { useGetProjectsQuery, useCreateProjectMutation, useUpdateProjectMutation, useDeleteProjectMutation } = projectApi;
 export const {
   useGetPropertiesQuery,
   useCreatePropertyMutation,

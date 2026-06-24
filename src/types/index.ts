@@ -183,6 +183,7 @@ export interface Project {
   name: string;
   code: string;
   location: string;
+  propertyName?: string;
   landId?: string;
   status: "Planning" | "Approved" | "Construction" | "Sales" | "Completed";
   budget: number;
