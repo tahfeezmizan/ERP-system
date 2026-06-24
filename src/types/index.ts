@@ -10,6 +10,8 @@ export interface User {
   avatar?: string;
   companyId: string;
   department?: string;
+  phone?: string;
+  jobTitle?: string;
 }
 
 export interface AuthTokens {

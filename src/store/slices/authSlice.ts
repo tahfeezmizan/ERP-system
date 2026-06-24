@@ -78,6 +78,24 @@ const authSlice = createSlice({
       state.fiscalYear = action.payload;
       saveAuthToStorage(state);
     },
+    updateProfile: (
+      state,
+      action: PayloadAction<{
+        name?: string;
+        email?: string;
+        department?: string;
+        phone?: string;
+        jobTitle?: string;
+      }>
+    ) => {
+      if (state.user) {
+        state.user = {
+          ...state.user,
+          ...action.payload,
+        };
+        saveAuthToStorage(state);
+      }
+    },
     logout: (state) => {
       state.user = null;
       state.tokens = null;
@@ -88,6 +106,6 @@ const authSlice = createSlice({
   },
 });
 
-export const { setCredentials, updateTokens, setCompany, setFiscalYear, logout } =
+export const { setCredentials, updateTokens, setCompany, setFiscalYear, updateProfile, logout } =
   authSlice.actions;
 export default authSlice.reducer;

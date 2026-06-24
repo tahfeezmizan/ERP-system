@@ -11,12 +11,14 @@ function generateToken(): string {
 
 const mockUser: User = {
   id: "user_1",
-  name: "Admin User",
-  email: MOCK_CREDENTIALS.email,
-  role: "super_admin",
-  permissions: getPermissionsForRole("super_admin"),
+  name: "Demo Admin",
+  email: "admin@demo.com",
+  role: "admin",
+  permissions: getPermissionsForRole("admin"),
   companyId: "comp_1",
-  department: "Administration",
+  department: "Property Management",
+  phone: "+1 (555) 000-0000",
+  jobTitle: "Property Manager",
 };
 
 export const authApi = baseApi.injectEndpoints({
