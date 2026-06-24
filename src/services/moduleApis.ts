@@ -16,7 +16,15 @@ import {
   mockProjects,
   mockUnits,
 } from "@/lib/mock-data";
-import type { Booking, Collection, Customer, Lead, LandRecord, PaginatedResponse, PropertyUnit } from "@/types";
+import type {
+  Booking,
+  Collection,
+  Customer,
+  Lead,
+  LandRecord,
+  PaginatedResponse,
+  PropertyUnit,
+} from "@/types";
 import type { Project } from "@/app/(dashboard)/projects/model";
 import type { CreateCustomerFormData } from "@/schemas/customer";
 import type {
@@ -57,15 +65,19 @@ export const landApi = baseApi.injectEndpoints({
     getLandRecords: builder.query<LandRecord[], void>({
       queryFn: async () => {
         await delay(400);
-        return { data: getLocalStorageData<LandRecord>("landRecords", mockLandRecords) };
+        return {
+          data: getLocalStorageData<LandRecord>("landRecords", mockLandRecords),
+        };
       },
       providesTags: ["Land"],
     }),
-    
+
     createLandRecord: builder.mutation<LandRecord, CreateLandRecordFormData>({
       queryFn: async (data) => {
         await delay(400);
-        const records = [...getLocalStorageData<LandRecord>("landRecords", mockLandRecords)];
+        const records = [
+          ...getLocalStorageData<LandRecord>("landRecords", mockLandRecords),
+        ];
         const newRecord: LandRecord = {
           id: `land_${Math.random().toString(36).slice(2, 10)}`,
           owners: [],
@@ -87,7 +99,9 @@ export const landApi = baseApi.injectEndpoints({
     >({
       queryFn: async ({ id, data }) => {
         await delay(400);
-        const records = [...getLocalStorageData<LandRecord>("landRecords", mockLandRecords)];
+        const records = [
+          ...getLocalStorageData<LandRecord>("landRecords", mockLandRecords),
+        ];
         const index = records.findIndex((r) => r.id === id);
         if (index === -1) {
           return { error: { status: 404, data: "Land record not found" } };
@@ -109,7 +123,10 @@ export const landApi = baseApi.injectEndpoints({
     deleteLandRecord: builder.mutation<string, string>({
       queryFn: async (id) => {
         await delay(400);
-        const records = getLocalStorageData<LandRecord>("landRecords", mockLandRecords);
+        const records = getLocalStorageData<LandRecord>(
+          "landRecords",
+          mockLandRecords,
+        );
         const filtered = records.filter((r) => r.id !== id);
         if (filtered.length === records.length) {
           return { error: { status: 404, data: "Land record not found" } };
@@ -135,7 +152,9 @@ export const projectApi = baseApi.injectEndpoints({
     createProject: builder.mutation<Project, CreateProjectFormData>({
       queryFn: async (data) => {
         await delay(400);
-        const list = [...getLocalStorageData<Project>("projects", mockProjects)];
+        const list = [
+          ...getLocalStorageData<Project>("projects", mockProjects),
+        ];
         const newProject: Project = {
           id: `proj_${Math.random().toString(36).slice(2, 10)}`,
           status: "Planning",
@@ -167,14 +186,18 @@ export const propertyApi = baseApi.injectEndpoints({
     getUnits: builder.query<PropertyUnit[], void>({
       queryFn: async () => {
         await delay(400);
-        return { data: getLocalStorageData<PropertyUnit>("apartments", mockUnits) };
+        return {
+          data: getLocalStorageData<PropertyUnit>("apartments", mockUnits),
+        };
       },
       providesTags: ["Property"],
     }),
     createUnit: builder.mutation<PropertyUnit, CreatePropertyUnitFormData>({
       queryFn: async (data) => {
         await delay(400);
-        const list = [...getLocalStorageData<PropertyUnit>("apartments", mockUnits)];
+        const list = [
+          ...getLocalStorageData<PropertyUnit>("apartments", mockUnits),
+        ];
         const newUnit: PropertyUnit = {
           id: `unit_${Math.random().toString(36).slice(2, 10)}`,
           projectId: `proj_${Math.random().toString(36).slice(2, 6)}`,
@@ -219,10 +242,14 @@ export const crmApi = baseApi.injectEndpoints({
     >({
       queryFn: async ({ id, stage }) => {
         await delay(300);
-        const leads = getLocalStorageData<Lead>("leads", mockLeads).map(l => ({ ...l }));
+        const leads = getLocalStorageData<Lead>("leads", mockLeads).map(
+          (l) => ({ ...l }),
+        );
         const lead = leads.find((l) => l.id === id);
         if (!lead) {
-          return { error: { status: 404, data: { message: "Lead not found" } } };
+          return {
+            error: { status: 404, data: { message: "Lead not found" } },
+          };
         }
         lead.stage = stage;
         lead.lastFollowUp = new Date().toISOString().slice(0, 10);
@@ -262,7 +289,9 @@ export const bookingApi = baseApi.injectEndpoints({
     createBooking: builder.mutation<Booking, CreateBookingFormData>({
       queryFn: async (data) => {
         await delay(400);
-        const list = [...getLocalStorageData<Booking>("bookings", mockBookings)];
+        const list = [
+          ...getLocalStorageData<Booking>("bookings", mockBookings),
+        ];
         const seq = list.length + 1;
         const newBooking: Booking = {
           id: `book_${Math.random().toString(36).slice(2, 10)}`,
@@ -287,14 +316,18 @@ export const collectionApi = baseApi.injectEndpoints({
     getCollections: builder.query<Collection[], void>({
       queryFn: async () => {
         await delay(400);
-        return { data: getLocalStorageData<Collection>("collections", mockCollections) };
+        return {
+          data: getLocalStorageData<Collection>("collections", mockCollections),
+        };
       },
       providesTags: ["Collection"],
     }),
     createCollection: builder.mutation<Collection, CreateCollectionFormData>({
       queryFn: async (data) => {
         await delay(400);
-        const list = [...getLocalStorageData<Collection>("collections", mockCollections)];
+        const list = [
+          ...getLocalStorageData<Collection>("collections", mockCollections),
+        ];
         const seq = list.length + 1;
         const newCollection: Collection = {
           id: `coll_${Math.random().toString(36).slice(2, 10)}`,
@@ -318,14 +351,18 @@ export const customerApi = baseApi.injectEndpoints({
     getCustomers: builder.query<Customer[], void>({
       queryFn: async () => {
         await delay(400);
-        return { data: getLocalStorageData<Customer>("customers", mockCustomers) };
+        return {
+          data: getLocalStorageData<Customer>("customers", mockCustomers),
+        };
       },
       providesTags: ["Customer"],
     }),
     createCustomer: builder.mutation<Customer, CreateCustomerFormData>({
       queryFn: async (customer) => {
         await delay(400);
-        const list = [...getLocalStorageData<Customer>("customers", mockCustomers)];
+        const list = [
+          ...getLocalStorageData<Customer>("customers", mockCustomers),
+        ];
         const newCustomer: Customer = {
           id: `cust_${Math.random().toString(36).slice(2, 10)}`,
           totalPaid: 0,
@@ -360,14 +397,18 @@ export const procurementApi = baseApi.injectEndpoints({
     getOrders: builder.query<any[], void>({
       queryFn: async () => {
         await delay(400);
-        return { data: getLocalStorageData<any>("vendors", mockProcurementOrders) };
+        return {
+          data: getLocalStorageData<any>("vendors", mockProcurementOrders),
+        };
       },
       providesTags: ["Procurement"],
     }),
     createOrder: builder.mutation<any, CreateProcurementFormData>({
       queryFn: async (data) => {
         await delay(400);
-        const list = [...getLocalStorageData<any>("vendors", mockProcurementOrders)];
+        const list = [
+          ...getLocalStorageData<any>("vendors", mockProcurementOrders),
+        ];
         const seq = list.length + 1;
         const newOrder = {
           id: `po_${Math.random().toString(36).slice(2, 10)}`,
@@ -392,14 +433,18 @@ export const inventoryApi = baseApi.injectEndpoints({
     getItems: builder.query<any[], void>({
       queryFn: async () => {
         await delay(400);
-        return { data: getLocalStorageData<any>("inventory", mockInventoryItems) };
+        return {
+          data: getLocalStorageData<any>("inventory", mockInventoryItems),
+        };
       },
       providesTags: ["Inventory"],
     }),
     createItem: builder.mutation<any, CreateInventoryItemFormData>({
       queryFn: async (data) => {
         await delay(400);
-        const list = [...getLocalStorageData<any>("inventory", mockInventoryItems)];
+        const list = [
+          ...getLocalStorageData<any>("inventory", mockInventoryItems),
+        ];
         const newItem = {
           id: `inv_${Math.random().toString(36).slice(2, 10)}`,
           createdAt: new Date().toISOString(),
@@ -419,14 +464,18 @@ export const contractorApi = baseApi.injectEndpoints({
     getContractors: builder.query<any[], void>({
       queryFn: async () => {
         await delay(400);
-        return { data: getLocalStorageData<any>("contractors", mockContractors) };
+        return {
+          data: getLocalStorageData<any>("contractors", mockContractors),
+        };
       },
       providesTags: ["Contractor"],
     }),
     createContractor: builder.mutation<any, CreateContractorFormData>({
       queryFn: async (data) => {
         await delay(400);
-        const list = [...getLocalStorageData<any>("contractors", mockContractors)];
+        const list = [
+          ...getLocalStorageData<any>("contractors", mockContractors),
+        ];
         const newContractor = {
           id: `con_${Math.random().toString(36).slice(2, 10)}`,
           activeProjects: 0,
@@ -448,14 +497,18 @@ export const financeApi = baseApi.injectEndpoints({
     getAccounts: builder.query<any[], void>({
       queryFn: async () => {
         await delay(400);
-        return { data: getLocalStorageData<any>("accounts", mockFinanceAccounts) };
+        return {
+          data: getLocalStorageData<any>("accounts", mockFinanceAccounts),
+        };
       },
       providesTags: ["Finance"],
     }),
     createJournalEntry: builder.mutation<any, CreateJournalEntryFormData>({
       queryFn: async (data) => {
         await delay(400);
-        const list = [...getLocalStorageData<any>("accounts", mockFinanceAccounts)];
+        const list = [
+          ...getLocalStorageData<any>("accounts", mockFinanceAccounts),
+        ];
         const newEntry = {
           id: `acc_${Math.random().toString(36).slice(2, 10)}`,
           code: data.accountCode,
@@ -515,7 +568,9 @@ export const maintenanceApi = baseApi.injectEndpoints({
     createComplaint: builder.mutation<any, CreateComplaintFormData>({
       queryFn: async (data) => {
         await delay(400);
-        const list = [...getLocalStorageData<any>("complaints", mockComplaints)];
+        const list = [
+          ...getLocalStorageData<any>("complaints", mockComplaints),
+        ];
         const seq = list.length + 1;
         const newComplaint = {
           id: `comp_${Math.random().toString(36).slice(2, 10)}`,
@@ -565,15 +620,17 @@ export const {
   useCreateLeadMutation,
 } = crmApi;
 export const { useGetBookingsQuery, useCreateBookingMutation } = bookingApi;
-export const { useGetCollectionsQuery, useCreateCollectionMutation } = collectionApi;
+export const { useGetCollectionsQuery, useCreateCollectionMutation } =
+  collectionApi;
 export const { useGetCustomersQuery, useCreateCustomerMutation } = customerApi;
 export const { useGetProgressQuery } = constructionApi;
 export const { useGetOrdersQuery, useCreateOrderMutation } = procurementApi;
 export const { useGetItemsQuery, useCreateItemMutation } = inventoryApi;
-export const { useGetContractorsQuery, useCreateContractorMutation } = contractorApi;
-export const { useGetAccountsQuery, useCreateJournalEntryMutation } = financeApi;
+export const { useGetContractorsQuery, useCreateContractorMutation } =
+  contractorApi;
+export const { useGetAccountsQuery, useCreateJournalEntryMutation } =
+  financeApi;
 export const { useGetEmployeesQuery, useCreateEmployeeMutation } = hrApi;
-export const { useGetComplaintsQuery, useCreateComplaintMutation } = maintenanceApi;
+export const { useGetComplaintsQuery, useCreateComplaintMutation } =
+  maintenanceApi;
 export const { useGetSalesReportQuery } = reportApi;
-
-
