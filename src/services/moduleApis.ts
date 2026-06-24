@@ -28,6 +28,7 @@ import type {
   CreateContractorFormData,
   CreateEmployeeFormData,
   CreatePropertyUnitFormData,
+  UnitFormData,
   PropertyFormData,
   CreateProjectFormData,
   CreateProcurementFormData,
@@ -218,25 +219,62 @@ export const propertyApi = baseApi.injectEndpoints({
     getUnits: builder.query<PropertyUnit[], void>({
       queryFn: async () => {
         await delay(400);
-        return { data: getLocalStorageData<PropertyUnit>("apartments", mockUnits) };
+        return { data: getLocalStorageData<PropertyUnit>("units", mockUnits) };
       },
       providesTags: ["Property"],
     }),
-    createUnit: builder.mutation<PropertyUnit, CreatePropertyUnitFormData>({
+    createUnit: builder.mutation<PropertyUnit, UnitFormData>({
       queryFn: async (data) => {
         await delay(400);
-        const list = [...getLocalStorageData<PropertyUnit>("apartments", mockUnits)];
+        const list = [...getLocalStorageData<PropertyUnit>("units", mockUnits)];
+        const properties = getLocalStorageData<Property>("properties", mockProperties);
+        const matchedProperty = properties.find((p) => p.name === data.propertyName);
         const newUnit: PropertyUnit = {
           id: `unit_${Math.random().toString(36).slice(2, 10)}`,
-          projectId: `proj_${Math.random().toString(36).slice(2, 6)}`,
-          status: "Available",
+          propertyId: matchedProperty?.id,
           ...data,
         };
-        (newUnit as any).createdAt = new Date().toISOString();
         list.push(newUnit);
-        setLocalStorageData("apartments", list);
+        setLocalStorageData("units", list);
         syncPropertyUnitSubkeys(list);
         return { data: newUnit };
+      },
+      invalidatesTags: ["Property"],
+    }),
+    updateUnit: builder.mutation<PropertyUnit, { id: string; data: UnitFormData }>({
+      queryFn: async ({ id, data }) => {
+        await delay(400);
+        const list = [...getLocalStorageData<PropertyUnit>("units", mockUnits)];
+        const index = list.findIndex((u) => u.id === id);
+        if (index === -1) {
+          return { error: { status: 404, data: "Unit not found" } };
+        }
+        const properties = getLocalStorageData<Property>("properties", mockProperties);
+        const matchedProperty = properties.find((p) => p.name === data.propertyName);
+        const updated: PropertyUnit = {
+          ...list[index],
+          ...data,
+          id,
+          propertyId: matchedProperty?.id ?? list[index].propertyId,
+        };
+        list[index] = updated;
+        setLocalStorageData("units", list);
+        syncPropertyUnitSubkeys(list);
+        return { data: updated };
+      },
+      invalidatesTags: ["Property"],
+    }),
+    deleteUnit: builder.mutation<string, string>({
+      queryFn: async (id) => {
+        await delay(400);
+        const list = getLocalStorageData<PropertyUnit>("units", mockUnits);
+        const filtered = list.filter((u) => u.id !== id);
+        if (filtered.length === list.length) {
+          return { error: { status: 404, data: "Unit not found" } };
+        }
+        setLocalStorageData("units", filtered);
+        syncPropertyUnitSubkeys(filtered);
+        return { data: id };
       },
       invalidatesTags: ["Property"],
     }),
@@ -615,6 +653,8 @@ export const {
   useDeletePropertyMutation,
   useGetUnitsQuery,
   useCreateUnitMutation,
+  useUpdateUnitMutation,
+  useDeleteUnitMutation,
 } = propertyApi;
 export const {
   useGetLeadsQuery,

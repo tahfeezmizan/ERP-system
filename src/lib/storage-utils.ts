@@ -60,8 +60,8 @@ export function initializeStorage() {
   // 2b. Portfolio properties
   getLocalStorageData<Property>("properties", mockProperties);
 
-  // 3. Property units (apartments) and buildings
-  const units = getLocalStorageData<PropertyUnit>("apartments", mockUnits);
+  // 3. Property units
+  const units = getLocalStorageData<PropertyUnit>("units", mockUnits);
   syncPropertyUnitSubkeys(units);
 
   // 4. Customers
@@ -124,6 +124,8 @@ export function syncLandRecordSubkeys(records: LandRecord[]) {
 // Helper to sync unit fields with building storage keys
 export function syncPropertyUnitSubkeys(units: PropertyUnit[]) {
   if (typeof window === "undefined") return;
-  const buildings = Array.from(new Set(units.map((u) => u.building).filter(Boolean)));
-  setLocalStorageData("buildings", buildings);
+  const propertyNames = Array.from(
+    new Set(units.map((u) => u.propertyName).filter(Boolean))
+  );
+  setLocalStorageData("unitPropertyNames", propertyNames);
 }

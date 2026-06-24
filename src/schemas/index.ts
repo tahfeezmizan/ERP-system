@@ -172,19 +172,21 @@ export const propertySchema = z.object({
 });
 export type PropertyFormData = z.infer<typeof propertySchema>;
 
-// ─── Property Unit ────────────────────────────────────────────────────────────
-export const createPropertyUnitSchema = z.object({
-  projectName: z.string().min(2, "Project is required"),
-  building: z.string().min(1, "Building is required"),
-  block: z.string().min(1, "Block is required"),
+// ─── Unit ─────────────────────────────────────────────────────────────────────
+export const unitSchema = z.object({
+  unit: z.string().min(1, "Unit is required"),
+  propertyName: z.string().min(2, "Property is required"),
+  type: z.enum(["Office", "Apartment"]),
   floor: z.coerce.number().int().min(0, "Floor is required"),
-  unitNumber: z.string().min(1, "Unit number is required"),
-  unitType: z.enum(["Apartment", "Commercial", "Parking", "Shop", "Roof Rights"]),
   area: z.coerce.number().positive("Area must be positive"),
-  facing: z.string().min(1, "Facing is required"),
-  price: z.coerce.number().positive("Price must be positive"),
+  status: z.enum(["occupied", "vacant"]),
+  marketRent: z.coerce.number().positive("Market rent must be positive"),
 });
-export type CreatePropertyUnitFormData = z.infer<typeof createPropertyUnitSchema>;
+export type UnitFormData = z.infer<typeof unitSchema>;
+
+// Legacy alias
+export const createPropertyUnitSchema = unitSchema;
+export type CreatePropertyUnitFormData = UnitFormData;
 
 // ─── Project ──────────────────────────────────────────────────────────────────
 export const createProjectSchema = z.object({

@@ -21,23 +21,23 @@ import type { Booking, Collection, KpiMetric } from "@/types";
 function getDynamicKpis(): KpiMetric[] {
   // Create a deep copy of the static kpi configurations
   const kpis = mockKpis.map((k) => ({ ...k }));
-  const units = getLocalStorageData("apartments", mockUnits);
+  const units = getLocalStorageData("units", mockUnits);
   const leads = getLocalStorageData("leads", mockLeads);
   const bookings = getLocalStorageData("bookings", mockBookings);
   const collections = getLocalStorageData("collections", mockCollections);
 
   // Available Units
-  const availableCount = units.filter((u: any) => u.status === "Available").length;
+  const availableCount = units.filter((u: any) => u.status === "vacant").length;
   const kpi4 = kpis.find((k) => k.id === "4");
   if (kpi4) kpi4.value = availableCount;
 
   // Booked Units
-  const bookedCount = units.filter((u: any) => u.status === "Booked").length;
+  const bookedCount = units.filter((u: any) => u.status === "occupied").length;
   const kpi5 = kpis.find((k) => k.id === "5");
   if (kpi5) kpi5.value = bookedCount;
 
   // Sold Units
-  const soldCount = units.filter((u: any) => u.status === "Sold").length;
+  const soldCount = units.length;
   const kpi6 = kpis.find((k) => k.id === "6");
   if (kpi6) kpi6.value = soldCount;
 
@@ -110,8 +110,8 @@ export const dashboardApi = baseApi.injectEndpoints({
     getUnitStatus: builder.query<any[], void>({
       queryFn: async () => {
         await delay(300);
-        const units = getLocalStorageData("apartments", mockUnits);
-        const statuses = ["Available", "Reserved", "Booked", "Sold", "Handover Pending", "Handed Over"];
+        const units = getLocalStorageData("units", mockUnits);
+        const statuses = ["occupied", "vacant"];
         const distribution = statuses.map((status) => ({
           name: status,
           value: units.filter((u: any) => u.status === status).length,

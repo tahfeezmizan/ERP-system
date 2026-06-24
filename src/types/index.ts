@@ -209,19 +209,19 @@ export interface Property {
   value: number;
 }
 
+export type UnitOccupancyStatus = "occupied" | "vacant";
+export type UnitSpaceType = "Office" | "Apartment";
+
 export interface PropertyUnit {
   id: string;
-  projectId: string;
-  projectName: string;
-  building: string;
-  block: string;
+  unit: string;
+  propertyName: string;
+  propertyId?: string;
+  type: UnitSpaceType;
   floor: number;
-  unitNumber: string;
-  unitType: "Apartment" | "Commercial" | "Parking" | "Shop" | "Roof Rights";
   area: number;
-  facing: string;
-  price: number;
-  status: UnitStatus;
+  status: UnitOccupancyStatus;
+  marketRent: number;
 }
 
 export interface Lead {

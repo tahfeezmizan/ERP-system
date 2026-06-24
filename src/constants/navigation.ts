@@ -29,90 +29,29 @@ export interface NavItem {
 
 export const MAIN_NAV: NavItem[] = [
   { title: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
-  {
-    title: "Land Management",
-    href: "/land",
-    icon: Map,
-    permission: "land.view",
-  },
-  {
-    title: "Projects",
-    href: "/projects",
-    icon: Building2,
-    permission: "project.view",
-  },
+
   {
     title: "Properties",
     href: "/properties",
     icon: Home,
     permission: "property.view",
   },
+
   {
-    title: "Sales CRM",
-    href: "/crm",
-    icon: Users,
-    permission: "crm.view",
+    title: "Units",
+    href: "/units",
+    icon: Building2,
+    permission: "property.view",
   },
+
   {
-    title: "Bookings",
-    href: "/bookings",
-    icon: CalendarCheck,
-    permission: "booking.view",
-  },
-  {
-    title: "Collections",
-    href: "/collections",
-    icon: Wallet,
-    permission: "collection.view",
-  },
-  {
-    title: "Customers",
-    href: "/customers",
-    icon: UserCircle,
-    permission: "customer.view",
-  },
-  {
-    title: "Construction",
-    href: "/construction",
-    icon: HardHat,
-    permission: "construction.view",
-  },
-  {
-    title: "Procurement",
-    href: "/procurement",
-    icon: ShoppingCart,
-    permission: "procurement.view",
-  },
-  {
-    title: "Inventory",
-    href: "/inventory",
-    icon: Package,
-    permission: "inventory.view",
-  },
-  {
-    title: "Contractors",
-    href: "/contractors",
-    icon: Truck,
-    permission: "contractor.view",
-  },
-  {
-    title: "Accounts & Finance",
+    title: "Finance",
     href: "/finance",
     icon: Landmark,
     permission: "finance.view",
   },
-  {
-    title: "HR & Payroll",
-    href: "/hr",
-    icon: Briefcase,
-    permission: "hr.view",
-  },
-  {
-    title: "Maintenance",
-    href: "/maintenance",
-    icon: Wrench,
-    permission: "maintenance.view",
-  },
+
+
   {
     title: "Reports",
     href: "/reports",
