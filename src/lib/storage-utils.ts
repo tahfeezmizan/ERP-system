@@ -14,6 +14,7 @@ import {
   mockProjects,
   mockProperties,
   mockUnits,
+  mockVendors,
   mockWorkOrders,
 } from "./mock-data";
 
@@ -76,8 +77,8 @@ export function initializeStorage() {
   // 7. Collections
   getLocalStorageData<Collection>("collections", mockCollections);
 
-  // 8. Vendors (procurement orders)
-  getLocalStorageData<any>("vendors", mockProcurementOrders);
+  // 8. Vendors
+  getLocalStorageData<any>("vendorContacts", mockVendors);
 
   // 9. Contractors
   getLocalStorageData<any>("contractors", mockContractors);

@@ -247,6 +247,17 @@ export const createProcurementSchema = z.object({
 });
 export type CreateProcurementFormData = z.infer<typeof createProcurementSchema>;
 
+export const vendorSchema = z.object({
+  company: z.string().min(2, "Company name is required"),
+  contact: z.string().min(2, "Contact person is required"),
+  email: z.string().email("Invalid email"),
+  phone: z.string().min(7, "Phone is required"),
+  type: z.string().min(2, "Type is required"),
+  rating: z.coerce.number().min(1, "Rating must be at least 1").max(5, "Rating cannot exceed 5"),
+  status: z.enum(["active", "inactive"]),
+});
+export type VendorFormData = z.infer<typeof vendorSchema>;
+
 // ─── Inventory Stock-In ───────────────────────────────────────────────────────
 export const createInventoryItemSchema = z.object({
   name: z.string().min(2, "Item name is required"),

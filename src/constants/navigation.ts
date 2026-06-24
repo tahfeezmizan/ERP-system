@@ -65,6 +65,12 @@ export const MAIN_NAV: NavItem[] = [
     permission: "maintenance.view",
   },
   {
+    title: "Vendors",
+    href: "/vendors",
+    icon: Truck,
+    permission: "procurement.view",
+  },
+  {
     title: "Finance",
     href: "/finance",
     icon: Landmark,

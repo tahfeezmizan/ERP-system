@@ -18,7 +18,11 @@ import {
   mockProperties,
   mockTenants,
   mockUnits,
+  mockVendors,
   mockWorkOrders,
+  mockInvoices,
+  mockTransactions,
+  mockChartOfAccounts,
 } from "@/lib/mock-data";
 import {
   getLocalStorageData,
@@ -43,10 +47,11 @@ import type {
   PropertyFormData,
   TenantFormData,
   UnitFormData,
+  VendorFormData,
   WorkOrderFormData
 } from "@/schemas";
 import type { CreateCustomerFormData } from "@/schemas/customer";
-import type { Booking, Collection, Customer, LandRecord, Lead, Lease, PaginatedResponse, Project, Property, PropertyUnit, Tenant, WorkOrder } from "@/types";
+import type { Booking, Collection, Customer, LandRecord, Lead, Lease, PaginatedResponse, Project, Property, PropertyUnit, Tenant, Vendor, WorkOrder } from "@/types";
 import { baseApi } from "./baseApi";
 
 function paginate<T>(data: T[], page = 1, pageSize = 10): PaginatedResponse<T> {
@@ -595,6 +600,57 @@ export const procurementApi = baseApi.injectEndpoints({
   }),
 });
 
+export const vendorApi = baseApi.injectEndpoints({
+  endpoints: (builder) => ({
+    getVendors: builder.query<Vendor[], void>({
+      queryFn: async () => {
+        await delay(400);
+        return { data: getLocalStorageData<Vendor>("vendorContacts", mockVendors) };
+      },
+      providesTags: ["Vendor"],
+    }),
+    createVendor: builder.mutation<Vendor, VendorFormData>({
+      queryFn: async (data) => {
+        await delay(400);
+        const list = [...getLocalStorageData<Vendor>("vendorContacts", mockVendors)];
+        const newVendor: Vendor = {
+          id: `ven_${Math.random().toString(36).slice(2, 10)}`,
+          ...data,
+        };
+        list.push(newVendor);
+        setLocalStorageData("vendorContacts", list);
+        return { data: newVendor };
+      },
+      invalidatesTags: ["Vendor"],
+    }),
+    updateVendor: builder.mutation<Vendor, { id: string; data: VendorFormData }>({
+      queryFn: async ({ id, data }) => {
+        await delay(400);
+        const list = [...getLocalStorageData<Vendor>("vendorContacts", mockVendors)];
+        const index = list.findIndex((vendor) => vendor.id === id);
+        if (index === -1) {
+          return { error: { status: 404, data: "Vendor not found" } };
+        }
+        const updated: Vendor = { ...list[index], ...data, id };
+        list[index] = updated;
+        setLocalStorageData("vendorContacts", list);
+        return { data: updated };
+      },
+      invalidatesTags: ["Vendor"],
+    }),
+    deleteVendor: builder.mutation<string, string>({
+      queryFn: async (id) => {
+        await delay(400);
+        const list = [...getLocalStorageData<Vendor>("vendorContacts", mockVendors)];
+        const updatedList = list.filter((vendor) => vendor.id !== id);
+        setLocalStorageData("vendorContacts", updatedList);
+        return { data: id };
+      },
+      invalidatesTags: ["Vendor"],
+    }),
+  }),
+});
+
 export const inventoryApi = baseApi.injectEndpoints({
   endpoints: (builder) => ({
     getItems: builder.query<any[], void>({
@@ -653,6 +709,7 @@ export const contractorApi = baseApi.injectEndpoints({
 
 export const financeApi = baseApi.injectEndpoints({
   endpoints: (builder) => ({
+    // Accounts (legacy)
     getAccounts: builder.query<any[], void>({
       queryFn: async () => {
         await delay(400);
@@ -660,7 +717,7 @@ export const financeApi = baseApi.injectEndpoints({
       },
       providesTags: ["Finance"],
     }),
-    createJournalEntry: builder.mutation<any, CreateJournalEntryFormData>({
+    createJournalEntry: builder.mutation<any, any>({
       queryFn: async (data) => {
         await delay(400);
         const list = [...getLocalStorageData<any>("accounts", mockFinanceAccounts)];
@@ -678,8 +735,151 @@ export const financeApi = baseApi.injectEndpoints({
       },
       invalidatesTags: ["Finance"],
     }),
+
+    // Invoices
+    getInvoices: builder.query<any[], void>({
+      queryFn: async () => {
+        await delay(300);
+        return { data: getLocalStorageData<any>("invoices", mockInvoices) };
+      },
+      providesTags: ["Finance"],
+    }),
+    createInvoice: builder.mutation<any, any>({
+      queryFn: async (data) => {
+        await delay(400);
+        const list = [...getLocalStorageData<any>("invoices", mockInvoices)];
+        const seq = list.length + 1;
+        const newInvoice = {
+          id: `inv_${Math.random().toString(36).slice(2, 10)}`,
+          invoiceNo: `INV-2026-${String(seq).padStart(3, "0")}`,
+          status: "unpaid",
+          ...data,
+        };
+        list.push(newInvoice);
+        setLocalStorageData("invoices", list);
+        return { data: newInvoice };
+      },
+      invalidatesTags: ["Finance"],
+    }),
+    updateInvoice: builder.mutation<any, { id: string; data: any }>({
+      queryFn: async ({ id, data }) => {
+        await delay(400);
+        const list = [...getLocalStorageData<any>("invoices", mockInvoices)];
+        const index = list.findIndex((i) => i.id === id);
+        if (index === -1) return { error: { status: 404, data: "Invoice not found" } };
+        list[index] = { ...list[index], ...data, id };
+        setLocalStorageData("invoices", list);
+        return { data: list[index] };
+      },
+      invalidatesTags: ["Finance"],
+    }),
+    deleteInvoice: builder.mutation<string, string>({
+      queryFn: async (id) => {
+        await delay(400);
+        const list = getLocalStorageData<any>("invoices", mockInvoices);
+        const filtered = list.filter((i: any) => i.id !== id);
+        setLocalStorageData("invoices", filtered);
+        return { data: id };
+      },
+      invalidatesTags: ["Finance"],
+    }),
+
+    // Transactions
+    getTransactions: builder.query<any[], void>({
+      queryFn: async () => {
+        await delay(300);
+        return { data: getLocalStorageData<any>("transactions", mockTransactions) };
+      },
+      providesTags: ["Finance"],
+    }),
+    createTransaction: builder.mutation<any, any>({
+      queryFn: async (data) => {
+        await delay(400);
+        const list = [...getLocalStorageData<any>("transactions", mockTransactions)];
+        const seq = list.length + 1;
+        const newTxn = {
+          id: `txn_${Math.random().toString(36).slice(2, 10)}`,
+          txnNo: `TXN-${String(seq).padStart(3, "0")}`,
+          status: "cleared",
+          ...data,
+        };
+        list.push(newTxn);
+        setLocalStorageData("transactions", list);
+        return { data: newTxn };
+      },
+      invalidatesTags: ["Finance"],
+    }),
+    updateTransaction: builder.mutation<any, { id: string; data: any }>({
+      queryFn: async ({ id, data }) => {
+        await delay(400);
+        const list = [...getLocalStorageData<any>("transactions", mockTransactions)];
+        const index = list.findIndex((t) => t.id === id);
+        if (index === -1) return { error: { status: 404, data: "Transaction not found" } };
+        list[index] = { ...list[index], ...data, id };
+        setLocalStorageData("transactions", list);
+        return { data: list[index] };
+      },
+      invalidatesTags: ["Finance"],
+    }),
+    deleteTransaction: builder.mutation<string, string>({
+      queryFn: async (id) => {
+        await delay(400);
+        const list = getLocalStorageData<any>("transactions", mockTransactions);
+        const filtered = list.filter((t: any) => t.id !== id);
+        setLocalStorageData("transactions", filtered);
+        return { data: id };
+      },
+      invalidatesTags: ["Finance"],
+    }),
+
+    // Chart of Accounts
+    getChartOfAccounts: builder.query<any[], void>({
+      queryFn: async () => {
+        await delay(300);
+        return { data: getLocalStorageData<any>("chartOfAccounts", mockChartOfAccounts) };
+      },
+      providesTags: ["Finance"],
+    }),
+    createChartAccount: builder.mutation<any, any>({
+      queryFn: async (data) => {
+        await delay(400);
+        const list = [...getLocalStorageData<any>("chartOfAccounts", mockChartOfAccounts)];
+        const newAccount = {
+          id: `coa_${Math.random().toString(36).slice(2, 10)}`,
+          active: true,
+          ...data,
+        };
+        list.push(newAccount);
+        setLocalStorageData("chartOfAccounts", list);
+        return { data: newAccount };
+      },
+      invalidatesTags: ["Finance"],
+    }),
+    updateChartAccount: builder.mutation<any, { id: string; data: any }>({
+      queryFn: async ({ id, data }) => {
+        await delay(400);
+        const list = [...getLocalStorageData<any>("chartOfAccounts", mockChartOfAccounts)];
+        const index = list.findIndex((a) => a.id === id);
+        if (index === -1) return { error: { status: 404, data: "Account not found" } };
+        list[index] = { ...list[index], ...data, id };
+        setLocalStorageData("chartOfAccounts", list);
+        return { data: list[index] };
+      },
+      invalidatesTags: ["Finance"],
+    }),
+    deleteChartAccount: builder.mutation<string, string>({
+      queryFn: async (id) => {
+        await delay(400);
+        const list = getLocalStorageData<any>("chartOfAccounts", mockChartOfAccounts);
+        const filtered = list.filter((a: any) => a.id !== id);
+        setLocalStorageData("chartOfAccounts", filtered);
+        return { data: id };
+      },
+      invalidatesTags: ["Finance"],
+    }),
   }),
 });
+
 
 export const hrApi = baseApi.injectEndpoints({
   endpoints: (builder) => ({
@@ -798,9 +998,25 @@ export const { useGetCollectionsQuery, useCreateCollectionMutation } = collectio
 export const { useGetCustomersQuery, useCreateCustomerMutation } = customerApi;
 export const { useGetProgressQuery } = constructionApi;
 export const { useGetOrdersQuery, useCreateOrderMutation } = procurementApi;
+export const { useGetVendorsQuery, useCreateVendorMutation, useUpdateVendorMutation, useDeleteVendorMutation } = vendorApi;
 export const { useGetItemsQuery, useCreateItemMutation } = inventoryApi;
 export const { useGetContractorsQuery, useCreateContractorMutation } = contractorApi;
-export const { useGetAccountsQuery, useCreateJournalEntryMutation } = financeApi;
+export const {
+  useGetAccountsQuery,
+  useCreateJournalEntryMutation,
+  useGetInvoicesQuery,
+  useCreateInvoiceMutation,
+  useUpdateInvoiceMutation,
+  useDeleteInvoiceMutation,
+  useGetTransactionsQuery,
+  useCreateTransactionMutation,
+  useUpdateTransactionMutation,
+  useDeleteTransactionMutation,
+  useGetChartOfAccountsQuery,
+  useCreateChartAccountMutation,
+  useUpdateChartAccountMutation,
+  useDeleteChartAccountMutation,
+} = financeApi;
 export const { useGetEmployeesQuery, useCreateEmployeeMutation } = hrApi;
 export const { useGetComplaintsQuery, useCreateComplaintMutation } = maintenanceApi;
 export const { useGetSalesReportQuery } = reportApi;

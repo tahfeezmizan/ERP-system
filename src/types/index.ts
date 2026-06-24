@@ -265,6 +265,19 @@ export interface Tenant {
   status: TenantStatus;
 }
 
+export type VendorStatus = "active" | "inactive";
+
+export interface Vendor {
+  id: string;
+  company: string;
+  contact: string;
+  email: string;
+  phone: string;
+  type: string;
+  rating: number;
+  status: VendorStatus;
+}
+
 export interface Lead {
   id: string;
   name: string;

@@ -19,6 +19,7 @@ import type {
 
 
 
+
 export const mockKpis: KpiMetric[] = [
   { id: "1", label: "Today's Collection", value: "৳12,50,000", change: 8.5, trend: "up" },
   { id: "2", label: "Monthly Collection", value: "৳2,45,00,000", change: 12.3, trend: "up" },
@@ -632,10 +633,179 @@ export const mockProcurementOrders = [
   { id: "po_2", poNo: "PO-2025-002", vendor: "Steel Corp BD", amount: 8500000, status: "Pending", date: "2025-06-15" },
 ];
 
+export const mockVendors = [
+  { id: "ven_1", company: "Apex HVAC Services", contact: "Mark Miller", email: "mark@apexhvac.com", phone: "206-555-0201", type: "HVAC", rating: 4.8, status: "active" },
+  { id: "ven_2", company: "Seattle Plumbing Pros", contact: "Danielle Davis", email: "davis@seattleplumbing.com", phone: "206-555-0202", type: "Plumbing", rating: 4.6, status: "active" },
+  { id: "ven_3", company: "Elevate Lift Corp", contact: "Eric Evans", email: "eevans@elevatelift.com", phone: "206-555-0203", type: "Elevator", rating: 4.4, status: "active" },
+];
+
 export const mockFinanceAccounts = [
   { id: "acc_1", code: "1001", name: "Cash in Hand", type: "Asset", balance: 5200000 },
   { id: "acc_2", code: "1002", name: "Bank - DBBL", type: "Asset", balance: 45000000 },
   { id: "acc_3", code: "4001", name: "Sales Revenue", type: "Revenue", balance: 125000000 },
+];
+
+export const mockInvoices = [
+  {
+    id: "inv_1",
+    invoiceNo: "INV-2026-001",
+    tenant: "Acme Corporation",
+    account: "Operating Account",
+    amount: 12000,
+    status: "paid",
+    date: "2026-05-02",
+    dueDate: "2026-05-15",
+    reference: "ACH-ACME-RENT",
+    notes: "May 2026 rent",
+  },
+  {
+    id: "inv_2",
+    invoiceNo: "INV-2026-002",
+    tenant: "TechStart Inc",
+    account: "Operating Account",
+    amount: 10000,
+    status: "unpaid",
+    date: "2026-05-10",
+    dueDate: "2026-05-25",
+    reference: "CHK-TECH-005",
+    notes: "May 2026 rent",
+  },
+  {
+    id: "inv_3",
+    invoiceNo: "INV-2026-003",
+    tenant: "John Doe",
+    account: "Operating Account",
+    amount: 450,
+    status: "paid",
+    date: "2026-05-12",
+    dueDate: "2026-05-20",
+    reference: "CK-4028-HVAC",
+    notes: "HVAC maintenance",
+  },
+];
+
+export const mockTransactions = [
+  {
+    id: "txn_1",
+    txnNo: "TXN-001",
+    date: "2026-05-02",
+    account: "Operating Account",
+    type: "Credit",
+    amount: 12000,
+    reference: "ACH-ACME-RENT",
+    status: "cleared",
+    memo: "Acme Corp rent payment",
+  },
+  {
+    id: "txn_2",
+    txnNo: "TXN-002",
+    date: "2026-05-12",
+    account: "Maintenance Expense",
+    type: "Debit",
+    amount: 450,
+    reference: "CK-4028-HVAC",
+    status: "cleared",
+    memo: "HVAC maintenance payment",
+  },
+];
+
+export const mockChartOfAccounts = [
+  {
+    id: "coa_1",
+    code: "1010",
+    name: "Operating Account",
+    type: "Asset",
+    subtype: "Cash",
+    normalBalance: "Debit",
+    active: true,
+    description: "Primary operating bank account",
+  },
+  {
+    id: "coa_2",
+    code: "4010",
+    name: "Rental Revenue",
+    type: "Revenue",
+    subtype: "-",
+    normalBalance: "Credit",
+    active: true,
+    description: "Revenue from rental properties",
+  },
+  {
+    id: "coa_3",
+    code: "5020",
+    name: "Maintenance Expense",
+    type: "Expense",
+    subtype: "-",
+    normalBalance: "Debit",
+    active: true,
+    description: "Property maintenance and repairs",
+  },
+];
+
+export const mockGeneralLedgerEntries = [
+  {
+    id: "gle_1",
+    postDate: "2026-05-02",
+    code: "1010",
+    account: "Operating Account",
+    memo: "Acme Corp rent payment",
+    reference: "ACH-ACME-RENT",
+    debit: 12000,
+    credit: 0,
+  },
+  {
+    id: "gle_2",
+    postDate: "2026-05-02",
+    code: "4010",
+    account: "Rental Revenue",
+    memo: "Acme Corp rent payment",
+    reference: "ACH-ACME-RENT",
+    debit: 0,
+    credit: 12000,
+  },
+  {
+    id: "gle_3",
+    postDate: "2026-05-12",
+    code: "5020",
+    account: "Maintenance Expense",
+    memo: "HVAC maintenance payment",
+    reference: "CK-4028-HVAC",
+    debit: 450,
+    credit: 0,
+  },
+  {
+    id: "gle_4",
+    postDate: "2026-05-12",
+    code: "1010",
+    account: "Operating Account",
+    memo: "HVAC maintenance payment",
+    reference: "CK-4028-HVAC",
+    debit: 0,
+    credit: 450,
+  },
+];
+
+export const mockBankAccounts = [
+  {
+    id: "bank_1",
+    name: "Chase Operating Account",
+    bank: "JPMorgan Chase",
+    accountNumber: "4821",
+    routingNumber: "021000021",
+    balance: 45850.25,
+    status: "Connected",
+    currency: "USD",
+  },
+  {
+    id: "bank_2",
+    name: "Wells Fargo Security Deposit Escrow",
+    bank: "Wells Fargo",
+    accountNumber: "9832",
+    routingNumber: "121000248",
+    balance: 18200.0,
+    status: "Connected",
+    currency: "USD",
+  },
 ];
 
 export const mockWorkOrders: WorkOrder[] = [
