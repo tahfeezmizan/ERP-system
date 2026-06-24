@@ -292,7 +292,7 @@ export default function ReportsPage() {
         </button>
       </div>
 
-      {/* ─── TAB 1: OCCUPANCY REPORT ─────────────────────────────────────────── */}
+      {/* ─── TAB 1: OCCUPANCY REPORT ───── */}
       {activeTab === "Occupancy" && (
         <div className="space-y-6 animate-in fade-in duration-200">
           {/* KPI Cards Grid */}
