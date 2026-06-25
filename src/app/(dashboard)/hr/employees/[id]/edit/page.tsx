@@ -27,30 +27,30 @@ export default function EditEmployeePage({
 
   const initialValues: Partial<CreateEmployeeFormData> | undefined = employee
     ? {
-        fullName: employee.fullName,
-        dateOfBirth: employee.dateOfBirth,
-        gender: employee.gender,
-        nidNumber: employee.nidNumber ?? "",
-        mobileNumber: employee.mobileNumber,
-        email: employee.email ?? "",
-        presentAddress: employee.presentAddress ?? "",
-        permanentAddress: employee.permanentAddress ?? "",
-        department: employee.department,
-        designation: employee.designation,
-        employmentType: employee.employmentType,
-        joiningDate: employee.joiningDate,
-        reportingManagerId: employee.reportingManagerId ?? "",
-        salary: employee.salary ? String(employee.salary) : "",
-        bankName: employee.bankName ?? "",
-        bankAccountNumber: employee.bankAccountNumber ?? "",
-        employeeStatus: employee.employeeStatus,
-        fatherName: employee.fatherName ?? "",
-        motherName: employee.motherName ?? "",
-        spouseName: employee.spouseName ?? "",
-        emergencyContactName: employee.emergencyContactName,
-        emergencyContactRelationship: employee.emergencyContactRelationship,
-        emergencyContactNumber: employee.emergencyContactNumber,
-      }
+      fullName: employee.fullName,
+      dateOfBirth: employee.dateOfBirth,
+      gender: employee.gender,
+      nidNumber: employee.nidNumber ?? "",
+      mobileNumber: employee.mobileNumber,
+      email: employee.email ?? "",
+      presentAddress: employee.presentAddress ?? "",
+      permanentAddress: employee.permanentAddress ?? "",
+      department: employee.department,
+      designation: employee.designation,
+      employmentType: employee.employmentType,
+      joiningDate: employee.joiningDate,
+      reportingManagerId: employee.reportingManagerId ?? "",
+      salary: employee.salary ? String(employee.salary) : "",
+      bankName: employee.bankName ?? "",
+      bankAccountNumber: employee.bankAccountNumber ?? "",
+      employeeStatus: employee.employeeStatus,
+      fatherName: employee.fatherName ?? "",
+      motherName: employee.motherName ?? "",
+      spouseName: employee.spouseName ?? "",
+      emergencyContactName: employee.emergencyContactName,
+      emergencyContactRelationship: employee.emergencyContactRelationship,
+      emergencyContactNumber: employee.emergencyContactNumber,
+    }
     : undefined;
 
   async function handleSubmit(data: CreateEmployeeFormData) {
@@ -61,9 +61,9 @@ export default function EditEmployeePage({
     } catch (err: unknown) {
       const message =
         err &&
-        typeof err === "object" &&
-        "data" in err &&
-        typeof (err as { data: unknown }).data === "string"
+          typeof err === "object" &&
+          "data" in err &&
+          typeof (err as { data: unknown }).data === "string"
           ? (err as { data: string }).data
           : "Failed to update employee";
       toast.error(message);

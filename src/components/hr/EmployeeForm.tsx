@@ -245,16 +245,6 @@ export function EmployeeForm({
             {...register("presentAddress")}
           />
         </div>
-        <div className="grid gap-2 sm:col-span-2">
-          <Label htmlFor="permanent-address">Permanent Address</Label>
-          <Textarea
-            id="permanent-address"
-            rows={3}
-            placeholder="Permanent address"
-            disabled={sameAddress}
-            {...register("permanentAddress")}
-          />
-        </div>
         <div className="flex items-center gap-2 sm:col-span-2">
           <input
             id="same-address"
@@ -266,6 +256,16 @@ export function EmployeeForm({
           <Label htmlFor="same-address" className="font-normal">
             Same as Present Address
           </Label>
+        </div>
+        <div className="grid gap-2 sm:col-span-2">
+          <Label htmlFor="permanent-address">Permanent Address</Label>
+          <Textarea
+            id="permanent-address"
+            rows={3}
+            placeholder="Permanent address"
+            disabled={sameAddress}
+            {...register("permanentAddress")}
+          />
         </div>
       </FormSection>
 

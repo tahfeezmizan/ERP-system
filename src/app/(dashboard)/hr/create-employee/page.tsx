@@ -36,9 +36,9 @@ export default function CreateEmployeePage() {
     } catch (err: unknown) {
       const message =
         err &&
-        typeof err === "object" &&
-        "data" in err &&
-        typeof (err as { data: unknown }).data === "string"
+          typeof err === "object" &&
+          "data" in err &&
+          typeof (err as { data: unknown }).data === "string"
           ? (err as { data: string }).data
           : "Failed to create employee";
       toast.error(message);
