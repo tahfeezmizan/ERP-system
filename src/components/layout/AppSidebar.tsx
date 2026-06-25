@@ -1,18 +1,19 @@
 "use client";
 
-import Link from "next/link";
-import { usePathname } from "next/navigation";
-import { Building2, ChevronLeft, ChevronRight, X } from "lucide-react";
-import { MAIN_NAV } from "@/constants/navigation";
-import { APP_NAME } from "@/constants/app";
-import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
+import { APP_NAME } from "@/constants/app";
+import { MAIN_NAV } from "@/constants/navigation";
 import { useAppDispatch, useAppSelector } from "@/hooks/redux";
+import { usePermissions } from "@/hooks/usePermissions";
+import { cn } from "@/lib/utils";
 import {
   setSidebarCollapsed,
   setSidebarMobileOpen,
 } from "@/store/slices/uiSlice";
-import { usePermissions } from "@/hooks/usePermissions";
+import { ChevronLeft, ChevronRight, X } from "lucide-react";
+import Image from "next/image";
+import Link from "next/link";
+import { usePathname } from "next/navigation";
 
 export function AppSidebar() {
   const pathname = usePathname();
@@ -28,9 +29,15 @@ export function AppSidebar() {
   const sidebarContent = (
     <>
       <div className="flex h-16 items-center gap-2 border-b border-gray-800 px-4">
-        <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary">
-          <Building2 className="h-5 w-5 text-white" />
+        <div className="flex h-9 w-9 items-center justify-center">
+          <Image
+            src={require("@/assests/bfs-logo.png")}
+            alt="logo"
+            width={200}
+            height={200}
+          />
         </div>
+
         {!collapsed && (
           <div className="flex flex-col text-white">
             <span className="text-sm font-bold  leading-tight">{APP_NAME}</span>
@@ -59,7 +66,7 @@ export function AppSidebar() {
         </Button>
       </div>
 
-        <nav className="min-h-0 flex-1 overflow-y-auto p-3 space-y-1 scrollbar-thin">
+      <nav className="min-h-0 flex-1 overflow-y-auto p-3 space-y-1 scrollbar-thin">
         {filteredNav.map((item) => {
           const isActive =
             pathname === item.href ||

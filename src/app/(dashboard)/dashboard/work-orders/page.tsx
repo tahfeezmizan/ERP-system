@@ -299,7 +299,7 @@ export default function WorkOrdersPage() {
               <SelectTrigger className="w-[140px] bg-white border-slate-200">
                 <SelectValue placeholder="All Status" />
               </SelectTrigger>
-              <SelectContent>
+              <SelectContent className="bg-white">
                 <SelectItem value="All Status">All Status</SelectItem>
                 <SelectItem value="open">Open</SelectItem>
                 <SelectItem value="in progress">In Progress</SelectItem>
@@ -312,7 +312,7 @@ export default function WorkOrdersPage() {
               <SelectTrigger className="w-[140px] bg-white border-slate-200">
                 <SelectValue placeholder="All Priority" />
               </SelectTrigger>
-              <SelectContent>
+              <SelectContent className="bg-white">
                 <SelectItem value="All Priority">All Priority</SelectItem>
                 <SelectItem value="low">Low</SelectItem>
                 <SelectItem value="medium">Medium</SelectItem>
@@ -348,7 +348,7 @@ export default function WorkOrdersPage() {
               <SelectTrigger id="wo-property">
                 <SelectValue placeholder="Select property" />
               </SelectTrigger>
-              <SelectContent>
+              <SelectContent className="bg-white">
                 {propertyOptions.map((opt) => (
                   <SelectItem key={opt} value={opt}>
                     {opt}
@@ -366,7 +366,7 @@ export default function WorkOrdersPage() {
               <SelectTrigger id="wo-category">
                 <SelectValue placeholder="Select category" />
               </SelectTrigger>
-              <SelectContent>
+              <SelectContent className="bg-white">
                 {CATEGORIES.map((cat) => (
                   <SelectItem key={cat} value={cat}>
                     {cat}
@@ -391,7 +391,7 @@ export default function WorkOrdersPage() {
               <SelectTrigger id="wo-priority">
                 <SelectValue placeholder="Select priority" />
               </SelectTrigger>
-              <SelectContent>
+              <SelectContent className="bg-white">
                 {PRIORITIES.map((pri) => (
                   <SelectItem key={pri} value={pri} className="capitalize">
                     {pri}
@@ -409,7 +409,7 @@ export default function WorkOrdersPage() {
               <SelectTrigger id="wo-status">
                 <SelectValue placeholder="Select status" />
               </SelectTrigger>
-              <SelectContent>
+              <SelectContent className="bg-white">
                 {STATUSES.map((st) => (
                   <SelectItem key={st} value={st} className="capitalize">
                     {st}

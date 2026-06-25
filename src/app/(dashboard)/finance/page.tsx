@@ -1031,7 +1031,7 @@ export default function FinancePage() {
               <SelectTrigger id="inv-status">
                 <SelectValue placeholder="Select status" />
               </SelectTrigger>
-              <SelectContent>
+              <SelectContent className="bg-white">
                 {INVOICE_STATUSES.map((s) => (
                   <SelectItem key={s} value={s}>
                     {s}
@@ -1139,7 +1139,7 @@ export default function FinancePage() {
               <SelectTrigger id="txn-type">
                 <SelectValue placeholder="Select type" />
               </SelectTrigger>
-              <SelectContent>
+              <SelectContent className="bg-white">
                 {TXN_TYPES.map((t) => (
                   <SelectItem key={t} value={t}>
                     {t}
@@ -1181,7 +1181,7 @@ export default function FinancePage() {
               <SelectTrigger id="txn-status">
                 <SelectValue placeholder="Select status" />
               </SelectTrigger>
-              <SelectContent>
+              <SelectContent className="bg-white">
                 {TXN_STATUSES.map((s) => (
                   <SelectItem key={s} value={s}>
                     {s}
@@ -1242,7 +1242,7 @@ export default function FinancePage() {
               <SelectTrigger id="coa-type">
                 <SelectValue placeholder="Select type" />
               </SelectTrigger>
-              <SelectContent>
+              <SelectContent className="bg-white">
                 {ACCOUNT_TYPES.map((t) => (
                   <SelectItem key={t} value={t}>
                     {t}
@@ -1272,7 +1272,7 @@ export default function FinancePage() {
               <SelectTrigger id="coa-subtype">
                 <SelectValue placeholder="Select subtype" />
               </SelectTrigger>
-              <SelectContent>
+              <SelectContent className="bg-white">
                 {ACCOUNT_SUBTYPES.map((s) => (
                   <SelectItem key={s} value={s}>
                     {s}
@@ -1292,7 +1292,7 @@ export default function FinancePage() {
               <SelectTrigger id="coa-normal">
                 <SelectValue placeholder="Select balance" />
               </SelectTrigger>
-              <SelectContent>
+              <SelectContent className="bg-white">
                 {NORMAL_BALANCES.map((b) => (
                   <SelectItem key={b} value={b}>
                     {b}

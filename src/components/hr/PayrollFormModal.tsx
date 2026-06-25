@@ -169,7 +169,7 @@ export function PayrollFormModal({
               <SelectTrigger id="payroll-employee">
                 <SelectValue placeholder="Select employee" />
               </SelectTrigger>
-              <SelectContent>
+              <SelectContent className="bg-white">
                 {employees.map((emp) => (
                   <SelectItem key={emp.id} value={emp.id}>
                     {emp.fullName} ({emp.employeeId})
@@ -247,7 +247,7 @@ export function PayrollFormModal({
               <SelectTrigger id="payroll-payment-method">
                 <SelectValue placeholder="Select method" />
               </SelectTrigger>
-              <SelectContent>
+              <SelectContent className="bg-white">
                 {PAYMENT_METHODS.map((method) => (
                   <SelectItem key={method} value={method}>
                     {method}
@@ -275,7 +275,7 @@ export function PayrollFormModal({
               <SelectTrigger id="payroll-status">
                 <SelectValue placeholder="Select status" />
               </SelectTrigger>
-              <SelectContent>
+              <SelectContent className="bg-white">
                 {PAYROLL_STATUSES.map((s) => (
                   <SelectItem key={s} value={s}>
                     {s}

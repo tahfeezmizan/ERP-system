@@ -218,7 +218,7 @@ export default function LeadsPage() {
             <SelectTrigger className="w-[180px]">
               <SelectValue placeholder="All Status" />
             </SelectTrigger>
-            <SelectContent>
+            <SelectContent className="bg-white">
               {LEAD_FILTER_OPTIONS.map((stage) => (
                 <SelectItem key={stage} value={stage}>
                   {stage}
@@ -294,7 +294,7 @@ export default function LeadsPage() {
               <SelectTrigger id="lead-type">
                 <SelectValue placeholder="Select type" />
               </SelectTrigger>
-              <SelectContent>
+              <SelectContent className="bg-white">
                 {LEAD_TYPES.map((type) => (
                   <SelectItem key={type} value={type}>
                     {type}
@@ -316,7 +316,7 @@ export default function LeadsPage() {
               <SelectTrigger id="lead-source">
                 <SelectValue placeholder="Select source" />
               </SelectTrigger>
-              <SelectContent>
+              <SelectContent className="bg-white">
                 {[
                   "Facebook",
                   "Website",
@@ -350,7 +350,7 @@ export default function LeadsPage() {
               <SelectTrigger id="lead-stage">
                 <SelectValue placeholder="Select stage" />
               </SelectTrigger>
-              <SelectContent>
+              <SelectContent className="bg-white">
                 {LEAD_FILTER_OPTIONS.filter((value) => value !== "All Status").map((stage) => (
                   <SelectItem key={stage} value={stage}>
                     {stage}

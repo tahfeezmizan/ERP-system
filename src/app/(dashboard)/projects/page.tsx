@@ -281,7 +281,7 @@ export default function ProjectsPage() {
             <SelectTrigger className="w-[160px]">
               <SelectValue placeholder="All Status" />
             </SelectTrigger>
-            <SelectContent>
+            <SelectContent className="bg-white">
               {STATUS_FILTER_OPTIONS.map((status) => (
                 <SelectItem key={status} value={status}>
                   {status}
@@ -355,7 +355,7 @@ export default function ProjectsPage() {
               <SelectTrigger id="project-property">
                 <SelectValue placeholder="Select property" />
               </SelectTrigger>
-              <SelectContent>
+              <SelectContent className="bg-white">
                 {properties.map((property) => (
                   <SelectItem key={property.id} value={property.name}>
                     {property.name}
@@ -472,7 +472,7 @@ export default function ProjectsPage() {
               <SelectTrigger id="project-status">
                 <SelectValue placeholder="Select status" />
               </SelectTrigger>
-              <SelectContent>
+              <SelectContent className="bg-white">
                 {STATUS_FILTER_OPTIONS.filter((status) => status !== "All Status").map(
                   (status) => (
                     <SelectItem key={status} value={status}>

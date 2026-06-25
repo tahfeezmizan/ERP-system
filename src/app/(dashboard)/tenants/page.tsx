@@ -206,7 +206,7 @@ export default function TenantsPage() {
             <SelectTrigger className="w-[160px]">
               <SelectValue placeholder="All Status" />
             </SelectTrigger>
-            <SelectContent>
+            <SelectContent className="bg-white">
               {STATUS_FILTER_OPTIONS.map((status) => (
                 <SelectItem key={status} value={status}>
                   {status === "All Status"
@@ -293,7 +293,7 @@ export default function TenantsPage() {
               <SelectTrigger id="tenant-type">
                 <SelectValue placeholder="Select type" />
               </SelectTrigger>
-              <SelectContent>
+              <SelectContent className="bg-white">
                 {TENANT_TYPES.map((type) => (
                   <SelectItem key={type} value={type}>
                     {type}
@@ -332,7 +332,7 @@ export default function TenantsPage() {
               <SelectTrigger id="tenant-status">
                 <SelectValue placeholder="Select status" />
               </SelectTrigger>
-              <SelectContent>
+              <SelectContent className="bg-white">
                 <SelectItem value="active">Active</SelectItem>
                 <SelectItem value="inactive">Inactive</SelectItem>
               </SelectContent>

@@ -210,7 +210,7 @@ export default function PropertiesPage() {
             <SelectTrigger className="w-[160px]">
               <SelectValue placeholder="All Types" />
             </SelectTrigger>
-            <SelectContent>
+            <SelectContent className="bg-white">
               {TYPE_FILTER_OPTIONS.map((type) => (
                 <SelectItem key={type} value={type}>
                   {type}
@@ -272,7 +272,7 @@ export default function PropertiesPage() {
               <SelectTrigger id="property-type">
                 <SelectValue placeholder="Select type" />
               </SelectTrigger>
-              <SelectContent>
+              <SelectContent className="bg-white">
                 {PROPERTY_TYPES.map((type) => (
                   <SelectItem key={type} value={type}>
                     {type}
@@ -312,13 +312,13 @@ export default function PropertiesPage() {
               <SelectTrigger id="property-status">
                 <SelectValue placeholder="Select status" />
               </SelectTrigger>
-              <SelectContent>
+              <SelectContent className="bg-white">
                 <SelectItem value="active">Active</SelectItem>
                 <SelectItem value="inactive">Inactive</SelectItem>
               </SelectContent>
             </Select>
             {errors.status && (
-              <p className="text-sm text-destructive">
+              <p className="text-sm text-red-500 text-destructive">
                 {errors.status.message}
               </p>
             )}

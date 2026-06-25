@@ -765,7 +765,7 @@ export default function HRPage() {
                     <SelectTrigger className="w-[160px]">
                       <SelectValue placeholder="Department" />
                     </SelectTrigger>
-                    <SelectContent>
+                    <SelectContent className="bg-white">
                       <SelectItem value="all">All Departments</SelectItem>
                       {departments.map((d) => (
                         <SelectItem key={d} value={d}>{d}</SelectItem>
@@ -779,7 +779,7 @@ export default function HRPage() {
                     <SelectTrigger className="w-[160px]">
                       <SelectValue placeholder="Designation" />
                     </SelectTrigger>
-                    <SelectContent>
+                    <SelectContent className="bg-white">
                       <SelectItem value="all">All Designations</SelectItem>
                       {designations.map((d) => (
                         <SelectItem key={d} value={d}>{d}</SelectItem>
@@ -790,7 +790,7 @@ export default function HRPage() {
                     <SelectTrigger className="w-[160px]">
                       <SelectValue placeholder="Status" />
                     </SelectTrigger>
-                    <SelectContent>
+                    <SelectContent className="bg-white">
                       <SelectItem value="all">All Status</SelectItem>
                       <SelectItem value="Active">Active</SelectItem>
                       <SelectItem value="Probation">Probation</SelectItem>
@@ -887,7 +887,7 @@ export default function HRPage() {
                   <SelectTrigger className="w-[160px]">
                     <SelectValue placeholder="Status" />
                   </SelectTrigger>
-                  <SelectContent>
+                  <SelectContent className="bg-white">
                     <SelectItem value="all">All Status</SelectItem>
                     <SelectItem value="Pending">Pending</SelectItem>
                     <SelectItem value="Processed">Processed</SelectItem>

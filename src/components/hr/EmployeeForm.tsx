@@ -195,7 +195,7 @@ export function EmployeeForm({
             <SelectTrigger id="gender">
               <SelectValue placeholder="Select gender" />
             </SelectTrigger>
-            <SelectContent>
+            <SelectContent className="bg-white">
               {GENDERS.map((g) => (
                 <SelectItem key={g} value={g}>
                   {g}
@@ -303,7 +303,7 @@ export function EmployeeForm({
             <SelectTrigger id="employment-type">
               <SelectValue placeholder="Select type" />
             </SelectTrigger>
-            <SelectContent>
+            <SelectContent className="bg-white">
               {EMPLOYMENT_TYPES.map((t) => (
                 <SelectItem key={t} value={t}>
                   {t}
@@ -331,7 +331,7 @@ export function EmployeeForm({
             <SelectTrigger id="reporting-manager">
               <SelectValue placeholder="Select manager" />
             </SelectTrigger>
-            <SelectContent>
+            <SelectContent className="bg-white">
               <SelectItem value="none">None</SelectItem>
               {managerOptions.map((m) => (
                 <SelectItem key={m.id} value={m.id}>
@@ -366,7 +366,7 @@ export function EmployeeForm({
             <SelectTrigger id="employee-status">
               <SelectValue placeholder="Select status" />
             </SelectTrigger>
-            <SelectContent>
+            <SelectContent className="bg-white">
               {EMPLOYEE_STATUSES.map((s) => (
                 <SelectItem key={s} value={s}>
                   {s}

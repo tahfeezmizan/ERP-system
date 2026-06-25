@@ -218,7 +218,7 @@ export default function UnitsPage() {
             <SelectTrigger className="w-[160px]">
               <SelectValue placeholder="All Status" />
             </SelectTrigger>
-            <SelectContent>
+            <SelectContent className="bg-white">
               {STATUS_FILTER_OPTIONS.map((status) => (
                 <SelectItem key={status} value={status}>
                   {status === "All Status"
@@ -268,7 +268,7 @@ export default function UnitsPage() {
               <SelectTrigger id="unit-property">
                 <SelectValue placeholder="Select property" />
               </SelectTrigger>
-              <SelectContent>
+              <SelectContent className="bg-white">
                 {propertyOptions.map((name) => (
                   <SelectItem key={name} value={name}>
                     {name}
@@ -296,7 +296,7 @@ export default function UnitsPage() {
               <SelectTrigger id="unit-type">
                 <SelectValue placeholder="Select type" />
               </SelectTrigger>
-              <SelectContent>
+              <SelectContent className="bg-white">
                 {UNIT_TYPES.map((type) => (
                   <SelectItem key={type} value={type}>
                     {type}
@@ -350,7 +350,7 @@ export default function UnitsPage() {
               <SelectTrigger id="unit-status">
                 <SelectValue placeholder="Select status" />
               </SelectTrigger>
-              <SelectContent>
+              <SelectContent className="bg-white">
                 <SelectItem value="occupied">Occupied</SelectItem>
                 <SelectItem value="vacant">Vacant</SelectItem>
               </SelectContent>
