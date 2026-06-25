@@ -394,4 +394,41 @@ export interface Document {
   createdAt?: string;
 }
 
+export type EmployeeGender = "Male" | "Female" | "Other";
+export type EmploymentType = "Permanent" | "Contract" | "Intern" | "Consultant";
+export type EmployeeStatus =
+  | "Active"
+  | "Probation"
+  | "Resigned"
+  | "Terminated";
+
+export interface Employee {
+  id: string;
+  employeeId: string;
+  fullName: string;
+  dateOfBirth: string;
+  gender: EmployeeGender;
+  nidNumber?: string;
+  mobileNumber: string;
+  email?: string;
+  presentAddress?: string;
+  permanentAddress?: string;
+  department: string;
+  designation: string;
+  employmentType: EmploymentType;
+  joiningDate: string;
+  reportingManagerId?: string;
+  salary?: number;
+  bankName?: string;
+  bankAccountNumber?: string;
+  employeeStatus: EmployeeStatus;
+  fatherName?: string;
+  motherName?: string;
+  spouseName?: string;
+  emergencyContactName: string;
+  emergencyContactRelationship: string;
+  emergencyContactNumber: string;
+  createdAt: string;
+  updatedAt: string;
+}
 

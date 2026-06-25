@@ -1,15 +1,27 @@
 "use client";
 
-import { EntityCreateModal } from "@/components/shared/EntityCreateModal";
+import { DataTable, type Column } from "@/components/tables/DataTable";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import {
-  useCreateEmployeeMutation,
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
+  exportEmployeesToCsv,
+  getReportingManagerName,
+} from "@/lib/hr-utils";
+import {
+  useDeleteEmployeeMutation,
   useGetEmployeesQuery,
 } from "@/services/moduleApis";
-import { Plus } from "lucide-react";
-import { useState } from "react";
+import type { Employee } from "@/types";
+import { Eye, Pencil, Plus, Trash2 } from "lucide-react";
+import Link from "next/link";
+import { useSearchParams } from "next/navigation";
+import { useMemo, useState } from "react";
 import { toast } from "sonner";
 
 type TabId =
@@ -211,7 +223,10 @@ function InlineStatusBadge({ status }: { status: string }) {
     approved: "bg-green-100 text-green-700",
     completed: "bg-green-100 text-green-700",
     processed: "bg-green-100 text-green-700",
+    probation: "bg-yellow-100 text-yellow-700",
     pending: "bg-orange-100 text-orange-700",
+    resigned: "bg-orange-100 text-orange-700",
+    terminated: "bg-red-100 text-red-700",
     "in progress": "bg-blue-100 text-blue-700",
     "on leave": "bg-yellow-100 text-yellow-700",
   };
@@ -224,25 +239,57 @@ function InlineStatusBadge({ status }: { status: string }) {
   );
 }
 
+function ConfirmDeleteModal({
+  open,
+  label,
+  onCancel,
+  onConfirm,
+}: {
+  open: boolean;
+  label: string;
+  onCancel: () => void;
+  onConfirm: () => void;
+}) {
+  if (!open) return null;
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm">
+      <div className="w-[min(95vw,400px)] rounded-2xl border border-gray-200 bg-white p-6 shadow-2xl">
+        <h2 className="text-base font-semibold text-gray-900">
+          Delete {label}?
+        </h2>
+        <p className="mt-2 text-sm text-gray-500">
+          This action cannot be undone. The employee record will be permanently
+          removed.
+        </p>
+        <div className="mt-6 flex justify-end gap-3">
+          <Button variant="outline" onClick={onCancel}>Cancel</Button>
+          <Button
+            className="bg-red-600 text-white hover:bg-red-700"
+            onClick={onConfirm}
+          >
+            Delete
+          </Button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 export default function HRPage() {
-  const [activeTab, setActiveTab] = useState<TabId>("overview");
+  const searchParams = useSearchParams();
+  const initialTab = searchParams.get("tab");
+  const [activeTab, setActiveTab] = useState<TabId>(
+    initialTab === "employees" ? "employees" : "overview",
+  );
 
-  const { data: employees = [], refetch: refetchEmployees } =
+  const { data: employees = [], isLoading: loadingEmployees } =
     useGetEmployeesQuery();
-  const [createEmployee, { isLoading: creatingEmployee }] =
-    useCreateEmployeeMutation();
+  const [deleteEmployee] = useDeleteEmployeeMutation();
 
-  const [employeeModalOpen, setEmployeeModalOpen] = useState(false);
-  const [employeeForm, setEmployeeForm] = useState({
-    name: "",
-    department: "",
-    designation: "",
-    phone: "",
-    email: "",
-    joiningDate: "",
-    salary: "",
-    nid: "",
-  });
+  const [departmentFilter, setDepartmentFilter] = useState("all");
+  const [designationFilter, setDesignationFilter] = useState("all");
+  const [statusFilter, setStatusFilter] = useState("all");
+  const [deleteTarget, setDeleteTarget] = useState<Employee | null>(null);
 
   const fmt = (n: number) =>
     "$" +
@@ -251,38 +298,106 @@ export default function HRPage() {
       maximumFractionDigits: 0,
     });
 
-  function openCreateEmployee() {
-    setEmployeeForm({
-      name: "",
-      department: "",
-      designation: "",
-      phone: "",
-      email: "",
-      joiningDate: "",
-      salary: "",
-      nid: "",
-    });
-    setEmployeeModalOpen(true);
-  }
+  const departments = useMemo(
+    () =>
+      [...new Set(employees.map((e) => e.department).filter(Boolean))].sort(),
+    [employees],
+  );
+  const designations = useMemo(
+    () =>
+      [...new Set(employees.map((e) => e.designation).filter(Boolean))].sort(),
+    [employees],
+  );
 
-  async function submitEmployee(e: React.FormEvent<HTMLFormElement>) {
-    e.preventDefault();
+  const filteredEmployees = useMemo(() => {
+    return employees.filter((emp) => {
+      if (departmentFilter !== "all" && emp.department !== departmentFilter) {
+        return false;
+      }
+      if (
+        designationFilter !== "all" &&
+        emp.designation !== designationFilter
+      ) {
+        return false;
+      }
+      if (
+        statusFilter !== "all" &&
+        emp.employeeStatus !== statusFilter
+      ) {
+        return false;
+      }
+      return true;
+    });
+  }, [employees, departmentFilter, designationFilter, statusFilter]);
+
+  const employeeColumns: Column<Employee>[] = [
+    {
+      key: "employeeId",
+      header: "Employee ID",
+      cell: (row) => (
+        <span className="font-mono text-xs">{row.employeeId}</span>
+      ),
+      sortable: true,
+    },
+    {
+      key: "fullName",
+      header: "Full Name",
+      cell: (row) => <span className="font-medium">{row.fullName}</span>,
+      sortable: true,
+    },
+    {
+      key: "department",
+      header: "Department",
+      cell: (row) => row.department,
+      sortable: true,
+    },
+    {
+      key: "designation",
+      header: "Designation",
+      cell: (row) => row.designation,
+      sortable: true,
+    },
+    {
+      key: "mobileNumber",
+      header: "Mobile Number",
+      cell: (row) => row.mobileNumber,
+      sortable: true,
+    },
+    {
+      key: "employmentType",
+      header: "Employment Type",
+      cell: (row) => row.employmentType,
+      sortable: true,
+    },
+    {
+      key: "joiningDate",
+      header: "Joining Date",
+      cell: (row) => row.joiningDate,
+      sortable: true,
+    },
+    {
+      key: "employeeStatus",
+      header: "Employee Status",
+      cell: (row) => <InlineStatusBadge status={row.employeeStatus} />,
+      sortable: true,
+    },
+    {
+      key: "reportingManagerId",
+      header: "Reporting Manager",
+      cell: (row) =>
+        getReportingManagerName(employees, row.reportingManagerId),
+      sortable: true,
+    },
+  ];
+
+  async function confirmDeleteEmployee() {
+    if (!deleteTarget) return;
     try {
-      await createEmployee({
-        name: employeeForm.name,
-        department: employeeForm.department,
-        designation: employeeForm.designation,
-        phone: employeeForm.phone,
-        email: employeeForm.email || undefined,
-        joiningDate: employeeForm.joiningDate,
-        salary: parseFloat(employeeForm.salary),
-        nid: employeeForm.nid,
-      }).unwrap();
-      toast.success("Employee added");
-      setEmployeeModalOpen(false);
-      void refetchEmployees();
+      await deleteEmployee(deleteTarget.id).unwrap();
+      toast.success("Employee deleted");
+      setDeleteTarget(null);
     } catch {
-      toast.error("Failed to add employee");
+      toast.error("Failed to delete employee");
     }
   }
 
@@ -291,9 +406,11 @@ export default function HRPage() {
       <Button
         id="btn-add-employee"
         className="flex items-center gap-2 bg-gray-900 text-white hover:bg-gray-700"
-        onClick={openCreateEmployee}
+        asChild
       >
-        <Plus className="h-4 w-4" /> Add Employee
+        <Link href="/hr/create-employee">
+          <Plus className="h-4 w-4" /> Add Employee
+        </Link>
       </Button>
     ) : null;
 
@@ -425,47 +542,107 @@ export default function HRPage() {
         )}
 
         {activeTab === "employees" && (
-          <div className="rounded-xl border border-gray-200 bg-white shadow-sm overflow-hidden">
-            <table className="w-full">
-              <thead className="bg-gray-50 border-b border-gray-100">
-                <tr>
-                  <th className={thCls}>Employee ID</th>
-                  <th className={thCls}>Name</th>
-                  <th className={thCls}>Department</th>
-                  <th className={thCls}>Designation</th>
-                  <th className={thCls}>Status</th>
-                </tr>
-              </thead>
-              <tbody>
-                {employees.length === 0 && (
-                  <tr>
-                    <td
-                      colSpan={5}
-                      className="py-10 text-center text-sm text-gray-400"
-                    >
-                      No employees yet. Click &quot;Add Employee&quot; to add
-                      one.
-                    </td>
-                  </tr>
-                )}
-                {employees.map((emp: any, index: number) => (
-                  <tr
-                    key={emp.id}
-                    className="border-t border-gray-100 hover:bg-gray-50 transition-colors"
+          <div className="rounded-xl border border-gray-200 bg-white p-5 shadow-sm">
+            <DataTable
+              columns={employeeColumns}
+              data={filteredEmployees}
+              isLoading={loadingEmployees}
+              searchPlaceholder="Search by ID, name, mobile, or email..."
+              searchKeys={[
+                "employeeId",
+                "fullName",
+                "mobileNumber",
+                "email",
+              ]}
+              onExportCsv={() => exportEmployeesToCsv(filteredEmployees)}
+              emptyMessage="No employees yet. Click Add Employee to register one."
+              rowActions={(row) => (
+                <div className="flex items-center gap-1">
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="icon"
+                    className="h-8 w-8 text-gray-500 hover:bg-gray-100 hover:text-gray-900"
+                    asChild
                   >
-                    <td className={tdCls + " font-mono text-xs"}>
-                      EMP-{String(index + 1).padStart(3, "0")}
-                    </td>
-                    <td className={tdCls}>{emp.name}</td>
-                    <td className={tdCls}>{emp.department}</td>
-                    <td className={tdCls}>{emp.designation}</td>
-                    <td className={tdCls}>
-                      <InlineStatusBadge status={emp.status} />
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+                    <Link
+                      href={`/hr/employees/${row.id}`}
+                      aria-label="View employee"
+                    >
+                      <Eye className="h-4 w-4" />
+                    </Link>
+                  </Button>
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="icon"
+                    className="h-8 w-8 text-blue-600 hover:bg-blue-50 hover:text-blue-700"
+                    asChild
+                  >
+                    <Link
+                      href={`/hr/employees/${row.id}/edit`}
+                      aria-label="Edit employee"
+                    >
+                      <Pencil className="h-4 w-4" />
+                    </Link>
+                  </Button>
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="icon"
+                    className="h-8 w-8 text-red-600 hover:bg-red-50 hover:text-red-700"
+                    onClick={() => setDeleteTarget(row)}
+                    aria-label="Delete employee"
+                  >
+                    <Trash2 className="h-4 w-4" />
+                  </Button>
+                </div>
+              )}
+              toolbarExtra={
+                <div className="flex flex-wrap gap-2">
+                  <Select
+                    value={departmentFilter}
+                    onValueChange={setDepartmentFilter}
+                  >
+                    <SelectTrigger className="w-[160px]">
+                      <SelectValue placeholder="Department" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">All Departments</SelectItem>
+                      {departments.map((d) => (
+                        <SelectItem key={d} value={d}>{d}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  <Select
+                    value={designationFilter}
+                    onValueChange={setDesignationFilter}
+                  >
+                    <SelectTrigger className="w-[160px]">
+                      <SelectValue placeholder="Designation" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">All Designations</SelectItem>
+                      {designations.map((d) => (
+                        <SelectItem key={d} value={d}>{d}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  <Select value={statusFilter} onValueChange={setStatusFilter}>
+                    <SelectTrigger className="w-[160px]">
+                      <SelectValue placeholder="Status" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">All Status</SelectItem>
+                      <SelectItem value="Active">Active</SelectItem>
+                      <SelectItem value="Probation">Probation</SelectItem>
+                      <SelectItem value="Resigned">Resigned</SelectItem>
+                      <SelectItem value="Terminated">Terminated</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              }
+            />
           </div>
         )}
 
@@ -602,115 +779,12 @@ export default function HRPage() {
         )}
       </div>
 
-      <EntityCreateModal
-        open={employeeModalOpen}
-        onOpenChange={setEmployeeModalOpen}
-        title="Add Employee"
-        description="Register a new employee in the system"
-        submitLabel="Add Employee"
-        isLoading={creatingEmployee}
-        onSubmit={submitEmployee}
-      >
-        <div className="grid gap-4 sm:grid-cols-2">
-          <div className="grid gap-2">
-            <Label htmlFor="emp-name">Full Name</Label>
-            <Input
-              id="emp-name"
-              placeholder="e.g. John Smith"
-              value={employeeForm.name}
-              onChange={(e) =>
-                setEmployeeForm((p) => ({ ...p, name: e.target.value }))
-              }
-              required
-            />
-          </div>
-          <div className="grid gap-2">
-            <Label htmlFor="emp-department">Department</Label>
-            <Input
-              id="emp-department"
-              placeholder="e.g. Sales"
-              value={employeeForm.department}
-              onChange={(e) =>
-                setEmployeeForm((p) => ({ ...p, department: e.target.value }))
-              }
-              required
-            />
-          </div>
-          <div className="grid gap-2">
-            <Label htmlFor="emp-designation">Designation</Label>
-            <Input
-              id="emp-designation"
-              placeholder="e.g. Property Manager"
-              value={employeeForm.designation}
-              onChange={(e) =>
-                setEmployeeForm((p) => ({ ...p, designation: e.target.value }))
-              }
-              required
-            />
-          </div>
-          <div className="grid gap-2">
-            <Label htmlFor="emp-phone">Phone</Label>
-            <Input
-              id="emp-phone"
-              placeholder="e.g. 01712345678"
-              value={employeeForm.phone}
-              onChange={(e) =>
-                setEmployeeForm((p) => ({ ...p, phone: e.target.value }))
-              }
-              required
-            />
-          </div>
-          <div className="grid gap-2">
-            <Label htmlFor="emp-email">Email</Label>
-            <Input
-              id="emp-email"
-              type="email"
-              placeholder="e.g. john@company.com"
-              value={employeeForm.email}
-              onChange={(e) =>
-                setEmployeeForm((p) => ({ ...p, email: e.target.value }))
-              }
-            />
-          </div>
-          <div className="grid gap-2">
-            <Label htmlFor="emp-joining">Joining Date</Label>
-            <Input
-              id="emp-joining"
-              type="date"
-              value={employeeForm.joiningDate}
-              onChange={(e) =>
-                setEmployeeForm((p) => ({ ...p, joiningDate: e.target.value }))
-              }
-              required
-            />
-          </div>
-          <div className="grid gap-2">
-            <Label htmlFor="emp-salary">Salary ($)</Label>
-            <Input
-              id="emp-salary"
-              type="number"
-              placeholder="e.g. 5000"
-              value={employeeForm.salary}
-              onChange={(e) =>
-                setEmployeeForm((p) => ({ ...p, salary: e.target.value }))
-              }
-              required
-            />
-          </div>
-          <div className="grid gap-2">
-            <Label htmlFor="emp-nid">NID</Label>
-            <Input
-              id="emp-nid"
-              placeholder="National ID number"
-              value={employeeForm.nid}
-              onChange={(e) =>
-                setEmployeeForm((p) => ({ ...p, nid: e.target.value }))
-              }
-              required
-            />
-          </div>
-        </div>
-      </EntityCreateModal>
+      <ConfirmDeleteModal
+        open={Boolean(deleteTarget)}
+        label={deleteTarget?.fullName ?? "employee"}
+        onCancel={() => setDeleteTarget(null)}
+        onConfirm={confirmDeleteEmployee}
+      />
     </div>
   );
 }

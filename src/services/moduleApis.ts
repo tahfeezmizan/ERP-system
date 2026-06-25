@@ -30,6 +30,10 @@ import {
   syncLandRecordSubkeys,
   syncPropertyUnitSubkeys,
 } from "@/lib/storage-utils";
+import {
+  generateEmployeeId,
+  normalizeEmployee,
+} from "@/lib/hr-utils";
 import { delay } from "@/lib/utils";
 import type {
   CreateBookingFormData,
@@ -37,6 +41,7 @@ import type {
   CreateComplaintFormData,
   CreateContractorFormData,
   CreateEmployeeFormData,
+  UpdateEmployeeFormData,
   CreateInventoryItemFormData,
   CreateJournalEntryFormData,
   CreateLandRecordFormData,
@@ -57,6 +62,7 @@ import type {
   Collection,
   Customer,
   Document,
+  Employee,
   LandRecord,
   Lead,
   Lease,
@@ -1086,28 +1092,191 @@ export const financeApi = baseApi.injectEndpoints({
 
 export const hrApi = baseApi.injectEndpoints({
   endpoints: (builder) => ({
-    getEmployees: builder.query<any[], void>({
+    getEmployees: builder.query<Employee[], void>({
       queryFn: async () => {
         await delay(400);
-        return { data: getLocalStorageData<any>("employees", mockEmployees) };
+        const raw = getLocalStorageData<Record<string, unknown>>(
+          "employees",
+          mockEmployees,
+        );
+        return { data: raw.map((item) => normalizeEmployee(item)) };
       },
       providesTags: ["HR"],
     }),
-    createEmployee: builder.mutation<any, CreateEmployeeFormData>({
+    getEmployeeById: builder.query<Employee, string>({
+      queryFn: async (id) => {
+        await delay(300);
+        const raw = getLocalStorageData<Record<string, unknown>>(
+          "employees",
+          mockEmployees,
+        );
+        const found = raw.find((item) => String(item.id) === id);
+        if (!found) {
+          return { error: { status: 404, data: "Employee not found" } };
+        }
+        return { data: normalizeEmployee(found) };
+      },
+      providesTags: (_result, _error, id) => [{ type: "HR", id }],
+    }),
+    createEmployee: builder.mutation<Employee, CreateEmployeeFormData>({
       queryFn: async (data) => {
         await delay(400);
-        const list = [...getLocalStorageData<any>("employees", mockEmployees)];
-        const newEmployee = {
+        const list = getLocalStorageData<Record<string, unknown>>(
+          "employees",
+          mockEmployees,
+        );
+        const employees = list.map((item) => normalizeEmployee(item));
+
+        if (
+          data.nidNumber &&
+          employees.some((e) => e.nidNumber === data.nidNumber)
+        ) {
+          return {
+            error: { status: 400, data: "NID number already exists" },
+          };
+        }
+
+        const now = new Date().toISOString();
+        const employeeId = generateEmployeeId(employees);
+        const parsedSalary =
+          data.salary && data.salary.trim() !== ""
+            ? Number(data.salary)
+            : undefined;
+        if (parsedSalary !== undefined && Number.isNaN(parsedSalary)) {
+          return {
+            error: { status: 400, data: "Salary must be numeric" },
+          };
+        }
+        if (parsedSalary !== undefined && parsedSalary <= 0) {
+          return {
+            error: { status: 400, data: "Salary must be positive" },
+          };
+        }
+        const newEmployee: Employee = {
           id: `emp_${Math.random().toString(36).slice(2, 10)}`,
-          status: "Active",
-          name: data.name,
+          employeeId,
+          fullName: data.fullName,
+          dateOfBirth: data.dateOfBirth,
+          gender: data.gender,
+          nidNumber: data.nidNumber || undefined,
+          mobileNumber: data.mobileNumber,
+          email: data.email || undefined,
+          presentAddress: data.presentAddress || undefined,
+          permanentAddress: data.permanentAddress || undefined,
           department: data.department,
           designation: data.designation,
-          createdAt: new Date().toISOString(),
+          employmentType: data.employmentType,
+          joiningDate: data.joiningDate,
+          reportingManagerId: data.reportingManagerId || undefined,
+          salary: parsedSalary,
+          bankName: data.bankName || undefined,
+          bankAccountNumber: data.bankAccountNumber || undefined,
+          employeeStatus: data.employeeStatus,
+          fatherName: data.fatherName || undefined,
+          motherName: data.motherName || undefined,
+          spouseName: data.spouseName || undefined,
+          emergencyContactName: data.emergencyContactName,
+          emergencyContactRelationship: data.emergencyContactRelationship,
+          emergencyContactNumber: data.emergencyContactNumber,
+          createdAt: now,
+          updatedAt: now,
         };
+
         list.push(newEmployee);
         setLocalStorageData("employees", list);
         return { data: newEmployee };
+      },
+      invalidatesTags: ["HR"],
+    }),
+    updateEmployee: builder.mutation<
+      Employee,
+      { id: string; data: UpdateEmployeeFormData }
+    >({
+      queryFn: async ({ id, data }) => {
+        await delay(400);
+        const list = getLocalStorageData<Record<string, unknown>>(
+          "employees",
+          mockEmployees,
+        );
+        const index = list.findIndex((item) => String(item.id) === id);
+        if (index === -1) {
+          return { error: { status: 404, data: "Employee not found" } };
+        }
+
+        const employees = list.map((item) => normalizeEmployee(item));
+        if (
+          data.nidNumber &&
+          employees.some(
+            (e) => e.id !== id && e.nidNumber === data.nidNumber,
+          )
+        ) {
+          return {
+            error: { status: 400, data: "NID number already exists" },
+          };
+        }
+
+        const existing = normalizeEmployee(list[index]);
+        const parsedSalary =
+          data.salary && data.salary.trim() !== ""
+            ? Number(data.salary)
+            : undefined;
+        if (parsedSalary !== undefined && Number.isNaN(parsedSalary)) {
+          return {
+            error: { status: 400, data: "Salary must be numeric" },
+          };
+        }
+        if (parsedSalary !== undefined && parsedSalary <= 0) {
+          return {
+            error: { status: 400, data: "Salary must be positive" },
+          };
+        }
+        const updated: Employee = {
+          ...existing,
+          fullName: data.fullName,
+          dateOfBirth: data.dateOfBirth,
+          gender: data.gender,
+          nidNumber: data.nidNumber || undefined,
+          mobileNumber: data.mobileNumber,
+          email: data.email || undefined,
+          presentAddress: data.presentAddress || undefined,
+          permanentAddress: data.permanentAddress || undefined,
+          department: data.department,
+          designation: data.designation,
+          employmentType: data.employmentType,
+          joiningDate: data.joiningDate,
+          reportingManagerId: data.reportingManagerId || undefined,
+          salary: parsedSalary,
+          bankName: data.bankName || undefined,
+          bankAccountNumber: data.bankAccountNumber || undefined,
+          employeeStatus: data.employeeStatus,
+          fatherName: data.fatherName || undefined,
+          motherName: data.motherName || undefined,
+          spouseName: data.spouseName || undefined,
+          emergencyContactName: data.emergencyContactName,
+          emergencyContactRelationship: data.emergencyContactRelationship,
+          emergencyContactNumber: data.emergencyContactNumber,
+          updatedAt: new Date().toISOString(),
+        };
+
+        list[index] = updated;
+        setLocalStorageData("employees", list);
+        return { data: updated };
+      },
+      invalidatesTags: ["HR"],
+    }),
+    deleteEmployee: builder.mutation<string, string>({
+      queryFn: async (id) => {
+        await delay(400);
+        const list = getLocalStorageData<Record<string, unknown>>(
+          "employees",
+          mockEmployees,
+        );
+        const filtered = list.filter((item) => String(item.id) !== id);
+        if (filtered.length === list.length) {
+          return { error: { status: 404, data: "Employee not found" } };
+        }
+        setLocalStorageData("employees", filtered);
+        return { data: id };
       },
       invalidatesTags: ["HR"],
     }),
@@ -1236,7 +1405,13 @@ export const {
   useUpdateChartAccountMutation,
   useDeleteChartAccountMutation,
 } = financeApi;
-export const { useGetEmployeesQuery, useCreateEmployeeMutation } = hrApi;
+export const {
+  useGetEmployeesQuery,
+  useGetEmployeeByIdQuery,
+  useCreateEmployeeMutation,
+  useUpdateEmployeeMutation,
+  useDeleteEmployeeMutation,
+} = hrApi;
 export const { useGetComplaintsQuery, useCreateComplaintMutation } =
   maintenanceApi;
 export const { useGetSalesReportQuery } = reportApi;

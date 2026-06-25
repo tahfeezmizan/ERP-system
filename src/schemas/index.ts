@@ -172,17 +172,59 @@ export const createContractorSchema = z.object({
 export type CreateContractorFormData = z.infer<typeof createContractorSchema>;
 
 // ─── Employee ─────────────────────────────────────────────────────────────────
+export const employeeGenderEnum = z.enum(["Male", "Female", "Other"]);
+export const employmentTypeEnum = z.enum([
+  "Permanent",
+  "Contract",
+  "Intern",
+  "Consultant",
+]);
+export const employeeStatusEnum = z.enum([
+  "Active",
+  "Probation",
+  "Resigned",
+  "Terminated",
+]);
+
 export const createEmployeeSchema = z.object({
-  name: z.string().min(2, "Name is required"),
+  fullName: z.string().min(2, "Full name is required"),
+  dateOfBirth: z.string().min(1, "Date of birth is required"),
+  gender: employeeGenderEnum,
+  nidNumber: z.string().optional(),
+  mobileNumber: z
+    .string()
+    .min(10, "Mobile number is required")
+    .regex(/^\d+$/, "Mobile must be numeric"),
+  email: z.string().email("Invalid email").optional().or(z.literal("")),
+  presentAddress: z.string().optional(),
+  permanentAddress: z.string().optional(),
   department: z.string().min(2, "Department is required"),
   designation: z.string().min(2, "Designation is required"),
-  phone: z.string().min(10, "Phone is required"),
-  email: z.string().email("Invalid email").optional().or(z.literal("")),
+  employmentType: employmentTypeEnum,
   joiningDate: z.string().min(1, "Joining date is required"),
-  salary: z.coerce.number().positive("Salary must be positive"),
-  nid: z.string().min(10, "NID is required"),
+  reportingManagerId: z.string().optional(),
+  salary: z.string().optional(),
+  bankName: z.string().optional(),
+  bankAccountNumber: z.string().optional(),
+  employeeStatus: employeeStatusEnum,
+  fatherName: z.string().optional(),
+  motherName: z.string().optional(),
+  spouseName: z.string().optional(),
+  emergencyContactName: z
+    .string()
+    .min(2, "Emergency contact name is required"),
+  emergencyContactRelationship: z
+    .string()
+    .min(2, "Emergency contact relationship is required"),
+  emergencyContactNumber: z
+    .string()
+    .min(10, "Emergency contact number is required")
+    .regex(/^\d+$/, "Emergency contact number must be numeric"),
 });
+
+export const updateEmployeeSchema = createEmployeeSchema;
 export type CreateEmployeeFormData = z.infer<typeof createEmployeeSchema>;
+export type UpdateEmployeeFormData = z.infer<typeof updateEmployeeSchema>;
 
 // ─── Property (Portfolio) ─────────────────────────────────────────────────────
 export const propertySchema = z.object({
