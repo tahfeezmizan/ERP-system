@@ -11,10 +11,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
-import {
-  createEmployeeSchema,
-  type CreateEmployeeFormData,
-} from "@/schemas";
+import { createEmployeeSchema, type CreateEmployeeFormData } from "@/schemas";
 import type { Employee } from "@/types";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useEffect, useState } from "react";
@@ -200,7 +197,9 @@ export function EmployeeForm({
             </SelectTrigger>
             <SelectContent>
               {GENDERS.map((g) => (
-                <SelectItem key={g} value={g}>{g}</SelectItem>
+                <SelectItem key={g} value={g}>
+                  {g}
+                </SelectItem>
               ))}
             </SelectContent>
           </Select>
@@ -306,7 +305,9 @@ export function EmployeeForm({
             </SelectTrigger>
             <SelectContent>
               {EMPLOYMENT_TYPES.map((t) => (
-                <SelectItem key={t} value={t}>{t}</SelectItem>
+                <SelectItem key={t} value={t}>
+                  {t}
+                </SelectItem>
               ))}
             </SelectContent>
           </Select>
@@ -367,7 +368,9 @@ export function EmployeeForm({
             </SelectTrigger>
             <SelectContent>
               {EMPLOYEE_STATUSES.map((s) => (
-                <SelectItem key={s} value={s}>{s}</SelectItem>
+                <SelectItem key={s} value={s}>
+                  {s}
+                </SelectItem>
               ))}
             </SelectContent>
           </Select>
