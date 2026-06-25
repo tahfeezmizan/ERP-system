@@ -46,8 +46,8 @@ export default function CreateEmployeePage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <div className="px-6 pt-6 pb-4">
+    <div className="space-y-6">
+      <div>
         <Link
           href="/hr?tab=employees"
           className="mb-3 inline-flex items-center gap-1 text-sm text-gray-500 hover:text-gray-900"
@@ -61,16 +61,14 @@ export default function CreateEmployeePage() {
         </p>
       </div>
 
-      <div className="px-6 pb-10">
-        <EmployeeForm
-          mode="create"
-          employeeIdDisplay={nextEmployeeId}
-          managers={employees}
-          isLoading={isLoading}
-          onCancel={() => router.push("/hr?tab=employees")}
-          onSubmit={handleSubmit}
-        />
-      </div>
+      <EmployeeForm
+        mode="create"
+        employeeIdDisplay={nextEmployeeId}
+        managers={employees}
+        isLoading={isLoading}
+        onCancel={() => router.push("/hr?tab=employees")}
+        onSubmit={handleSubmit}
+      />
     </div>
   );
 }

@@ -125,7 +125,7 @@ export default function EmployeeDetailPage({
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-gray-50 px-6 py-10 text-sm text-gray-500">
+      <div className="px-6 py-10 text-sm text-gray-500">
         Loading employee...
       </div>
     );
@@ -133,7 +133,7 @@ export default function EmployeeDetailPage({
 
   if (!employee) {
     return (
-      <div className="min-h-screen bg-gray-50 px-6 py-10">
+      <div className="py-10">
         <p className="text-sm text-gray-500">Employee not found.</p>
         <Link
           href="/hr?tab=employees"
@@ -151,8 +151,8 @@ export default function EmployeeDetailPage({
   );
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <div className="px-6 pt-6 pb-4">
+    <div className="space-y-6">
+      <div>
         <Link
           href="/hr?tab=employees"
           className="mb-3 inline-flex items-center gap-1 text-sm text-gray-500 hover:text-gray-900"
@@ -194,7 +194,7 @@ export default function EmployeeDetailPage({
         </div>
       </div>
 
-      <div className="space-y-6 px-6 pb-10">
+      <div className="space-y-6">
         <DetailSection title="Employee Information">
           <DetailField label="Full Name" value={employee.fullName} />
           <DetailField label="Date of Birth" value={employee.dateOfBirth} />

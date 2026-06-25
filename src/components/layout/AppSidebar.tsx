@@ -59,7 +59,7 @@ export function AppSidebar() {
         </Button>
       </div>
 
-      <nav className="flex-1 overflow-y-auto p-3 space-y-1 scrollbar-thin">
+        <nav className="min-h-0 flex-1 overflow-y-auto p-3 space-y-1 scrollbar-thin">
         {filteredNav.map((item) => {
           const isActive =
             pathname === item.href ||
@@ -97,7 +97,7 @@ export function AppSidebar() {
       )}
       <aside
         className={cn(
-          "fixed h-dvh inset-y-0 left-0 z-50 flex flex-col border-r bg-foreground transition-all duration-300 lg:static lg:z-auto",
+          "fixed inset-y-0 left-0 z-50 flex h-dvh min-h-0 flex-col border-r bg-foreground transition-all duration-300 lg:static lg:z-auto",
           collapsed ? "w-[70px]" : "w-[260px]",
           mobileOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0",
         )}

@@ -418,8 +418,8 @@ export default function HRPage() {
   const tdCls = "px-4 py-3 text-sm text-gray-700";
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <div className="flex items-start justify-between px-6 pt-6 pb-4">
+    <div className="bg-gray-50">
+      <div className="flex items-start justify-between pb-4">
         <div>
           <h1 className="text-2xl font-bold text-gray-900">Human Resources</h1>
           <p className="mt-0.5 text-sm text-gray-500">
@@ -429,7 +429,7 @@ export default function HRPage() {
         {headerAction}
       </div>
 
-      <div className="px-6 space-y-6 pb-10">
+      <div className="space-y-6 pb-6">
         <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
           <KpiCard
             label="Total Employees"

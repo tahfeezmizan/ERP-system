@@ -72,7 +72,7 @@ export default function EditEmployeePage({
 
   if (loadingEmployee) {
     return (
-      <div className="min-h-screen bg-gray-50 px-6 py-10 text-sm text-gray-500">
+      <div className="px-6 py-10 text-sm text-gray-500">
         Loading employee...
       </div>
     );
@@ -80,7 +80,7 @@ export default function EditEmployeePage({
 
   if (!employee) {
     return (
-      <div className="min-h-screen bg-gray-50 px-6 py-10">
+      <div className="py-10">
         <p className="text-sm text-gray-500">Employee not found.</p>
         <Link
           href="/hr?tab=employees"
@@ -93,8 +93,8 @@ export default function EditEmployeePage({
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <div className="px-6 pt-6 pb-4">
+    <div className="space-y-6">
+      <div>
         <Link
           href={`/hr/employees/${id}`}
           className="mb-3 inline-flex items-center gap-1 text-sm text-gray-500 hover:text-gray-900"
@@ -108,19 +108,17 @@ export default function EditEmployeePage({
         </p>
       </div>
 
-      <div className="px-6 pb-10">
-        <EmployeeForm
-          mode="edit"
-          employeeIdDisplay={employee.employeeId}
-          managers={employees}
-          excludeManagerId={id}
-          initialValues={initialValues}
-          isLoading={isLoading}
-          showSaveAnother={false}
-          onCancel={() => router.push(`/hr/employees/${id}`)}
-          onSubmit={(data) => handleSubmit(data)}
-        />
-      </div>
+      <EmployeeForm
+        mode="edit"
+        employeeIdDisplay={employee.employeeId}
+        managers={employees}
+        excludeManagerId={id}
+        initialValues={initialValues}
+        isLoading={isLoading}
+        showSaveAnother={false}
+        onCancel={() => router.push(`/hr/employees/${id}`)}
+        onSubmit={(data) => handleSubmit(data)}
+      />
     </div>
   );
 }
