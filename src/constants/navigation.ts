@@ -75,6 +75,13 @@ export const MAIN_NAV: NavItem[] = [
   },
 
   {
+    title: "Human Resources",
+    href: "/hr",
+    icon: Briefcase,
+    permission: "hr.view",
+  },
+
+  {
     title: "Vendors",
     href: "/vendors",
     icon: Truck,
