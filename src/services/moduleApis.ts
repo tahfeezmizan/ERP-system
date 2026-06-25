@@ -7,6 +7,7 @@ import {
   mockContractors,
   mockCustomers,
   mockEmployees,
+  mockPayrollRecords,
   mockFinanceAccounts,
   mockInventoryItems,
   mockLandRecords,
@@ -34,6 +35,10 @@ import {
   generateEmployeeId,
   normalizeEmployee,
 } from "@/lib/hr-utils";
+import {
+  buildPayrollRecordFromForm,
+  normalizePayrollRecord,
+} from "@/lib/payroll-utils";
 import { delay } from "@/lib/utils";
 import type {
   CreateBookingFormData,
@@ -42,6 +47,8 @@ import type {
   CreateContractorFormData,
   CreateEmployeeFormData,
   UpdateEmployeeFormData,
+  CreatePayrollFormData,
+  UpdatePayrollFormData,
   CreateInventoryItemFormData,
   CreateJournalEntryFormData,
   CreateLandRecordFormData,
@@ -63,6 +70,7 @@ import type {
   Customer,
   Document,
   Employee,
+  PayrollRecord,
   LandRecord,
   Lead,
   Lease,
@@ -1182,7 +1190,7 @@ export const hrApi = baseApi.injectEndpoints({
           updatedAt: now,
         };
 
-        list.push(newEmployee);
+        list.push(newEmployee as unknown as Record<string, unknown>);
         setLocalStorageData("employees", list);
         return { data: newEmployee };
       },
@@ -1258,7 +1266,7 @@ export const hrApi = baseApi.injectEndpoints({
           updatedAt: new Date().toISOString(),
         };
 
-        list[index] = updated;
+        list[index] = updated as unknown as Record<string, unknown>;
         setLocalStorageData("employees", list);
         return { data: updated };
       },
@@ -1276,6 +1284,118 @@ export const hrApi = baseApi.injectEndpoints({
           return { error: { status: 404, data: "Employee not found" } };
         }
         setLocalStorageData("employees", filtered);
+        return { data: id };
+      },
+      invalidatesTags: ["HR"],
+    }),
+    getPayrollRecords: builder.query<PayrollRecord[], void>({
+      queryFn: async () => {
+        await delay(400);
+        const raw = getLocalStorageData<Record<string, unknown>>(
+          "payrollRecords",
+          mockPayrollRecords as unknown as Record<string, unknown>[],
+        );
+        return { data: raw.map((item) => normalizePayrollRecord(item)) };
+      },
+      providesTags: ["HR"],
+    }),
+    createPayrollRecord: builder.mutation<
+      PayrollRecord,
+      CreatePayrollFormData
+    >({
+      queryFn: async (data) => {
+        await delay(400);
+        const list = getLocalStorageData<Record<string, unknown>>(
+          "payrollRecords",
+          mockPayrollRecords as unknown as Record<string, unknown>[],
+        );
+        const employees = getLocalStorageData<Record<string, unknown>>(
+          "employees",
+          mockEmployees,
+        ).map((item) => normalizeEmployee(item));
+        const employee = employees.find((e) => e.id === data.employeeRecordId);
+        if (!employee) {
+          return { error: { status: 400, data: "Employee not found" } };
+        }
+        const duplicate = list.some(
+          (item) =>
+            String(item.employeeRecordId) === data.employeeRecordId &&
+            String(item.period) === data.period,
+        );
+        if (duplicate) {
+          return {
+            error: {
+              status: 400,
+              data: "Payroll already exists for this employee and period",
+            },
+          };
+        }
+        const newRecord = buildPayrollRecordFromForm(data, employee);
+        list.push(newRecord as unknown as Record<string, unknown>);
+        setLocalStorageData("payrollRecords", list);
+        return { data: newRecord };
+      },
+      invalidatesTags: ["HR"],
+    }),
+    updatePayrollRecord: builder.mutation<
+      PayrollRecord,
+      { id: string; data: UpdatePayrollFormData }
+    >({
+      queryFn: async ({ id, data }) => {
+        await delay(400);
+        const list = getLocalStorageData<Record<string, unknown>>(
+          "payrollRecords",
+          mockPayrollRecords as unknown as Record<string, unknown>[],
+        );
+        const index = list.findIndex((item) => String(item.id) === id);
+        if (index === -1) {
+          return { error: { status: 404, data: "Payroll record not found" } };
+        }
+        const employees = getLocalStorageData<Record<string, unknown>>(
+          "employees",
+          mockEmployees,
+        ).map((item) => normalizeEmployee(item));
+        const employee = employees.find((e) => e.id === data.employeeRecordId);
+        if (!employee) {
+          return { error: { status: 400, data: "Employee not found" } };
+        }
+        const duplicate = list.some(
+          (item, i) =>
+            i !== index &&
+            String(item.employeeRecordId) === data.employeeRecordId &&
+            String(item.period) === data.period,
+        );
+        if (duplicate) {
+          return {
+            error: {
+              status: 400,
+              data: "Payroll already exists for this employee and period",
+            },
+          };
+        }
+        const existing = normalizePayrollRecord(list[index]);
+        const updated = buildPayrollRecordFromForm(data, employee, {
+          id: existing.id,
+          createdAt: existing.createdAt,
+        });
+        list[index] = updated as unknown as Record<string, unknown>;
+        setLocalStorageData("payrollRecords", list);
+        return { data: updated };
+      },
+      invalidatesTags: ["HR"],
+    }),
+    deletePayrollRecord: builder.mutation<string, string>({
+      queryFn: async (id) => {
+        await delay(400);
+        const list = getLocalStorageData<Record<string, unknown>>(
+          "payrollRecords",
+          mockPayrollRecords as unknown as Record<string, unknown>[],
+        );
+        const filtered = list.filter((item) => String(item.id) !== id);
+        if (filtered.length === list.length) {
+          return { error: { status: 404, data: "Payroll record not found" } };
+        }
+        setLocalStorageData("payrollRecords", filtered);
         return { data: id };
       },
       invalidatesTags: ["HR"],
@@ -1411,6 +1531,10 @@ export const {
   useCreateEmployeeMutation,
   useUpdateEmployeeMutation,
   useDeleteEmployeeMutation,
+  useGetPayrollRecordsQuery,
+  useCreatePayrollRecordMutation,
+  useUpdatePayrollRecordMutation,
+  useDeletePayrollRecordMutation,
 } = hrApi;
 export const { useGetComplaintsQuery, useCreateComplaintMutation } =
   maintenanceApi;

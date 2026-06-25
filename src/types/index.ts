@@ -402,6 +402,45 @@ export type EmployeeStatus =
   | "Resigned"
   | "Terminated";
 
+export type PayrollPaymentMethod =
+  | "Bank Transfer"
+  | "Cash"
+  | "Cheque"
+  | "Mobile Banking";
+
+export type PayrollStatus = "Pending" | "Processed" | "Cancelled";
+
+/** Payroll row — money fields map to DECIMAL(10,2) in the database. */
+export interface PayrollRecord {
+  id: string;
+  employeeRecordId: string;
+  employeeId: string;
+  employeeName: string;
+  department: string;
+  period: string;
+  paymentDate: string;
+  paymentMethod: PayrollPaymentMethod;
+  /** DECIMAL(10,2) */
+  gross: number;
+  /** DECIMAL(10,2) */
+  deductions: number;
+  leaveTaken: number;
+  overtimeHours: number;
+  /** DECIMAL(10,2) — auto-calculated from gross and overtime hours */
+  overtimePay: number;
+  /** DECIMAL(10,2) */
+  bonusAllowance: number;
+  /** DECIMAL(10,2) */
+  taxWithheld: number;
+  /** DECIMAL(10,2) — auto-calculated */
+  net: number;
+  approvedBy: string;
+  comments?: string;
+  status: PayrollStatus;
+  createdAt: string;
+  updatedAt: string;
+}
+
 export interface Employee {
   id: string;
   employeeId: string;

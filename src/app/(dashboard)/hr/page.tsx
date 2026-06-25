@@ -1,5 +1,6 @@
 "use client";
 
+import { PayrollFormModal } from "@/components/hr/PayrollFormModal";
 import { DataTable, type Column } from "@/components/tables/DataTable";
 import { Button } from "@/components/ui/button";
 import {
@@ -13,11 +14,17 @@ import {
   exportEmployeesToCsv,
   getReportingManagerName,
 } from "@/lib/hr-utils";
+import { formatPayrollMoney } from "@/lib/payroll-utils";
+import type { CreatePayrollFormData } from "@/schemas";
 import {
+  useCreatePayrollRecordMutation,
   useDeleteEmployeeMutation,
+  useDeletePayrollRecordMutation,
   useGetEmployeesQuery,
+  useGetPayrollRecordsQuery,
+  useUpdatePayrollRecordMutation,
 } from "@/services/moduleApis";
-import type { Employee } from "@/types";
+import type { Employee, PayrollRecord } from "@/types";
 import { Eye, Pencil, Plus, Trash2 } from "lucide-react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
@@ -114,33 +121,6 @@ const MOCK_ATTENDANCE = [
     checkIn: "—",
     checkOut: "—",
     status: "On Leave",
-  },
-];
-
-const MOCK_PAYROLL = [
-  {
-    employee: "John Smith",
-    period: "June 2026",
-    gross: 8500,
-    deductions: 1200,
-    net: 7300,
-    status: "Processed",
-  },
-  {
-    employee: "Sarah Johnson",
-    period: "June 2026",
-    gross: 7200,
-    deductions: 980,
-    net: 6220,
-    status: "Processed",
-  },
-  {
-    employee: "Michael Brown",
-    period: "June 2026",
-    gross: 5800,
-    deductions: 750,
-    net: 5050,
-    status: "Pending",
   },
 ];
 
@@ -278,25 +258,192 @@ function ConfirmDeleteModal({
 export default function HRPage() {
   const searchParams = useSearchParams();
   const initialTab = searchParams.get("tab");
-  const [activeTab, setActiveTab] = useState<TabId>(
-    initialTab === "employees" ? "employees" : "overview",
-  );
+  const [activeTab, setActiveTab] = useState<TabId>(() => {
+    if (initialTab === "employees") return "employees";
+    if (initialTab === "payroll") return "payroll";
+    return "overview";
+  });
 
   const { data: employees = [], isLoading: loadingEmployees } =
     useGetEmployeesQuery();
+  const { data: payrollRecords = [], isLoading: loadingPayroll } =
+    useGetPayrollRecordsQuery();
   const [deleteEmployee] = useDeleteEmployeeMutation();
+  const [createPayrollRecord, { isLoading: creatingPayroll }] =
+    useCreatePayrollRecordMutation();
+  const [updatePayrollRecord, { isLoading: updatingPayroll }] =
+    useUpdatePayrollRecordMutation();
+  const [deletePayrollRecord] = useDeletePayrollRecordMutation();
 
   const [departmentFilter, setDepartmentFilter] = useState("all");
   const [designationFilter, setDesignationFilter] = useState("all");
   const [statusFilter, setStatusFilter] = useState("all");
+  const [payrollStatusFilter, setPayrollStatusFilter] = useState("all");
   const [deleteTarget, setDeleteTarget] = useState<Employee | null>(null);
+  const [payrollModalOpen, setPayrollModalOpen] = useState(false);
+  const [editingPayroll, setEditingPayroll] = useState<PayrollRecord | null>(
+    null,
+  );
 
-  const fmt = (n: number) =>
-    "$" +
-    n.toLocaleString("en-US", {
-      minimumFractionDigits: 0,
-      maximumFractionDigits: 0,
-    });
+  const fmt = (n: number) => formatPayrollMoney(n);
+
+  const filteredPayroll = useMemo(() => {
+    if (payrollStatusFilter === "all") return payrollRecords;
+    return payrollRecords.filter((row) => row.status === payrollStatusFilter);
+  }, [payrollRecords, payrollStatusFilter]);
+
+  const payrollColumns: Column<PayrollRecord>[] = [
+    {
+      key: "employeeId",
+      header: "Employee ID",
+      cell: (row) => (
+        <span className="font-mono text-xs">{row.employeeId}</span>
+      ),
+      sortable: true,
+    },
+    {
+      key: "employeeName",
+      header: "Employee",
+      cell: (row) => <span className="font-medium">{row.employeeName}</span>,
+      sortable: true,
+    },
+    {
+      key: "department",
+      header: "Department",
+      cell: (row) => row.department,
+      sortable: true,
+    },
+    {
+      key: "period",
+      header: "Period",
+      cell: (row) => row.period,
+      sortable: true,
+    },
+    {
+      key: "paymentDate",
+      header: "Payment Date",
+      cell: (row) => row.paymentDate,
+      sortable: true,
+    },
+    {
+      key: "paymentMethod",
+      header: "Payment Method",
+      cell: (row) => row.paymentMethod,
+      sortable: true,
+    },
+    {
+      key: "gross",
+      header: "Gross",
+      cell: (row) => fmt(row.gross),
+      sortable: true,
+    },
+    {
+      key: "deductions",
+      header: "Deductions",
+      cell: (row) => fmt(row.deductions),
+      sortable: true,
+    },
+    {
+      key: "leaveTaken",
+      header: "Leave Taken",
+      cell: (row) => `${row.leaveTaken} day${row.leaveTaken === 1 ? "" : "s"}`,
+      sortable: true,
+    },
+    {
+      key: "overtimeHours",
+      header: "Overtime Hrs",
+      cell: (row) => row.overtimeHours.toFixed(2),
+      sortable: true,
+    },
+    {
+      key: "overtimePay",
+      header: "Overtime Pay",
+      cell: (row) => fmt(row.overtimePay),
+      sortable: true,
+    },
+    {
+      key: "bonusAllowance",
+      header: "Bonus/Allowance",
+      cell: (row) => fmt(row.bonusAllowance),
+      sortable: true,
+    },
+    {
+      key: "taxWithheld",
+      header: "Tax Withheld",
+      cell: (row) => fmt(row.taxWithheld),
+      sortable: true,
+    },
+    {
+      key: "net",
+      header: "Net",
+      cell: (row) => (
+        <span className="font-semibold text-green-700">{fmt(row.net)}</span>
+      ),
+      sortable: true,
+    },
+    {
+      key: "approvedBy",
+      header: "Approved By",
+      cell: (row) => row.approvedBy,
+      sortable: true,
+    },
+    {
+      key: "comments",
+      header: "Comments",
+      cell: (row) => (
+        <span className="max-w-[160px] truncate block" title={row.comments}>
+          {row.comments || "—"}
+        </span>
+      ),
+    },
+    {
+      key: "status",
+      header: "Status",
+      cell: (row) => <InlineStatusBadge status={row.status} />,
+      sortable: true,
+    },
+  ];
+
+  async function handlePayrollSubmit(data: CreatePayrollFormData) {
+    try {
+      if (editingPayroll) {
+        await updatePayrollRecord({ id: editingPayroll.id, data }).unwrap();
+        toast.success("Payroll record updated");
+      } else {
+        await createPayrollRecord(data).unwrap();
+        toast.success("Payroll record created");
+      }
+      setPayrollModalOpen(false);
+      setEditingPayroll(null);
+    } catch (err) {
+      const message =
+        err &&
+        typeof err === "object" &&
+        "data" in err &&
+        typeof (err as { data: unknown }).data === "string"
+          ? (err as { data: string }).data
+          : editingPayroll
+            ? "Failed to update payroll record"
+            : "Failed to create payroll record";
+      toast.error(message);
+    }
+  }
+
+  async function confirmDeletePayroll(record: PayrollRecord) {
+    if (
+      !window.confirm(
+        `Delete payroll for ${record.employeeName} (${record.period})?`,
+      )
+    ) {
+      return;
+    }
+    try {
+      await deletePayrollRecord(record.id).unwrap();
+      toast.success("Payroll record deleted");
+    } catch {
+      toast.error("Failed to delete payroll record");
+    }
+  }
 
   const departments = useMemo(
     () =>
@@ -411,6 +558,17 @@ export default function HRPage() {
         <Link href="/hr/create-employee">
           <Plus className="h-4 w-4" /> Add Employee
         </Link>
+      </Button>
+    ) : activeTab === "payroll" ? (
+      <Button
+        id="btn-add-payroll"
+        className="flex items-center gap-2 bg-gray-900 text-white hover:bg-gray-700"
+        onClick={() => {
+          setEditingPayroll(null);
+          setPayrollModalOpen(true);
+        }}
+      >
+        <Plus className="h-4 w-4" /> Add Payroll
       </Button>
     ) : null;
 
@@ -679,36 +837,65 @@ export default function HRPage() {
         )}
 
         {activeTab === "payroll" && (
-          <div className="rounded-xl border border-gray-200 bg-white shadow-sm overflow-hidden">
-            <table className="w-full">
-              <thead className="bg-gray-50 border-b border-gray-100">
-                <tr>
-                  <th className={thCls}>Employee</th>
-                  <th className={thCls}>Period</th>
-                  <th className={thCls}>Gross</th>
-                  <th className={thCls}>Deductions</th>
-                  <th className={thCls}>Net</th>
-                  <th className={thCls}>Status</th>
-                </tr>
-              </thead>
-              <tbody>
-                {MOCK_PAYROLL.map((row) => (
-                  <tr
-                    key={`${row.employee}-${row.period}`}
-                    className="border-t border-gray-100 hover:bg-gray-50 transition-colors"
+          <div className="rounded-xl border border-gray-200 bg-white p-5 shadow-sm">
+            <DataTable
+              columns={payrollColumns}
+              data={filteredPayroll}
+              isLoading={loadingPayroll}
+              searchPlaceholder="Search by employee, ID, department, or period..."
+              searchKeys={[
+                "employeeName",
+                "employeeId",
+                "department",
+                "period",
+                "approvedBy",
+                "comments",
+              ]}
+              emptyMessage="No payroll records yet. Click Add Payroll to create one."
+              rowActions={(row) => (
+                <div className="flex items-center gap-1">
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="icon"
+                    className="h-8 w-8 text-blue-600 hover:bg-blue-50 hover:text-blue-700"
+                    onClick={() => {
+                      setEditingPayroll(row);
+                      setPayrollModalOpen(true);
+                    }}
+                    aria-label="Edit payroll"
                   >
-                    <td className={tdCls}>{row.employee}</td>
-                    <td className={tdCls}>{row.period}</td>
-                    <td className={tdCls}>{fmt(row.gross)}</td>
-                    <td className={tdCls}>{fmt(row.deductions)}</td>
-                    <td className={tdCls}>{fmt(row.net)}</td>
-                    <td className={tdCls}>
-                      <InlineStatusBadge status={row.status} />
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+                    <Pencil className="h-4 w-4" />
+                  </Button>
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="icon"
+                    className="h-8 w-8 text-red-600 hover:bg-red-50 hover:text-red-700"
+                    onClick={() => confirmDeletePayroll(row)}
+                    aria-label="Delete payroll"
+                  >
+                    <Trash2 className="h-4 w-4" />
+                  </Button>
+                </div>
+              )}
+              toolbarExtra={
+                <Select
+                  value={payrollStatusFilter}
+                  onValueChange={setPayrollStatusFilter}
+                >
+                  <SelectTrigger className="w-[160px]">
+                    <SelectValue placeholder="Status" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">All Status</SelectItem>
+                    <SelectItem value="Pending">Pending</SelectItem>
+                    <SelectItem value="Processed">Processed</SelectItem>
+                    <SelectItem value="Cancelled">Cancelled</SelectItem>
+                  </SelectContent>
+                </Select>
+              }
+            />
           </div>
         )}
 
@@ -784,6 +971,18 @@ export default function HRPage() {
         label={deleteTarget?.fullName ?? "employee"}
         onCancel={() => setDeleteTarget(null)}
         onConfirm={confirmDeleteEmployee}
+      />
+
+      <PayrollFormModal
+        open={payrollModalOpen}
+        onOpenChange={(open) => {
+          setPayrollModalOpen(open);
+          if (!open) setEditingPayroll(null);
+        }}
+        employees={employees}
+        editingRecord={editingPayroll}
+        isSubmitting={creatingPayroll || updatingPayroll}
+        onSubmit={handlePayrollSubmit}
       />
     </div>
   );

@@ -226,6 +226,66 @@ export const updateEmployeeSchema = createEmployeeSchema;
 export type CreateEmployeeFormData = z.infer<typeof createEmployeeSchema>;
 export type UpdateEmployeeFormData = z.infer<typeof updateEmployeeSchema>;
 
+// ─── Payroll ──────────────────────────────────────────────────────────────────
+/** Validates monetary values as DECIMAL(10,2). */
+export const decimalMoneySchema = z
+  .number()
+  .min(0, "Amount cannot be negative")
+  .max(99_999_999.99, "Amount exceeds DECIMAL(10,2) limit");
+
+export const payrollPaymentMethodEnum = z.enum([
+  "Bank Transfer",
+  "Cash",
+  "Cheque",
+  "Mobile Banking",
+]);
+
+export const payrollStatusEnum = z.enum([
+  "Pending",
+  "Processed",
+  "Cancelled",
+]);
+
+export const createPayrollSchema = z
+  .object({
+    employeeRecordId: z.string().min(1, "Employee is required"),
+    employeeId: z.string().min(1, "Employee ID is required"),
+    employeeName: z.string().min(1, "Employee name is required"),
+    department: z.string().min(1, "Department is required"),
+    period: z.string().min(1, "Pay period is required"),
+    paymentDate: z.string().min(1, "Payment date is required"),
+    paymentMethod: payrollPaymentMethodEnum,
+    gross: decimalMoneySchema.refine((v) => v > 0, "Gross pay must be positive"),
+    deductions: decimalMoneySchema,
+    leaveTaken: z
+      .number()
+      .min(0, "Leave taken cannot be negative")
+      .max(31, "Leave taken cannot exceed 31 days"),
+    overtimeHours: z
+      .number()
+      .min(0, "Overtime hours cannot be negative")
+      .max(744, "Overtime hours exceeds monthly limit"),
+    bonusAllowance: decimalMoneySchema,
+    taxWithheld: decimalMoneySchema,
+    approvedBy: z.string().min(2, "Approver name is required"),
+    comments: z.string().max(500, "Comments cannot exceed 500 characters").optional(),
+    status: payrollStatusEnum,
+  })
+  .superRefine((data, ctx) => {
+    const deductionsPlusTax = data.deductions + data.taxWithheld;
+    if (deductionsPlusTax > data.gross + data.bonusAllowance) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: "Deductions and tax cannot exceed gross pay plus bonus",
+        path: ["deductions"],
+      });
+    }
+  });
+
+export const updatePayrollSchema = createPayrollSchema;
+export type CreatePayrollFormData = z.infer<typeof createPayrollSchema>;
+export type UpdatePayrollFormData = z.infer<typeof updatePayrollSchema>;
+
 // ─── Property (Portfolio) ─────────────────────────────────────────────────────
 export const propertySchema = z.object({
   name: z.string().min(2, "Property name is required"),

@@ -7,6 +7,7 @@ import {
   mockCustomers,
   mockDocuments,
   mockEmployees,
+  mockPayrollRecords,
   mockFinanceAccounts,
   mockInventoryItems,
   mockLandRecords,
@@ -86,6 +87,9 @@ export function initializeStorage() {
 
   // 10. Employees
   getLocalStorageData<any>("employees", mockEmployees);
+
+  // 10b. Payroll
+  getLocalStorageData<any>("payrollRecords", mockPayrollRecords);
 
   // 11. Complaints
   getLocalStorageData<any>("complaints", mockComplaints);
